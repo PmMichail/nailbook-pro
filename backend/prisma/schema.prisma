@@ -1,0 +1,339 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum SubscriptionPlan {
+  FREE
+  PRO
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  TRIAL
+  EXPIRED
+  CANCELLED
+}
+
+enum Role {
+  MASTER
+  CLIENT
+  ADMIN
+}
+
+model User {
+  id        String   @id @default(uuid())
+  role      Role     @default(CLIENT)
+  phone     String?  @unique
+  email     String?  @unique
+  name      String
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Multi-Tenant Fields
+  linkSlug  String? @unique
+  city      String?
+  address   String?
+  avatarUrl String?
+  masterId  String?
+  myMaster  User?   @relation("ClientToMaster", fields: [masterId], references: [id])
+  myClients User[]  @relation("ClientToMaster")
+
+  // Customization & CRM
+  notes     String?
+  salonName String?
+  salonLogo String?
+
+  // Relations for MASTER
+  appointments   Appointment[]          @relation("MasterAppointments")
+  portfolio      Portfolio[]
+  reviews        Review[]               @relation("MasterReviews")
+  blacklistedBy  Blacklist[]            @relation("MasterBlacklist")
+  weeklySettings MasterWeeklySettings[]
+
+  blockedSlots BlockedSlot[] @relation("MasterBlockedSlots")
+  galleries    GalleryItem[] @relation("MasterGallery")
+  priceLists   PriceList[]   @relation("MasterPriceLists")
+
+  // Relations for CLIENT
+  myAppointments Appointment[] @relation("ClientAppointments")
+  myReviews      Review[]      @relation("ClientReviews")
+  blacklisted    Blacklist[]   @relation("ClientBlacklist")
+  messages       Message[]     @relation()
+  likes          Like[]
+  favorites      Favorite[]
+  paymentInfo    PaymentInfo?
+  pushToken      PushToken?
+  telegramLink   TelegramLink?
+  calendarSync   CalendarSync?
+
+  // Referral System
+  referralCode ReferralCode? @relation("ClientReferral")
+  referralUses ReferralUse[] @relation("ReferredClient")
+
+  // Subscription System
+  subscription Subscription?
+
+  // Client Management Flag
+  isActiveClient Boolean @default(true)
+
+  // Payments
+  payments      Payment[] @relation("MasterPayments")
+}
+
+model Subscription {
+  id               String             @id @default(uuid())
+  masterId         String             @unique
+  master           User               @relation(fields: [masterId], references: [id])
+  plan             SubscriptionPlan   @default(FREE)
+  status           SubscriptionStatus @default(ACTIVE)
+  trialEndsAt      DateTime?
+  currentPeriodEnd DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+}
+
+model Payment {
+  id            String   @id @default(uuid())
+  masterId      String
+  master        User     @relation("MasterPayments", fields: [masterId], references: [id])
+  amount        Int      // в гривнях
+  currency      String   @default("UAH")
+  status        String   // success, failed, pending
+  liqpayOrderId String   @unique
+  createdAt     DateTime @default(now())
+}
+
+model MasterWeeklySettings {
+  id            String   @id @default(cuid())
+  masterId      String
+  master        User     @relation(fields: [masterId], references: [id])
+  dayOfWeek     Int // 1-7 (Mon-Sun)
+  workStart     String   @default("09:00")
+  workEnd       String   @default("18:00")
+  timePerClient Int      @default(120)
+  breakStart    String?
+  breakEnd      String?
+  isWorking     Boolean  @default(true)
+  updatedAt     DateTime @updatedAt
+
+  @@unique([masterId, dayOfWeek])
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+  CANCELLED
+}
+
+model Appointment {
+  id        String  @id @default(cuid())
+  masterId  String
+  master    User    @relation("MasterAppointments", fields: [masterId], references: [id])
+  clientId  String
+  client    User    @relation("ClientAppointments", fields: [clientId], references: [id])
+  serviceId String?
+  service   String? // Назва послуги
+  price     Int? // Збережена ціна на момент запису
+
+  originalPrice  Int? // ціна, яку бачив клієнт
+  finalPrice     Int? // ціна після корегування майстром
+  paymentStatus  PaymentStatus @default(UNPAID)
+  paymentDetails Json?
+  remindersSent  Json? // { "24h": true, "2h": true }
+
+  date      DateTime
+  time      String
+  status    AppointmentStatus @default(PENDING)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+}
+
+model Portfolio {
+  id        String   @id @default(uuid())
+  masterId  String
+  master    User     @relation(fields: [masterId], references: [id])
+  imageUrl  String
+  tags      String[]
+  likes     Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  masterId  String
+  master    User     @relation("MasterReviews", fields: [masterId], references: [id])
+  clientId  String
+  client    User     @relation("ClientReviews", fields: [clientId], references: [id])
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+}
+
+model Blacklist {
+  id        String   @id @default(uuid())
+  masterId  String
+  master    User     @relation("MasterBlacklist", fields: [masterId], references: [id])
+  clientId  String
+  client    User     @relation("ClientBlacklist", fields: [clientId], references: [id])
+  reason    String?
+  createdAt DateTime @default(now())
+}
+
+model BlockedSlot {
+  id        String   @id @default(cuid())
+  masterId  String
+  master    User     @relation("MasterBlockedSlots", fields: [masterId], references: [id])
+  date      DateTime
+  time      String
+  reason    String?
+  createdAt DateTime @default(now())
+}
+
+model BlockedPhone {
+  id        String   @id @default(uuid())
+  masterId  String
+  phone     String
+  reason    String?
+  createdAt DateTime @default(now())
+
+  @@unique([masterId, phone])
+}
+
+model Chat {
+  id        String    @id @default(uuid())
+  roomId    String    @unique
+  messages  Message[]
+  createdAt DateTime  @default(now())
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  chatId    String
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  senderId  String
+  sender    User     @relation(fields: [senderId], references: [id])
+  text      String?
+  imageUrl  String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model GalleryItem {
+  id        String     @id @default(cuid())
+  imageUrl  String
+  tags      String[]
+  likesNum  Int        @default(0)
+  masterId  String
+  master    User       @relation("MasterGallery", fields: [masterId], references: [id])
+  likes     Like[]
+  favorites Favorite[]
+  createdAt DateTime   @default(now())
+}
+
+model Favorite {
+  id        String      @id @default(cuid())
+  clientId  String
+  client    User        @relation(fields: [clientId], references: [id])
+  galleryId String
+  gallery   GalleryItem @relation(fields: [galleryId], references: [id])
+  createdAt DateTime    @default(now())
+
+  @@unique([clientId, galleryId])
+}
+
+model Like {
+  id        String      @id @default(uuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id])
+  galleryId String
+  gallery   GalleryItem @relation(fields: [galleryId], references: [id])
+  createdAt DateTime    @default(now())
+
+  @@unique([userId, galleryId])
+}
+
+model PaymentInfo {
+  id         String   @id @default(uuid())
+  masterId   String   @unique
+  master     User     @relation(fields: [masterId], references: [id])
+  cardNumber String
+  bankName   String
+  fullName   String
+  qrCodeUrl  String?
+  updatedAt  DateTime @updatedAt
+}
+
+model PushToken {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  token     String
+  os        String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TelegramLink {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id])
+  chatId       String   @unique
+  username     String?
+  notifEnabled Boolean  @default(true)
+  createdAt    DateTime @default(now())
+}
+
+model CalendarSync {
+  id           String   @id @default(uuid())
+  masterId     String   @unique
+  master       User     @relation(fields: [masterId], references: [id])
+  accessToken  String?
+  refreshToken String?
+  expiryDate   BigInt?
+  isEnabled    Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model PriceList {
+  id        String   @id @default(cuid())
+  masterId  String
+  master    User     @relation("MasterPriceLists", fields: [masterId], references: [id])
+  service   String
+  price     Int
+  duration  Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ReferralCode {
+  id        String   @id @default(cuid())
+  clientId  String   @unique
+  client    User     @relation("ClientReferral", fields: [clientId], references: [id])
+  code      String   @unique
+  uses      Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model ReferralUse {
+  id                      String   @id @default(cuid())
+  code                    String
+  referredClientId        String   @unique // Each client can only be referred ONCE
+  referredClient          User     @relation("ReferredClient", fields: [referredClientId], references: [id])
+  discountApplied         Int      @default(10) // 10%
+  isCodeOwnerDiscountUsed Boolean  @default(false) // Track if the person who gave the code got their 10% yet
+  createdAt               DateTime @default(now())
+}
