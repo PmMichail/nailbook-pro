@@ -79,6 +79,9 @@ model User {
   // Subscription System
   subscription Subscription?
 
+  // Connection code for linking clients
+  connectionCode ConnectionCode?
+
   // Client Management Flag
   isActiveClient Boolean @default(true)
 
@@ -159,6 +162,7 @@ model Appointment {
   status    AppointmentStatus @default(PENDING)
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
+  isArchived Boolean          @default(false)
 }
 
 model Portfolio {
@@ -336,4 +340,13 @@ model ReferralUse {
   discountApplied         Int      @default(10) // 10%
   isCodeOwnerDiscountUsed Boolean  @default(false) // Track if the person who gave the code got their 10% yet
   createdAt               DateTime @default(now())
+}
+
+model ConnectionCode {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  code      String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 }

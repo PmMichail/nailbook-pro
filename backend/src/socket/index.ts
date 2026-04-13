@@ -12,6 +12,18 @@ interface AuthSocket extends Socket {
   };
 }
 
+let ioInstance: Server | null = null;
+const activeUsers = new Map<string, string>(); // userId -> socketId
+
+export const getIo = () => {
+  if (!ioInstance) throw new Error('Socket.io not initialized');
+  return ioInstance;
+};
+
+export const getSocketId = (userId: string) => {
+  return activeUsers.get(userId);
+};
+
 export const initSocket = (httpServer: HttpServer) => {
   const io = new Server(httpServer, {
     cors: {
@@ -20,7 +32,7 @@ export const initSocket = (httpServer: HttpServer) => {
     }
   });
 
-  const activeUsers = new Map<string, string>(); // userId -> socketId
+  ioInstance = io;
 
   // Middleware для автентифікації
   io.use((socket: AuthSocket, next) => {

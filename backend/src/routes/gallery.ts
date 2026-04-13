@@ -1,19 +1,8 @@
 import { Router } from 'express';
 import prisma from '../models/prismaClient';
 import jwt from 'jsonwebtoken';
-import multer from 'multer';
-
-// Multer setup
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/');
-  },
-  filename: function (req, file, cb) {
-    const ext = file.originalname.split('.').pop() || 'jpg';
-    cb(null, Date.now() + '-' + Math.round(Math.random() * 1E9) + '.' + ext);
-  }
-});
-const upload = multer({ storage });
+import { uploadCloud } from '../services/cloudinary';
+// uploadCloud replaces multer({ storage })
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';
@@ -51,10 +40,12 @@ router.get('/', async (req, res) => {
     orderBy: { createdAt: 'desc' },
     include: { master: { select: { name: true, linkSlug: true } } }
   });
-  // formatting local urls to absolute for easy local testing (in prod use S3/cloudinary)
+  // formatting local urls to absolute, and enforce https for cloudinary
   const formatted = items.map(i => ({
     ...i,
-    imageUrl: i.imageUrl.startsWith('http') ? i.imageUrl : `http://localhost:3000/${i.imageUrl}`
+    imageUrl: i.imageUrl.startsWith('http') 
+        ? i.imageUrl.replace(/^http:\/\//i, 'https://')
+        : `https://localhost:3000/${i.imageUrl}`
   }));
   res.json(formatted);
 });
@@ -67,15 +58,20 @@ router.get('/master/:masterId', async (req, res) => {
   });
   const formatted = items.map(i => ({
     ...i,
-    imageUrl: i.imageUrl.startsWith('http') ? i.imageUrl : `http://localhost:3000/${i.imageUrl}`
+    imageUrl: i.imageUrl.startsWith('http') 
+        ? i.imageUrl.replace(/^http:\/\//i, 'https://')
+        : `https://localhost:3000/${i.imageUrl}`
   }));
   res.json(formatted);
 });
 
 // POST /gallery (add new work - Master only)
-router.post('/', requireMaster, upload.single('image'), async (req: any, res) => {
+router.post('/', requireMaster, uploadCloud.single('image'), async (req: any, res) => {
   const { tags } = req.body;
-  const imageUrl = req.file ? req.file.path.replace(/\\/g, '/') : null;
+  let imageUrl = req.file ? req.file.path.replace(/\\/g, '/') : null;
+  if (imageUrl) {
+     imageUrl = imageUrl.replace(/^http:\/\//i, 'https://');
+  }
   
   if (!imageUrl) return res.status(400).json({ error: 'image file required' });
   

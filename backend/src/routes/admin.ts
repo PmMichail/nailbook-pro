@@ -93,6 +93,7 @@ router.get('/payments', async (req, res) => {
 router.get('/statistics', async (req, res) => {
    try {
        const totalMasters = await prisma.user.count({ where: { role: 'MASTER' } });
+       const totalClients = await prisma.user.count({ where: { role: 'CLIENT' } });
        const activePro = await prisma.subscription.count({
            where: { plan: 'PRO', status: 'ACTIVE' }
        });
@@ -112,6 +113,7 @@ router.get('/statistics', async (req, res) => {
 
        res.json({
            totalMasters,
+           totalClients,
            activePro,
            activeTrials,
            canceledOrExpired,

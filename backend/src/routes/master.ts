@@ -5,6 +5,7 @@ import { sendPushNotification } from '../services/firebase';
 // In a real app we'd verify JWT, but we'll extract masterId manually or from headers.
 // We'll assume the client app sends authorization header and we mock user decoding.
 import jwt from 'jsonwebtoken';
+import { getIo, getSocketId } from '../socket/index';
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';
 
 const router = Router();
@@ -28,6 +29,25 @@ const requireMaster = (req: any, res: any, next: any) => {
 };
 
 router.use(authAny);
+
+// POST /connection-code
+router.post('/connection-code', async (req: any, res) => {
+   if (req.user?.role !== 'MASTER') return res.status(403).json({ error: 'Not a master' });
+   try {
+       const codeStr = Math.floor(100000 + Math.random() * 900000).toString(); // 6 digits
+       const expiresAt = new Date();
+       expiresAt.setHours(expiresAt.getHours() + 24); // Valid for 24h
+       
+       await prisma.connectionCode.upsert({
+           where: { userId: req.user.id },
+           update: { code: codeStr, expiresAt },
+           create: { userId: req.user.id, code: codeStr, expiresAt }
+       });
+       res.json({ code: codeStr, expiresAt });
+   } catch(e) {
+       res.status(500).json({ error: 'Server error' });
+   }
+});
 
 // GET /settings
 router.get('/settings', async (req: any, res) => {
@@ -175,6 +195,52 @@ router.get('/appointments', async (req: any, res) => {
   res.json(appointments);
 });
 
+// GET /appointments/by-date
+router.get('/appointments/by-date', async (req: any, res) => {
+  const dateStr = req.query.date;
+  if (!dateStr) return res.status(400).json({ error: 'date required' });
+  
+  const appointments = await prisma.appointment.findMany({
+    where: {
+      masterId: req.user.id,
+      date: new Date(dateStr),
+      isArchived: false
+    },
+    include: {
+      client: { select: { id: true, name: true, phone: true } }
+    },
+    orderBy: { time: 'asc' }
+  });
+  
+  let totalSum = 0;
+  appointments.forEach((app: any) => {
+     if (app.status !== 'CANCELLED') {
+        const price = app.finalPrice || app.originalPrice || app.price || 0;
+        totalSum += price;
+     }
+  });
+  
+  res.json({ appointments, totalSum, count: appointments.filter(a => a.status !== 'CANCELLED').length });
+});
+
+// PUT /appointments/archive-old
+router.put('/appointments/archive-old', async (req: any, res) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const updated = await prisma.appointment.updateMany({
+    where: {
+      masterId: req.user.id,
+      date: { lt: today },
+      isArchived: false
+    },
+    data: {
+      isArchived: true
+    }
+  });
+  res.json({ success: true, count: updated.count });
+});
+
 // PUT /appointments/:id/confirm
 router.put('/appointments/:id/confirm', async (req: any, res) => {
   const { price, note } = req.body || {};
@@ -213,6 +279,13 @@ router.put('/appointments/:id/confirm', async (req: any, res) => {
           `Майстер ${app.master?.name || ''} підтвердив Ваш запис на ${app.date.toISOString().split('T')[0]} о ${app.time}.`
       );
   }
+
+  // Socket emit
+  const socketId = getSocketId(app.clientId);
+  if (socketId) {
+     getIo().to(socketId).emit('appointment_updated', app);
+  }
+
   res.json(app);
 });
 

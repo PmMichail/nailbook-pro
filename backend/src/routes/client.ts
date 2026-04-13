@@ -52,6 +52,52 @@ const authClient = (req: any, res: any, next: any) => {
 
 router.use(authClient);
 
+// GET /masters/search?city=xxx
+router.get('/masters/search', async (req: any, res) => {
+  const { city } = req.query;
+  try {
+     const whereClause: any = { role: 'MASTER' };
+     if (city) {
+         whereClause.city = { contains: city as String, mode: 'insensitive' };
+     }
+     
+     const masters = await prisma.user.findMany({
+        where: whereClause,
+        select: { id: true, name: true, city: true, address: true, salonName: true, salonLogo: true, avatarUrl: true }
+     });
+     
+     res.json(masters);
+  } catch(e) {
+     res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// POST /masters/connect
+router.post('/masters/connect', async (req: any, res) => {
+   const { code } = req.body;
+   try {
+      const connectionCode = await prisma.connectionCode.findUnique({
+         where: { code }
+      });
+      
+      if (!connectionCode) {
+         return res.status(404).json({ error: 'Код недійсний' });
+      }
+      if (new Date() > connectionCode.expiresAt) {
+         return res.status(400).json({ error: 'Термін дії коду минув' });
+      }
+      
+      await prisma.user.update({
+         where: { id: req.user.id },
+         data: { masterId: connectionCode.userId, isActiveClient: true }
+      });
+      
+      res.json({ success: true, masterId: connectionCode.userId });
+   } catch(e) {
+      res.status(500).json({ error: 'Помилка підключення' });
+   }
+});
+
 // GET /calendar/:masterId?date=YYYY-MM-DD
 // Returns available slots only for a specific date for the master
 router.get('/calendar/:masterId', async (req: any, res) => {

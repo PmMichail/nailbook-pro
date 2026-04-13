@@ -3,16 +3,8 @@ import prisma from '../models/prismaClient';
 import jwt from 'jsonwebtoken';
 import multer from 'multer';
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/');
-  },
-  filename: function (req, file, cb) {
-    const ext = file.originalname.split('.').pop() || 'jpg';
-    cb(null, Date.now() + '-' + Math.round(Math.random() * 1E9) + '.' + ext);
-  }
-});
-const upload = multer({ storage });
+import { uploadCloud } from '../services/cloudinary';
+// uploadCloud replaces multer({ storage })
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';
@@ -31,7 +23,7 @@ const authenticate = (req: any, res: any, next: any) => {
 router.use(authenticate);
 
 // PUT /api/user/profile
-router.put('/profile', upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'salonLogo', maxCount: 1 }]), async (req: any, res) => {
+router.put('/profile', uploadCloud.fields([{ name: 'avatar', maxCount: 1 }, { name: 'salonLogo', maxCount: 1 }]), async (req: any, res) => {
   try {
     const userId = req.user.id;
     const { name, phone, password, salonName } = req.body;

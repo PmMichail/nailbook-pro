@@ -55,7 +55,21 @@ router.post('/register', async (req, res) => {
     if (userRole === 'MASTER') {
        linkSlug = Math.random().toString(36).substring(2, 8);
     } else if (userRole === 'CLIENT' && inviteCode) {
-       const master = await prisma.user.findUnique({ where: { linkSlug: inviteCode } });
+       let master = null;
+
+       // Check if it is a 6-digit temporary connection code
+       if (/^\d{6}$/.test(inviteCode)) {
+           const connection = await prisma.connectionCode.findUnique({ where: { code: inviteCode } });
+           if (connection && new Date() <= connection.expiresAt) {
+               master = await prisma.user.findUnique({ where: { id: connection.userId } });
+           }
+       }
+
+       // Fallback to permanent linkSlug if no master found yet
+       if (!master) {
+           master = await prisma.user.findUnique({ where: { linkSlug: inviteCode } });
+       }
+
        if (master) {
          resolvedMasterId = master.id;
          
