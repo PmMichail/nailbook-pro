@@ -1,0 +1,66 @@
+{
+  "expo": {
+    "name": "NailsBook Pro",
+    "slug": "nailbook-pro",
+    "version": "1.0.0",
+    "scheme": "nailbookpro",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "buildNumber": "26",
+      "supportsTablet": true,
+      "bundleIdentifier": "com.nailbook.pro",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSLocationWhenInUseUsageDescription": "NailsBook Pro потребує доступ до геолокації, щоб показувати салони та майстрів, які знаходяться найближче до вас.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "NailsBook Pro потребує вашу геолокацію для того, щоб показати найкращих майстрів навколо вас у радіусі 10 км."
+      }
+    },
+    "android": {
+      "package": "com.nailbook.pro",
+      "googleServicesFile": "./google-services.json",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFB6C1"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false,
+      "versionCode": 6
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "name": "NailsBook Pro",
+      "shortName": "NailsBook",
+      "themeColor": "#FF69B4",
+      "backgroundColor": "#FFF0F5",
+      "display": "standalone"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "863aae59-70b8-4725-9b8f-cb9c0e2c80f8"
+      }
+    },
+    "owner": "maiklmax",
+    "plugins": [
+      "expo-secure-store",
+      "expo-web-browser",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "NailsBook Pro потребує вашу геолокацію для того, щоб показати найкращих майстрів навколо вас у радіусі 20 км.",
+          "locationAlwaysPermission": "NailsBook Pro потребує вашу геолокацію для показу майстрів поблизу.",
+          "locationWhenInUsePermission": "NailsBook Pro потребує доступ до геолокації, щоб показувати салони та майстрів, які знаходяться найближче до вас."
+        }
+      ],
+      "./withAdiRegistration.js"
+    ]
+  }
+}

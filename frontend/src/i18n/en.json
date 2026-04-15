@@ -1,0 +1,11 @@
+{
+  "login_title": "Welcome to NailsBook Pro \uD83D\uDC85",
+  "phone": "Phone Number",
+  "password": "Password",
+  "login_btn": "Login",
+  "register_btn": "Create Account",
+  "register_title": "Registration ✨",
+  "name": "Your name",
+  "role_master": "I am a Master",
+  "role_client": "I am a Client"
+}
