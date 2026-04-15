@@ -35,18 +35,13 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Phone already registered' });
     }
 
-    // Since the frontend might send referral code as inviteCode, we support both
-    const effectiveReferralCode = referralCode || inviteCode;
-    
     // Referral Code Validation
     let validReferralCodeObj = null;
-    if (role !== 'MASTER' && effectiveReferralCode) {
+    if (role !== 'MASTER' && referralCode) {
       validReferralCodeObj = await prisma.referralCode.findUnique({
-        where: { code: effectiveReferralCode }
+        where: { code: referralCode }
       });
-      // If it explicitly was sent as referralCode but is invalid, we return error.
-      // If it was sent as inviteCode, we don't throw yet, as it might be a valid master slug.
-      if (!validReferralCodeObj && referralCode) {
+      if (!validReferralCodeObj) {
         return res.status(400).json({ error: 'Недійсний реферальний код.' });
       }
     }
@@ -98,14 +93,14 @@ router.post('/register', async (req, res) => {
                  return res.status(403).json({ error: 'Ваш майстер досягнув ліміту клієнтів. Зв\'яжіться з ним безпосередньо.' });
              }
          }
-       } else if (!validReferralCodeObj) {
-         return res.status(400).json({ error: 'Майстра або реферального коду не знайдено' });
+       } else {
+         return res.status(400).json({ error: 'Майстра за таким кодом не знайдено' });
        }
     }
 
-    // Apply Referral Record
+        // Apply Referral Record
     if (validReferralCodeObj && !resolvedMasterId) {
-      const owner = await prisma.user.findUnique({ where: { id: validReferralCodeObj.clientId } });
+      const owner = await prisma.user.findUnique({ where: { id: validReferralCodeObj.ownerId } });
       if (owner && owner.masterId) {
           resolvedMasterId = owner.masterId;
       }
@@ -122,6 +117,7 @@ router.post('/register', async (req, res) => {
         address,
         isActiveClient: userRole === 'CLIENT' ? true : false,
         linkSlug,
+        defaultDuration: userRole === 'MASTER' ? 120 : null,
         masterId: resolvedMasterId
       },
     });

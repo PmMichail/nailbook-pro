@@ -86,7 +86,7 @@ router.get('/masters/search', async (req: any, res) => {
            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
            const distance = R * c;
            
-           return distance <= 10; // Within 10km
+           return distance <= 20; // Within 20km
         });
      }
      

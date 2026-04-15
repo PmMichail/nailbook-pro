@@ -352,10 +352,3 @@ model ConnectionCode {
   expiresAt DateTime
   createdAt DateTime @default(now())
 }
-
-model SystemConfig {
-  id        String   @id @default(cuid())
-  key       String   @unique
-  value     String
-  updatedAt DateTime @updatedAt
-}

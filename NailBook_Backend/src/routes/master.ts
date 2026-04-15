@@ -584,23 +584,3 @@ router.put('/salon-info', async (req: any, res) => {
 });
 
 export default router;
-
-// GET /clients
-router.get('/clients', async (req: any, res) => {
-  try {
-     const clients = await prisma.user.findMany({
-        where: { masterId: req.user.id },
-        select: {
-           id: true, name: true, phone: true, avatarUrl: true, createdAt: true, isActiveClient: true,
-           myAppointments: {
-              where: { masterId: req.user.id },
-              orderBy: { date: 'desc' },
-              take: 5
-           }
-        }
-     });
-     res.json(clients);
-  } catch(e) {
-     res.status(500).json({ error: 'Server error' });
-  }
-});
