@@ -12,7 +12,7 @@ const withAdiRegistration = (config) => {
       }
       fs.writeFileSync(
         path.join(assetsDir, 'adi-registration.properties'),
-        'DS2KDXKRCRKKAAAAAAAAAAAAAAAA'
+        'DS2KDXKRCRKKAAAAAAAAAAAAAA'
       );
       console.log('✅ Injected adi-registration.properties into Android assets!');
       return config;
