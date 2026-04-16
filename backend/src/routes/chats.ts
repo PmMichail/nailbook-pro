@@ -23,7 +23,22 @@ router.get('/', async (req: AuthRequest, res) => {
       orderBy: { createdAt: 'desc' }
     });
 
-    res.json(chats);
+    const enrichedChats = await Promise.all(chats.map(async (chat) => {
+      let otherUser = null;
+      if (chat.roomId && chat.roomId.includes('_')) {
+         const ids = chat.roomId.split('_');
+         const otherId = ids.find(id => id !== req.user!.id);
+         if (otherId) {
+            otherUser = await prisma.user.findUnique({
+               where: { id: otherId },
+               select: { id: true, name: true, avatarUrl: true }
+            });
+         }
+      }
+      return { ...chat, otherUser };
+    }));
+
+    res.json(enrichedChats);
   } catch (error) {
     res.status(500).json({ error: 'Помилка сервера' });
   }
