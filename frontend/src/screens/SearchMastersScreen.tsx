@@ -47,7 +47,10 @@ export const SearchMastersScreen = () => {
                 </View>
                 <View style={styles.info}>
                     <Text style={[styles.name, { color: colors.text }]}>{item.salonName || item.name}</Text>
-                    <Text style={styles.city}>{item.city || 'Місто не вказано'}</Text>
+                    <Text style={styles.city}>
+                       {item.city ? `${item.city}` : 'Місто не вказано'}
+                       {item.address ? ` • ${item.address}` : ''}
+                    </Text>
                 </View>
             </View>
         </TouchableOpacity>

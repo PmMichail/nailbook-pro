@@ -24,23 +24,27 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
     }, []);
 
     const loadData = async () => {
+        setLoading(true);
         try {
-            setLoading(true);
-            const [resStats, resPay, resEvents, resConfig] = await Promise.all([
-                api.get('/api/admin/statistics'),
-                api.get('/api/admin/payments'),
-                api.get('/api/admin/activity'),
-                api.get('/api/admin/config')
-            ]);
-            
-            setStats(resStats.data);
-            setPayments(resPay.data);
-            setEvents(resEvents.data);
-            if (resConfig.data.PRO_PRICE) {
-                setProPrice(resConfig.data.PRO_PRICE);
-            }
-        } catch(e) {
-            console.error(e);
+            try {
+                const resStats = await api.get('/api/admin/statistics');
+                setStats(resStats.data);
+            } catch(e) { console.error('Error stats', e); }
+
+            try {
+                const resPay = await api.get('/api/admin/payments');
+                setPayments(resPay.data || []);
+            } catch(e) { console.error('Error payments', e); }
+
+            try {
+                const resEvents = await api.get('/api/admin/activity');
+                setEvents(resEvents.data || []);
+            } catch(e) { console.error('Error events', e); }
+
+            try {
+                const resConfig = await api.get('/api/admin/config');
+                if (resConfig.data?.PRO_PRICE) setProPrice(resConfig.data.PRO_PRICE);
+            } catch(e) { console.error('Error config', e); }
         } finally {
             setLoading(false);
         }

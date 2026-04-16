@@ -10,8 +10,8 @@ const CURRENT_USER_ID = '123'; // Має братись з Auth Context
 
 export const ChatScreen = ({ route }: any) => {
   const navigation = useNavigation();
-  const { appointmentId } = route.params || { appointmentId: 'mock-123' };
-  const roomId = appointmentId; // Use appointmentId as roomId for compatibility
+  const { appointmentId, roomId: paramRoomId } = route.params || {};
+  const roomId = paramRoomId || appointmentId || 'mock-123'; 
   
   const [messages, setMessages] = useState<any[]>([]);
   const [inputText, setInputText] = useState('');

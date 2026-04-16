@@ -395,9 +395,42 @@ export const MasterDashboardScreen = () => {
 
       {/* Appointments */}
       <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-        <Text style={styles.cardTitle}>Сьогоднішні записи (або обраний день)</Text>
-        {currentDayAppoints.length === 0 && <Text style={[styles.subtext, {color: colors.textSecondary}]}>Немає записів</Text>}
-        {currentDayAppoints.map((app: any) => (
+        <Text style={styles.cardTitle}>⚠️ Запити на підтвердження</Text>
+        {appointments.filter((a: any) => a.status === 'PENDING').length === 0 && <Text style={[styles.subtext, {color: colors.textSecondary}]}>Немає нових запитів</Text>}
+        {appointments.filter((a: any) => a.status === 'PENDING').map((app: any) => (
+            <View key={'pend-'+app.id} style={[styles.appointmentItem, {borderBottomColor: colors.border, backgroundColor: isDark ? '#3a2a1a' : '#fff5eb', padding: 10, borderRadius: 10}]}>
+                <View style={styles.appInfo}>
+                    <TouchableOpacity onPress={() => setSelectedClient(app)}>
+                      <Text style={[styles.appName, {color: '#FF69B4', fontWeight: 'bold'}]}>
+                        Клієнт: {app.client?.name || app.client?.phone || app.clientId.substring(0,6)} (Деталі)
+                      </Text>
+                    </TouchableOpacity>
+                    <Text style={[{color: colors.textSecondary, fontSize: 12, marginVertical: 3}]}>
+                      Дата: {new Date(app.date).toISOString().split('T')[0]} о {app.time}
+                    </Text>
+                    <Text style={[styles.appStatus, {color: '#FF8C00'}]}>
+                      ОЧІКУЄ ПІДТВЕРДЖЕННЯ
+                    </Text>
+                </View>
+                <View style={styles.appActions}>
+                    <TouchableOpacity style={[styles.actionBtn, {backgroundColor: '#98FB98'}]} onPress={() => {
+                        setConfirmApp(app);
+                        setConfirmPrice(app.price ? app.price.toString() : '');
+                        setConfirmNote('');
+                        setConfirmModalVisible(true);
+                    }}>
+                        <Text style={styles.actionIcon}>✓</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.actionBtn, {backgroundColor: '#FFB6C1'}]} onPress={() => updateAppStatus(app.id, 'cancel')}>
+                        <Text style={styles.actionIcon}>✗</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        ))}
+
+        <Text style={[styles.cardTitle, {marginTop: 20}]}>Сьогоднішні записи (або обраний день)</Text>
+        {currentDayAppoints.filter((a) => a.status !== 'PENDING').length === 0 && <Text style={[styles.subtext, {color: colors.textSecondary}]}>Немає записів</Text>}
+        {currentDayAppoints.filter((a) => a.status !== 'PENDING').map((app: any) => (
             <View key={app.id} style={[styles.appointmentItem, {borderBottomColor: colors.border}]}>
                 <View style={styles.appInfo}>
                     <TouchableOpacity onPress={() => setSelectedClient(app)}>
@@ -413,16 +446,6 @@ export const MasterDashboardScreen = () => {
                     </Text>
                 </View>
                 <View style={styles.appActions}>
-                    {app.status === 'PENDING' && (
-                        <TouchableOpacity style={[styles.actionBtn, {backgroundColor: '#98FB98'}]} onPress={() => {
-                           setConfirmApp(app);
-                           setConfirmPrice(app.price ? app.price.toString() : '');
-                           setConfirmNote('');
-                           setConfirmModalVisible(true);
-                        }}>
-                            <Text style={styles.actionIcon}>✓</Text>
-                        </TouchableOpacity>
-                    )}
                     {app.status !== 'CANCELLED' && (
                         <TouchableOpacity style={[styles.actionBtn, {backgroundColor: '#FFB6C1'}]} onPress={() => updateAppStatus(app.id, 'cancel')}>
                             <Text style={styles.actionIcon}>✗</Text>

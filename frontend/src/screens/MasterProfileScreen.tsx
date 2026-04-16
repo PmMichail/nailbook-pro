@@ -16,6 +16,7 @@ export const MasterProfileScreen = ({ navigation }: any) => {
   const [userId, setUserId] = useState('');
   const [salonName, setSalonName] = useState('');
   const [salonLogo, setSalonLogo] = useState<string | null>(null);
+  const [address, setAddress] = useState('');
   
   const [pushEnabled, setPushEnabled] = useState(true);
   const [telegramEnabled, setTelegramEnabled] = useState(false);
@@ -37,6 +38,7 @@ export const MasterProfileScreen = ({ navigation }: any) => {
         setName(u.name || '');
         setPhone(u.phone || '');
         setSalonName(u.salonName || '');
+        setAddress(u.address || '');
         
         if (u.avatarUrl) {
           const formattedUrl = u.avatarUrl.startsWith('http') ? u.avatarUrl : `${api.defaults.baseURL}/${u.avatarUrl}`;
@@ -147,6 +149,17 @@ export const MasterProfileScreen = ({ navigation }: any) => {
         lng: location.coords.longitude,
         ...(addressString ? { address: addressString } : {})
       });
+      
+      const uStr = await AsyncStorage.getItem('user');
+      if (uStr) {
+          const u = JSON.parse(uStr);
+          u.lat = location.coords.latitude;
+          u.lng = location.coords.longitude;
+          if (addressString) u.address = addressString;
+          await AsyncStorage.setItem('user', JSON.stringify(u));
+          setAddress(u.address || '');
+      }
+      
       Alert.alert('Готово', `Ваша геолокація успішно збережена!\nАдреса: ${addressString || 'Координати зафіксовані'}`);
     } catch(e) {
       Alert.alert('Помилка', 'Не вдалося визначити геолокацію');
@@ -228,6 +241,7 @@ export const MasterProfileScreen = ({ navigation }: any) => {
         <View style={[styles.settingRow, { backgroundColor: colors.card, flexDirection: 'column', alignItems: 'flex-start' }]}>
           <Text style={[styles.settingText, { color: colors.text, fontWeight: 'bold' }]}>Геолокація салону</Text>
           <Text style={{color: colors.textSecondary, marginBottom: 10, marginTop: 5, fontSize: 13}}>Дозвольте новим клієнтам поблизу знаходити вас на карті.</Text>
+          {address ? <Text style={{color: colors.primary, marginBottom: 10, fontWeight: 'bold'}}>Поточна адреса: {address}</Text> : null}
           <TouchableOpacity 
              style={[styles.saveBtn, {backgroundColor: '#ff9900', width: '100%'}]}
              onPress={handleFixLocation}
