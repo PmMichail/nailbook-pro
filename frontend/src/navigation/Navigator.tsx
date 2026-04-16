@@ -65,17 +65,18 @@ import { SearchMastersScreen } from '../screens/SearchMastersScreen';
 import { PublicMasterGalleryScreen } from '../screens/PublicMasterGalleryScreen';
 
 export const MasterTabs = () => {
+  const { colors } = useTheme();
   return (
     <>
     <GlobalHeader />
     <Tab.Navigator 
       tabBarPosition="bottom"
       screenOptions={{ 
-        tabBarActiveTintColor: '#FF69B4',
-        tabBarInactiveTintColor: '#999',
-        tabBarStyle: { backgroundColor: '#fff', elevation: 10 },
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textSecondary,
+        tabBarStyle: { backgroundColor: colors.card, borderTopWidth: 1, borderTopColor: colors.border },
         tabBarIndicatorStyle: { backgroundColor: 'transparent' },
-        tabBarLabelStyle: { textTransform: 'none', fontSize: 12 },
+        tabBarLabelStyle: { textTransform: 'none', fontSize: 10, fontFamily: 'sans-serif' },
         swipeEnabled: true
     }}>
       <Tab.Screen name="Dashboard" component={MasterDashboardStack} options={{ tabBarLabel: 'Кабінет', title: '📋' }} />
@@ -89,17 +90,18 @@ export const MasterTabs = () => {
 };
 
 export const ClientTabs = () => {
+  const { colors } = useTheme();
   return (
     <>
     <GlobalHeader />
     <Tab.Navigator 
       tabBarPosition="bottom"
       screenOptions={{ 
-        tabBarActiveTintColor: '#FF69B4',
-        tabBarInactiveTintColor: '#999',
-        tabBarStyle: { backgroundColor: '#fff', elevation: 10 },
-        tabBarIndicatorStyle: { height: 2, backgroundColor: '#FF69B4', top: 0 },
-        tabBarLabelStyle: { textTransform: 'none', fontSize: 12 },
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textSecondary,
+        tabBarStyle: { backgroundColor: colors.card, borderTopWidth: 1, borderTopColor: colors.border },
+        tabBarIndicatorStyle: { height: 2, backgroundColor: colors.primary, top: 0 },
+        tabBarLabelStyle: { textTransform: 'none', fontSize: 10, fontFamily: 'sans-serif' },
         swipeEnabled: true
     }}>
       <Tab.Screen name="Calendar" component={ClientCalendarScreen} options={{ tabBarLabel: 'Календар', title: '📅' }} />
@@ -115,16 +117,19 @@ export const ClientTabs = () => {
 import { AdminDashboardScreen } from '../screens/AdminDashboardScreen';
 import { AdminMastersScreen } from '../screens/AdminMastersScreen';
 
+import { useTheme } from '../context/ThemeContext';
+
 export const AdminTabs = () => {
+  const { colors } = useTheme();
   return (
     <Tab.Navigator 
       tabBarPosition="bottom"
       screenOptions={{ 
-        tabBarActiveTintColor: '#FF69B4',
-        tabBarInactiveTintColor: '#999',
-        tabBarStyle: { backgroundColor: '#fff', elevation: 10 },
-        tabBarIndicatorStyle: { height: 2, backgroundColor: '#FF69B4', top: 0 },
-        tabBarLabelStyle: { textTransform: 'none', fontSize: 12 },
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textSecondary,
+        tabBarStyle: { backgroundColor: colors.card, borderTopWidth: 1, borderTopColor: colors.border },
+        tabBarIndicatorStyle: { height: 2, backgroundColor: colors.primary, top: 0 },
+        tabBarLabelStyle: { textTransform: 'none', fontSize: 10, fontFamily: 'sans-serif' },
         swipeEnabled: true
     }}>
       <Tab.Screen name="Dashboard" component={AdminDashboardScreen} options={{ tabBarLabel: 'Головна', title: '📊' }} />

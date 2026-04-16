@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, ActivityIndicator, Modal } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, ActivityIndicator, Modal, RefreshControl } from 'react-native';
 import api from '../api/client';
 import { useTheme } from '../context/ThemeContext';
 import QRCode from 'react-native-qrcode-svg';
@@ -24,6 +24,7 @@ export const MasterDashboardScreen = () => {
   }, []);
 
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [selectedCalendarDay, setSelectedCalendarDay] = useState(new Date().toISOString().split('T')[0]);
   
   // Weekly Settings State
@@ -60,13 +61,25 @@ export const MasterDashboardScreen = () => {
     'COMPLETED': 'ВИКОНАНО'
   };
 
+  const loadAllData = async () => {
+    await Promise.all([
+      fetchProfile(),
+      fetchSettings(),
+      fetchSlots(),
+      fetchAppointments(),
+      fetchPrices(),
+      fetchPaymentInfo()
+    ]);
+  };
+
   useEffect(() => {
-    fetchProfile();
-    fetchSettings();
-    fetchSlots();
-    fetchAppointments();
-    fetchPrices();
-    fetchPaymentInfo();
+    loadAllData();
+  }, [selectedCalendarDay]);
+
+  const onRefresh = useCallback(async () => {
+      setRefreshing(true);
+      await loadAllData();
+      setRefreshing(false);
   }, [selectedCalendarDay]);
 
   const fetchPaymentInfo = async () => {
@@ -82,17 +95,12 @@ export const MasterDashboardScreen = () => {
 
   useFocusEffect(
     useCallback(() => {
-      fetchProfile();
-      fetchSettings();
-      fetchSlots();
-      fetchAppointments();
-      fetchPrices();
+      loadAllData();
     }, [])
   );
 
   const fetchProfile = async () => {
     try {
-      // Just fetching self info via settings or we need a profile endpoint, let's pull from AsyncStorage
       const uStr = await AsyncStorage.getItem('user');
       if (uStr) {
         setMasterProfile(JSON.parse(uStr));
@@ -170,7 +178,6 @@ export const MasterDashboardScreen = () => {
   };
 
   const saveSettings = async () => {
-    console.log('[FRONTEND] Відправка PUT /master/settings з даними тижня');
     try {
       const res = await api.put(`/api/master/settings`, { weeklySettings });
       if (res.status === 200 || res.status === 201) {
@@ -195,10 +202,14 @@ export const MasterDashboardScreen = () => {
     }
   };
 
-  const updateAppStatus = async (id: string, action: 'confirm' | 'cancel') => {
+  const updateAppStatus = async (id: string, action: 'confirm' | 'cancel' | 'complete') => {
     try {
       if (action === 'cancel') {
          await api.put(`/api/master/appointments/${id}/cancel`);
+         fetchAppointments();
+      } else if (action === 'complete') {
+         await api.put(`/api/master/appointments/${id}/complete`);
+         Alert.alert('Успіх', 'Запис позначено як виконаний!');
          fetchAppointments();
       }
     } catch(e) {}
@@ -242,39 +253,42 @@ export const MasterDashboardScreen = () => {
   };
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
+    <ScrollView 
+      style={[styles.container, { backgroundColor: colors.background }]}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
+    >
       <Text style={[styles.header, { color: colors.text }]}>Dashboard</Text>
       
       {/* Top Actions */}
       <View style={{flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20}}>
-        <TouchableOpacity style={[styles.btnPrimary, {flex: 1, marginRight: 5}]} onPress={() => setQrModalVisible(true)}>
-          <Text style={styles.btnPrimaryText}>QR Код</Text>
+        <TouchableOpacity style={[styles.btnPrimary, {flex: 1, marginRight: 5, backgroundColor: colors.primary}]} onPress={() => setQrModalVisible(true)}>
+          <Text style={[styles.btnPrimaryText, { color: isDark ? '#000' : '#fff' }]}>QR Код</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.btnSecondary, {flex: 0.5}]} onPress={() => navigation.navigate('StatisticsScreen' as never)}>
+        <TouchableOpacity style={[styles.btnSecondary, {flex: 0.5, borderColor: colors.primary}]} onPress={() => navigation.navigate('StatisticsScreen' as never)}>
           <Text style={{color: colors.primary, fontWeight: 'bold'}}>Статист.</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.btnSecondary, {flex: 0.5, marginLeft: 5}]} onPress={() => navigation.navigate('PaymentSetupScreen' as never)}>
+        <TouchableOpacity style={[styles.btnSecondary, {flex: 0.5, marginLeft: 5, borderColor: colors.primary}]} onPress={() => navigation.navigate('PaymentSetupScreen' as never)}>
           <Text style={{color: colors.primary, fontWeight: 'bold'}}>Оплата</Text>
         </TouchableOpacity>
       </View>
-      <TouchableOpacity style={[styles.btnSecondary, {marginBottom: 20, width: '100%'}]} onPress={() => navigation.navigate('MasterClientsScreen' as never)}>
+      <TouchableOpacity style={[styles.btnSecondary, {marginBottom: 20, width: '100%', borderColor: colors.primary}]} onPress={() => navigation.navigate('MasterClientsScreen' as never)}>
           <Text style={{color: colors.primary, fontWeight: 'bold', fontSize: 16}}>👥 Мої Клієнти</Text>
       </TouchableOpacity>
 
 
       {/* Settings Form for Weekly */}
       <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-        <Text style={styles.cardTitle}>Налаштування Графіка</Text>
+        <Text style={[styles.cardTitle, { color: colors.primary }]}>Налаштування Графіка</Text>
 
         <View style={styles.daysRow}>
           {DAYS.map((day, ix) => (
             <TouchableOpacity 
               key={ix} 
-              style={[styles.dayCircle, { width: 45, height: 45, borderRadius: 22.5 }, activeEditDay === ix + 1 && { backgroundColor: colors.primary }]}
+              style={[styles.dayCircle, { width: 45, height: 45, borderRadius: 22.5, borderColor: colors.primary }, activeEditDay === ix + 1 && { backgroundColor: colors.primary }]}
               onPress={() => setActiveEditDay(ix + 1)}
             >
-              <Text style={{ color: activeEditDay === ix + 1 ? '#fff' : colors.text, fontSize: 12, fontWeight: 'bold' }}>{day}</Text>
-              <Text style={{ color: activeEditDay === ix + 1 ? '#fff' : colors.textSecondary, fontSize: 10 }}>{currentWeek[ix]}</Text>
+              <Text style={{ color: activeEditDay === ix + 1 ? (isDark ? '#000' : '#fff') : colors.text, fontSize: 12, fontWeight: 'bold' }}>{day}</Text>
+              <Text style={{ color: activeEditDay === ix + 1 ? (isDark ? '#000' : '#fff') : colors.textSecondary, fontSize: 10 }}>{currentWeek[ix]}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -283,8 +297,8 @@ export const MasterDashboardScreen = () => {
           style={{marginBottom: 15}}
           onPress={() => handleUpdateCurrentDaySetting('isWorking', !activeDaySetting.isWorking)}
         >
-          <Text style={{color: colors.primary, fontWeight: 'bold'}}>
-            {activeDaySetting.isWorking ? '✅ Робочий день' : '❌ Вихідний'} (Натисніть щоб змінити)
+          <Text style={{color: colors.text, fontWeight: 'bold'}}>
+            {activeDaySetting.isWorking ? '✅ Робочий день' : '❌ Вихідний'} <Text style={{color: colors.textSecondary, fontSize: 12}}>(Натисніть щоб змінити)</Text>
           </Text>
         </TouchableOpacity>
 
@@ -321,8 +335,8 @@ export const MasterDashboardScreen = () => {
           </>
         )}
 
-        <TouchableOpacity style={styles.btnPrimary} onPress={saveSettings}>
-          <Text style={styles.btnPrimaryText}>Зберегти Розклад</Text>
+        <TouchableOpacity style={[styles.btnPrimary, { backgroundColor: colors.primary }]} onPress={saveSettings}>
+          <Text style={[styles.btnPrimaryText, { color: isDark ? '#000' : '#fff' }]}>Зберегти Розклад</Text>
         </TouchableOpacity>
       </View>
 
@@ -330,19 +344,22 @@ export const MasterDashboardScreen = () => {
       <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15}}>
           <TouchableOpacity onPress={() => changeDay(-1)} style={{padding: 5}}><Text style={{fontSize: 20, color: colors.primary}}>◀</Text></TouchableOpacity>
-          <Text style={styles.cardTitle}>{selectedCalendarDay}</Text>
+          <Text style={[styles.cardTitle, { color: colors.primary, marginBottom: 0 }]}>{selectedCalendarDay}</Text>
           <TouchableOpacity onPress={() => changeDay(1)} style={{padding: 5}}><Text style={{fontSize: 20, color: colors.primary}}>▶</Text></TouchableOpacity>
         </View>
         {loading ? <ActivityIndicator color={colors.primary} /> : (
             <View style={styles.slotsGrid}>
                 {slots.map((s, i) => {
-                    let bgColor = '#98FB98'; // Green for available
+                    let bgColor = isDark ? 'rgba(46, 139, 87, 0.4)' : '#e6ffe6'; // Green for available
+                    let txtColor = isDark ? '#fff' : '#111';
                     let displayIcon = '';
                     if (s.isBlocked) {
-                        bgColor = isDark ? '#444' : '#e0e0e0';
+                        bgColor = isDark ? '#333' : '#e0e0e0';
+                        txtColor = colors.textSecondary;
                         displayIcon = '🔒';
                     } else if (s.appointment) {
-                        bgColor = '#FFB6C1'; 
+                        bgColor = isDark ? 'rgba(139, 0, 0, 0.5)' : '#ffe6e6'; 
+                        txtColor = isDark ? '#ffcccc' : '#8b0000';
                         displayIcon = '👤';
                     }
 
@@ -350,7 +367,7 @@ export const MasterDashboardScreen = () => {
                         <TouchableOpacity key={i} style={[styles.slotBtn, { backgroundColor: bgColor }]} onPress={() => {
                             if (!s.appointment) toggleSlotBlock(s);
                         }}>
-                            <Text style={styles.slotBtnText}>{s.time} {displayIcon}</Text>
+                            <Text style={[styles.slotBtnText, { color: txtColor }]}>{s.time} {displayIcon}</Text>
                         </TouchableOpacity>
                     );
                 })}
@@ -359,99 +376,101 @@ export const MasterDashboardScreen = () => {
       </View>
 
       <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-        <Text style={styles.cardTitle}>💳 Налаштування оплати</Text>
+        <Text style={[styles.cardTitle, { color: colors.primary }]}>💳 Налаштування оплати</Text>
         
-        <Text style={styles.label}>Номер картки (IBAN)</Text>
+        <Text style={[styles.label, {color: colors.textSecondary}]}>Номер картки (IBAN)</Text>
         <TextInput
           placeholder="Номер картки (IBAN)"
-          placeholderTextColor="#666"
+          placeholderTextColor={colors.textSecondary}
           value={payCard}
           onChangeText={setPayCard}
           style={[styles.input, {color: colors.text, borderColor: colors.border}]}
         />
         
-        <Text style={styles.label}>Назва банку</Text>
+        <Text style={[styles.label, {color: colors.textSecondary}]}>Назва банку</Text>
         <TextInput
           placeholder="ПриватБанк, Monobank..."
-          placeholderTextColor="#666"
+          placeholderTextColor={colors.textSecondary}
           value={payBank}
           onChangeText={setPayBank}
           style={[styles.input, {color: colors.text, borderColor: colors.border}]}
         />
 
-        <Text style={styles.label}>Посилання на оплату (Банка, Send, опціонально)</Text>
+        <Text style={[styles.label, {color: colors.textSecondary}]}>Посилання на оплату (Банка, Send, опціонально)</Text>
         <TextInput
           placeholder="https://send.monobank.ua/..."
-          placeholderTextColor="#666"
+          placeholderTextColor={colors.textSecondary}
           value={payLink}
           onChangeText={setPayLink}
           style={[styles.input, {color: colors.text, borderColor: colors.border}]}
         />
         
-        <TouchableOpacity style={styles.btnPrimary} onPress={savePaymentDetails}>
-          <Text style={styles.btnPrimaryText}>Зберегти реквізити</Text>
+        <TouchableOpacity style={[styles.btnPrimary, { backgroundColor: colors.primary }]} onPress={savePaymentDetails}>
+          <Text style={[styles.btnPrimaryText, { color: isDark ? '#000' : '#fff' }]}>Зберегти реквізити</Text>
         </TouchableOpacity>
       </View>
 
       {/* Appointments */}
       <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-        <Text style={styles.cardTitle}>⚠️ Запити на підтвердження</Text>
+        <Text style={[styles.cardTitle, { color: colors.text }]}>⚠️ Запити на підтвердження</Text>
         {appointments.filter((a: any) => a.status === 'PENDING').length === 0 && <Text style={[styles.subtext, {color: colors.textSecondary}]}>Немає нових запитів</Text>}
         {appointments.filter((a: any) => a.status === 'PENDING').map((app: any) => (
-            <View key={'pend-'+app.id} style={[styles.appointmentItem, {borderBottomColor: colors.border, backgroundColor: isDark ? '#3a2a1a' : '#fff5eb', padding: 10, borderRadius: 10}]}>
+            <View key={'pend-'+app.id} style={[styles.appointmentItem, {borderBottomColor: colors.border, backgroundColor: isDark ? 'rgba(224, 192, 180, 0.1)' : 'rgba(224, 192, 180, 0.2)', padding: 15, borderRadius: 12}]}>
                 <View style={styles.appInfo}>
                     <TouchableOpacity onPress={() => setSelectedClient(app)}>
-                      <Text style={[styles.appName, {color: '#FF69B4', fontWeight: 'bold'}]}>
-                        Клієнт: {app.client?.name || app.client?.phone || app.clientId.substring(0,6)} (Деталі)
+                      <Text style={[styles.appName, {color: colors.primary, fontWeight: 'bold', fontFamily: 'serif'}]}>
+                        Клієнт: {app.client?.name || app.client?.phone || app.clientId.substring(0,6)}
                       </Text>
                     </TouchableOpacity>
                     <Text style={[{color: colors.textSecondary, fontSize: 12, marginVertical: 3}]}>
                       Дата: {new Date(app.date).toISOString().split('T')[0]} о {app.time}
                     </Text>
-                    <Text style={[styles.appStatus, {color: '#FF8C00'}]}>
-                      ОЧІКУЄ ПІДТВЕРДЖЕННЯ
-                    </Text>
                 </View>
                 <View style={styles.appActions}>
-                    <TouchableOpacity style={[styles.actionBtn, {backgroundColor: '#98FB98'}]} onPress={() => {
+                    <TouchableOpacity style={[styles.actionBtn, {borderColor: '#2e8b57', borderWidth: 1}]} onPress={() => {
                         setConfirmApp(app);
                         setConfirmPrice(app.price ? app.price.toString() : '');
                         setConfirmNote('');
                         setConfirmModalVisible(true);
                     }}>
-                        <Text style={styles.actionIcon}>✓</Text>
+                        <Text style={[styles.actionIcon, { color: '#2e8b57' }]}>✓</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={[styles.actionBtn, {backgroundColor: '#FFB6C1'}]} onPress={() => updateAppStatus(app.id, 'cancel')}>
-                        <Text style={styles.actionIcon}>✗</Text>
+                    <TouchableOpacity style={[styles.actionBtn, {borderColor: '#8b0000', borderWidth: 1}]} onPress={() => updateAppStatus(app.id, 'cancel')}>
+                        <Text style={[styles.actionIcon, { color: '#8b0000' }]}>✗</Text>
                     </TouchableOpacity>
                 </View>
             </View>
         ))}
 
-        <Text style={[styles.cardTitle, {marginTop: 20}]}>Сьогоднішні записи (або обраний день)</Text>
+        <Text style={[styles.cardTitle, {marginTop: 20, color: colors.text}]}>Сьогоднішні записи (або обраний день)</Text>
         {currentDayAppoints.filter((a) => a.status !== 'PENDING').length === 0 && <Text style={[styles.subtext, {color: colors.textSecondary}]}>Немає записів</Text>}
         {currentDayAppoints.filter((a) => a.status !== 'PENDING').map((app: any) => (
             <View key={app.id} style={[styles.appointmentItem, {borderBottomColor: colors.border}]}>
                 <View style={styles.appInfo}>
                     <TouchableOpacity onPress={() => setSelectedClient(app)}>
-                      <Text style={[styles.appName, {color: '#FF69B4', fontWeight: 'bold'}]}>
-                        Клієнт: {app.client?.name || app.client?.phone || app.clientId.substring(0,6)} (Деталі)
+                      <Text style={[styles.appName, {color: colors.text, fontWeight: 'bold', fontFamily: 'serif'}]}>
+                        Клієнт: {app.client?.name || app.client?.phone || app.clientId.substring(0,6)}
                       </Text>
                     </TouchableOpacity>
                     <Text style={[{color: colors.textSecondary, fontSize: 12, marginVertical: 3}]}>
                       Дата: {new Date(app.date).toISOString().split('T')[0]} о {app.time}
                     </Text>
-                    <Text style={[styles.appStatus, app.status === 'CONFIRMED' && {color: 'green'}]}>
+                    <Text style={[styles.appStatus, app.status === 'CONFIRMED' && {color: '#2e8b57'}, app.status === 'CANCELLED' && {color: '#8b0000'}]}>
                       {statusMap[app.status] || app.status}
                     </Text>
                 </View>
                 <View style={styles.appActions}>
-                    {app.status !== 'CANCELLED' && (
-                        <TouchableOpacity style={[styles.actionBtn, {backgroundColor: '#FFB6C1'}]} onPress={() => updateAppStatus(app.id, 'cancel')}>
-                            <Text style={styles.actionIcon}>✗</Text>
+                    {app.status === 'CONFIRMED' && (
+                        <TouchableOpacity style={[styles.actionBtn, {borderColor: colors.primary, borderWidth: 1, backgroundColor: colors.primary}]} onPress={() => updateAppStatus(app.id, 'complete')}>
+                            <Text style={[styles.actionIcon, { color: isDark ? '#000' : '#fff' }]}>✓</Text>
                         </TouchableOpacity>
                     )}
-                    <TouchableOpacity style={[styles.actionBtn, {backgroundColor: '#333'}]} onPress={() => {
+                    {app.status !== 'CANCELLED' && app.status !== 'COMPLETED' && (
+                        <TouchableOpacity style={[styles.actionBtn, {borderColor: '#8b0000', borderWidth: 1}]} onPress={() => updateAppStatus(app.id, 'cancel')}>
+                            <Text style={[styles.actionIcon, { color: '#8b0000' }]}>✗</Text>
+                        </TouchableOpacity>
+                    )}
+                    <TouchableOpacity style={[styles.actionBtn, {borderColor: colors.textSecondary, borderWidth: 1}]} onPress={() => {
                         Alert.alert('Заблокувати', 'Бажаєте заблокувати номер цього клієнта?', [
                            {text: 'Ні', style: 'cancel'},
                            {text: 'Так', style: 'destructive', onPress: async () => {
@@ -463,7 +482,7 @@ export const MasterDashboardScreen = () => {
                            }}
                         ]);
                     }}>
-                        <Text style={styles.actionIcon}>🚫</Text>
+                        <Text style={[styles.actionIcon, { color: colors.textSecondary }]}>🚫</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -472,34 +491,34 @@ export const MasterDashboardScreen = () => {
 
       {/* Прайс-лист */}
       <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-        <Text style={styles.cardTitle}>Мої ціни (Прайс-лист)</Text>
+        <Text style={[styles.cardTitle, { color: colors.primary }]}>Мої ціни (Прайс-лист)</Text>
         {prices.map(item => (
-          <View key={item.id} style={[styles.row, {marginBottom: 10, alignItems: 'center', borderBottomWidth: 1, borderBottomColor: '#333', paddingBottom: 10}]}>
+          <View key={item.id} style={[styles.row, {marginBottom: 10, alignItems: 'center', borderBottomWidth: 1, borderBottomColor: colors.border, paddingBottom: 10}]}>
             <Text style={{color: colors.text, flex: 1}}>{item.service}: {item.price} грн</Text>
-            <TouchableOpacity onPress={() => { setEditPriceId(item.id); setPriceForm({service: item.service, price: item.price.toString()}); setPriceModalVisible(true); }} style={{marginRight: 15}}>
-               <Text>✏️</Text>
+            <TouchableOpacity onPress={() => { setEditPriceId(item.id); setPriceForm({service: item.service, price: item.price.toString()}); setPriceModalVisible(true); }} style={{marginRight: 15, padding: 5, borderWidth: 1, borderColor: colors.border, borderRadius: 8}}>
+               <Text style={{color: colors.text}}>✏️</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => deletePriceItem(item.id)}>
-               <Text>🗑️</Text>
+            <TouchableOpacity onPress={() => deletePriceItem(item.id)} style={{padding: 5, borderWidth: 1, borderColor: colors.border, borderRadius: 8}}>
+               <Text style={{color: colors.text}}>🗑️</Text>
             </TouchableOpacity>
           </View>
         ))}
-        <TouchableOpacity style={[styles.btnPrimary, {marginTop: 10}]} onPress={() => { setEditPriceId(null); setPriceForm({service: '', price: ''}); setPriceModalVisible(true); }}>
-           <Text style={styles.btnPrimaryText}>+ Додати послугу</Text>
+        <TouchableOpacity style={[styles.btnPrimary, {marginTop: 10, backgroundColor: colors.primary}]} onPress={() => { setEditPriceId(null); setPriceForm({service: '', price: ''}); setPriceModalVisible(true); }}>
+           <Text style={[styles.btnPrimaryText, { color: isDark ? '#000' : '#fff' }]}>+ Додати послугу</Text>
         </TouchableOpacity>
       </View>
 
       {/* Client Details Modal */}
       <Modal visible={!!selectedClient} transparent animationType="fade">
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, {backgroundColor: colors.card}]}>
+          <View style={[styles.modalContent, {backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1}]}>
             <Text style={[styles.modalTitle, {color: colors.text}]}>Деталі запису</Text>
             <Text style={{color: colors.text, marginBottom: 5}}>Ім'я: {selectedClient?.client?.name || 'Без імені'}</Text>
             <Text style={{color: colors.text, marginBottom: 5}}>Телефон: {selectedClient?.client?.phone || 'Приховано'}</Text>
             <Text style={{color: colors.text, marginBottom: 5}}>Послуга: {selectedClient?.service || 'Не вказано'}</Text>
             <Text style={{color: colors.text, marginBottom: 15}}>Ціна: {selectedClient?.price ? selectedClient.price + ' грн' : 'Не вказано'}</Text>
-            <TouchableOpacity style={styles.btnPrimary} onPress={() => setSelectedClient(null)}>
-              <Text style={styles.btnPrimaryText}>Закрити</Text>
+            <TouchableOpacity style={[styles.btnPrimary, { backgroundColor: colors.primary }]} onPress={() => setSelectedClient(null)}>
+              <Text style={[styles.btnPrimaryText, { color: isDark ? '#000' : '#fff' }]}>Закрити</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -508,17 +527,20 @@ export const MasterDashboardScreen = () => {
       {/* Price Edit Modal */}
       <Modal visible={priceModalVisible} transparent animationType="slide">
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, {backgroundColor: colors.card}]}>
+          <View style={[styles.modalContent, {backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1}]}>
             <Text style={[styles.modalTitle, {color: colors.text}]}>Редагувати послугу</Text>
-            <Text style={styles.label}>Назва послуги:</Text>
-            <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} placeholder="Манікюр..." placeholderTextColor="#666" value={priceForm.service} onChangeText={t => setPriceForm({...priceForm, service: t})} />
-            <Text style={styles.label}>Ціна (грн):</Text>
-            <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} placeholder="450" placeholderTextColor="#666" keyboardType="numeric" value={priceForm.price} onChangeText={t => setPriceForm({...priceForm, price: t})} />
-            
-            <TouchableOpacity style={[styles.btnPrimary, {marginBottom: 10}]} onPress={savePriceItem}>
-              <Text style={styles.btnPrimaryText}>Зберегти</Text>
+            <View style={{width: '100%', marginBottom: 10}}>
+                <Text style={[styles.label, {color: colors.textSecondary}]}>Назва послуги:</Text>
+                <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border, width: '100%'}]} placeholder="Манікюр..." placeholderTextColor="#666" value={priceForm.service} onChangeText={t => setPriceForm({...priceForm, service: t})} />
+            </View>
+            <View style={{width: '100%', marginBottom: 15}}>
+                <Text style={[styles.label, {color: colors.textSecondary}]}>Ціна (грн):</Text>
+                <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border, width: '100%'}]} placeholder="450" placeholderTextColor="#666" keyboardType="numeric" value={priceForm.price} onChangeText={t => setPriceForm({...priceForm, price: t})} />
+            </View>
+            <TouchableOpacity style={[styles.btnPrimary, {marginBottom: 10, width: '100%', backgroundColor: colors.primary }]} onPress={savePriceItem}>
+              <Text style={[styles.btnPrimaryText, { color: isDark ? '#000' : '#fff' }]}>Зберегти</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.btnSecondary} onPress={() => setPriceModalVisible(false)}>
+            <TouchableOpacity style={[styles.btnSecondary, {width: '100%', borderColor: colors.primary}]} onPress={() => setPriceModalVisible(false)}>
               <Text style={{color: colors.primary, fontWeight: 'bold'}}>Скасувати</Text>
             </TouchableOpacity>
           </View>
@@ -528,74 +550,81 @@ export const MasterDashboardScreen = () => {
       {/* Confirm Appointment Modal */}
       <Modal visible={confirmModalVisible} transparent animationType="slide">
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, {backgroundColor: colors.card}]}>
+          <View style={[styles.modalContent, {backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1}]}>
             <Text style={[styles.modalTitle, {color: colors.text}]}>Підтвердити запис</Text>
-            <Text style={{color: colors.text, marginBottom: 10}}>Ви можете змінити ціну або залишити базову. Також можна додати примітку.</Text>
+            <Text style={{color: colors.textSecondary, marginBottom: 10, textAlign: 'center'}}>Ви можете змінити ціну або залишити базову. Також можна додати примітку.</Text>
             
-            <Text style={styles.label}>Нова ціна (грн) - опціонально:</Text>
-            <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} placeholder="Введіть суму" placeholderTextColor="#666" keyboardType="numeric" value={confirmPrice} onChangeText={setConfirmPrice} />
-            
-            <Text style={styles.label}>Примітка клієнту (необов'язково):</Text>
-            <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border, height: 80}]} placeholder="Коментар..." placeholderTextColor="#666" multiline value={confirmNote} onChangeText={setConfirmNote} />
+            <View style={{width: '100%', marginBottom: 10}}>
+                <Text style={[styles.label, {color: colors.textSecondary}]}>Нова ціна (грн) - опціонально:</Text>
+                <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} placeholder="Введіть суму" placeholderTextColor="#666" keyboardType="numeric" value={confirmPrice} onChangeText={setConfirmPrice} />
+            </View>
 
-            <TouchableOpacity style={[styles.btnPrimary, {marginBottom: 10}]} onPress={submitConfirm}>
-              <Text style={styles.btnPrimaryText}>Підтвердити</Text>
+            <View style={{width: '100%', marginBottom: 15}}>
+                <Text style={[styles.label, {color: colors.textSecondary}]}>Примітка клієнту (необов'язково):</Text>
+                <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border, height: 80}]} placeholder="Коментар..." placeholderTextColor="#666" multiline value={confirmNote} onChangeText={setConfirmNote} />
+            </View>
+
+            <TouchableOpacity style={[styles.btnPrimary, {marginBottom: 10, width: '100%', backgroundColor: colors.primary }]} onPress={submitConfirm}>
+              <Text style={[styles.btnPrimaryText, { color: isDark ? '#000' : '#fff' }]}>Підтвердити</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.btnSecondary} onPress={() => setConfirmModalVisible(false)}>
+            <TouchableOpacity style={[styles.btnSecondary, {width: '100%', borderColor: colors.primary}]} onPress={() => setConfirmModalVisible(false)}>
               <Text style={{color: colors.primary, fontWeight: 'bold'}}>Закрити</Text>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
+
       <Modal visible={qrModalVisible} transparent animationType="slide">
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, {backgroundColor: colors.card}]}>
+          <View style={[styles.modalContent, {backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1}]}>
             <Text style={[styles.modalTitle, {color: colors.text}]}>Ваше посилання</Text>
-            <QRCode value={inviteLink} size={200} />
+            <View style={{padding: 10, backgroundColor: '#fff', borderRadius: 10}}>
+                <QRCode value={inviteLink} size={200} />
+            </View>
             <Text style={[styles.linkText, {color: colors.primary}]} onPress={copyLink}>{inviteLink}</Text>
             
-            <TouchableOpacity style={styles.btnSecondary} onPress={() => Alert.alert('Купон', 'Ваш клієнт може використати код: ' + masterProfile?.linkSlug + ' при реєстрації, щоб отримати сертифікат!')}>
-              <Text style={{color: colors.primary, fontWeight: 'bold'}}>Надіслати як Купон-Сертифікат</Text>
+            <TouchableOpacity style={[styles.btnSecondary, {borderColor: colors.primary, width: '100%'}]} onPress={() => Alert.alert('Купон', 'Ваш клієнт може використати код: ' + masterProfile?.linkSlug + ' при реєстрації, щоб отримати сертифікат!')}>
+              <Text style={{color: colors.primary, fontWeight: 'bold', textAlign: 'center'}}>Надіслати як Купон</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={[styles.btnPrimary, {marginTop: 15}]} onPress={() => setQrModalVisible(false)}>
-              <Text style={styles.btnPrimaryText}>Закрити</Text>
+            <TouchableOpacity style={[styles.btnPrimary, {marginTop: 15, width: '100%', backgroundColor: colors.primary }]} onPress={() => setQrModalVisible(false)}>
+              <Text style={[styles.btnPrimaryText, { color: isDark ? '#000' : '#fff' }]}>Закрити</Text>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
 
-      <View style={{height: 50}}/>
+      <View style={{height: 100}}/>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 15 },
-  header: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
-  card: { borderRadius: 20, padding: 20, marginBottom: 20, shadowColor: '#000', shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.1, shadowRadius: 5, elevation: 3, borderWidth: 1 },
-  cardTitle: { fontSize: 18, fontWeight: '600', marginBottom: 15, color: '#FF69B4' },
+  header: { fontSize: 24, fontFamily: 'serif', fontStyle: 'italic', marginBottom: 20 },
+  card: { borderRadius: 16, padding: 20, marginBottom: 20, shadowColor: '#000', shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.1, shadowRadius: 5, elevation: 3, borderWidth: 1 },
+  cardTitle: { fontSize: 18, fontFamily: 'serif', fontStyle: 'italic', fontWeight: 'bold', marginBottom: 15 },
   daysRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 },
-  dayCircle: { width: 35, height: 35, borderRadius: 17.5, alignItems: 'center', justifyContent: 'center', backgroundColor: 'transparent', borderWidth: 1, borderColor: '#FF69B4' },
+  dayCircle: { width: 35, height: 35, borderRadius: 17.5, alignItems: 'center', justifyContent: 'center', backgroundColor: 'transparent', borderWidth: 1 },
   row: { flexDirection: 'row', justifyContent: 'space-between' },
-  label: { fontSize: 14, marginBottom: 5 },
+  label: { fontSize: 13, marginBottom: 5 },
   input: { borderWidth: 1, borderRadius: 10, padding: 10, marginBottom: 15, fontSize: 16 },
-  btnPrimary: { backgroundColor: '#FF69B4', borderRadius: 20, padding: 15, alignItems: 'center' },
-  btnPrimaryText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
-  btnSecondary: { backgroundColor: 'transparent', borderRadius: 20, padding: 15, alignItems: 'center', borderWidth: 1, borderColor: '#FF69B4' },
+  btnPrimary: { borderRadius: 12, padding: 15, alignItems: 'center' },
+  btnPrimaryText: { fontWeight: 'bold', fontSize: 14 },
+  btnSecondary: { backgroundColor: 'transparent', borderRadius: 12, padding: 15, alignItems: 'center', borderWidth: 1 },
   slotsGrid: { flexDirection: 'row', flexWrap: 'wrap' },
   slotBtn: { padding: 15, borderRadius: 10, margin: 5, width: '45%', alignItems: 'center' },
-  slotBtnText: { fontWeight: 'bold', color: '#111' },
+  slotBtnText: { fontWeight: 'bold' },
   appointmentItem: { flexDirection: 'row', justifyContent: 'space-between', borderBottomWidth: 1, paddingBottom: 10, marginBottom: 10 },
   appInfo: { flex: 1 },
-  appName: { fontSize: 16, fontWeight: 'bold' },
-  appStatus: { fontSize: 12, fontWeight: 'bold', marginTop: 5 },
+  appName: { fontSize: 16 },
+  appStatus: { fontSize: 10, fontWeight: 'bold', marginTop: 5 },
   appActions: { flexDirection: 'row', alignItems: 'center' },
-  actionBtn: { width: 35, height: 35, borderRadius: 17.5, justifyContent: 'center', alignItems: 'center', marginLeft: 10 },
-  actionIcon: { fontSize: 16, fontWeight: 'bold', color: '#fff' },
-  subtext: { color: '#999', fontStyle: 'italic' },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
-  modalContent: { width: '80%', padding: 30, borderRadius: 20, alignItems: 'center' },
-  modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 20 },
-  linkText: { marginVertical: 20, fontSize: 16, textAlign: 'center', textDecorationLine: 'underline' }
+  actionBtn: { width: 35, height: 35, borderRadius: 17.5, justifyContent: 'center', alignItems: 'center', marginLeft: 10, backgroundColor: 'transparent' },
+  actionIcon: { fontSize: 16, fontWeight: 'bold' },
+  subtext: { fontSize: 13, fontStyle: 'italic' },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'center', alignItems: 'center' },
+  modalContent: { width: '85%', padding: 24, borderRadius: 20, alignItems: 'center' },
+  modalTitle: { fontSize: 22, fontFamily: 'serif', fontStyle: 'italic', marginBottom: 20 },
+  linkText: { marginVertical: 20, fontSize: 14, textAlign: 'center', textDecorationLine: 'underline' }
 });

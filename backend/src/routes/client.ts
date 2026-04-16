@@ -202,8 +202,8 @@ router.post('/appointments', async (req: any, res) => {
   let appliedDiscountReason = '';
 
   // 1. Check if New Client First Booking Discount
-  const previousAppointments = await prisma.appointment.count({ where: { clientId: req.user.id } });
-  if (previousAppointments === 0) {
+  const previousCompleted = await prisma.appointment.count({ where: { clientId: req.user.id, status: 'COMPLETED' } });
+  if (previousCompleted === 0) {
      const referredAsNew = await prisma.referralUse.findFirst({
         where: { referredClientId: req.user.id }
      });
@@ -218,9 +218,14 @@ router.post('/appointments', async (req: any, res) => {
      // User's own code
      const myCode = await prisma.referralCode.findUnique({ where: { clientId: req.user.id } });
      if (myCode) {
-        const unusedBonus = await prisma.referralUse.findFirst({
-           where: { code: myCode.code, isCodeOwnerDiscountUsed: false }
+        // Find a referral that hasn't been used yet AND where the referred client has at least 1 COMPLETED appointment
+        const possibleBonuses = await prisma.referralUse.findMany({
+           where: { code: myCode.code, isCodeOwnerDiscountUsed: false },
+           include: { referredClient: { include: { myAppointments: { where: { status: 'COMPLETED' } } } } }
         });
+        
+        const unusedBonus = possibleBonuses.find((b: any) => b.referredClient?.myAppointments?.length > 0);
+        
         if (unusedBonus) {
            finalPrice = Math.floor(price * 0.9);
            appliedDiscountReason = 'Реферальний бонус 10% за друга';
@@ -375,25 +380,25 @@ router.get('/referral-stats', async (req: any, res) => {
       return res.json({ uses: 0, pendingBonuses: 0, totalDiscountApplied: 0 });
     }
     
-    // Calculate how many of the referred clients actually created an appointment??
-    // Actually simplicity: each ReferralUse where isCodeOwnerDiscountUsed = false means 1 available bonus (10% discount).
-    
-    // Find people the current user referred
-    const uses = await prisma.referralUse.findMany({
-      where: { code: rc.code }
+    // Calculate how many of the referred clients actually completed an appointment
+    const allUses = await prisma.referralUse.findMany({
+      where: { code: rc.code },
+      include: { referredClient: { include: { myAppointments: { where: { status: 'COMPLETED' } } } } }
     });
     
-    const pendingBonuses = uses.filter((u: any) => !u.isCodeOwnerDiscountUsed).length;
+    // Only count uses that have at least 1 completed appointment
+    const validUses = allUses.filter((u: any) => u.referredClient?.myAppointments?.length > 0);
+    
+    const pendingBonuses = validUses.filter((u: any) => !u.isCodeOwnerDiscountUsed).length;
+    const totalDiscountApplied = validUses.filter((u: any) => u.isCodeOwnerDiscountUsed).length * 10;
     
     res.json({
-      code: rc.code,
-      uses: uses.length,
+      uses: validUses.length, // Number of successfully processed friends
       pendingBonuses,
-      usesDetails: uses
+      totalDiscountApplied
     });
-
-  } catch(e) {
-    console.error(e);
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Server error' });
   }
 });

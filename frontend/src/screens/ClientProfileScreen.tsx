@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Switch, ScrollView, TextInput, Alert, Image, Share } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Switch, ScrollView, TextInput, Alert, Image, Share, RefreshControl } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import * as Clipboard from 'expo-clipboard';
@@ -14,15 +14,21 @@ export const ClientProfileScreen = ({ navigation }: any) => {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [avatar, setAvatar] = useState<string | null>(null);
+  const [myMasterName, setMyMasterName] = useState<string | null>(null);
 
   const [referralCode, setReferralCode] = useState('');
   const [referralUses, setReferralUses] = useState(0);
   const [referralPendingBonuses, setReferralPendingBonuses] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    loadProfile();
-    loadReferralStats();
+    loadAll();
   }, []);
+
+  const loadAll = async () => {
+    await loadProfile();
+    await loadReferralStats();
+  };
 
   const loadProfile = async () => {
     try {
@@ -34,6 +40,13 @@ export const ClientProfileScreen = ({ navigation }: any) => {
         if (u.avatarUrl) {
           const formattedUrl = u.avatarUrl.startsWith('http') ? u.avatarUrl : `${api.defaults.baseURL}/${u.avatarUrl}`;
           setAvatar(formattedUrl);
+        }
+
+        if (u.masterId) {
+            const masterRes = await api.get(`/api/client/master/${u.masterId}`);
+            if (masterRes.data && masterRes.data.name) {
+                setMyMasterName(masterRes.data.name);
+            }
         }
       }
     } catch(e) {}
@@ -55,6 +68,12 @@ export const ClientProfileScreen = ({ navigation }: any) => {
       console.log('Failed to load referral stats', e);
     }
   };
+
+  const onRefresh = useCallback(async () => {
+      setRefreshing(true);
+      await loadAll();
+      setRefreshing(false);
+  }, []);
 
   const copyReferralCode = async () => {
     if (referralCode) {
@@ -106,7 +125,6 @@ export const ClientProfileScreen = ({ navigation }: any) => {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       
-      // Update local storage
       await AsyncStorage.setItem('user', JSON.stringify(res.data));
       Alert.alert('Успіх', 'Профіль оновлено');
       loadProfile();
@@ -122,7 +140,10 @@ export const ClientProfileScreen = ({ navigation }: any) => {
   };
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
+    <ScrollView 
+        style={[styles.container, { backgroundColor: colors.background }]}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
+    >
       <View style={[styles.header, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
         <TouchableOpacity onPress={handlePickAvatar}>
           {avatar ? (
@@ -130,7 +151,7 @@ export const ClientProfileScreen = ({ navigation }: any) => {
           ) : (
              <View style={[styles.avatarPlaceholder, {backgroundColor: colors.border}]} />
           )}
-          <Text style={{textAlign: 'center', color: colors.primary, marginTop: 5}}>Змінити</Text>
+          <Text style={{textAlign: 'center', color: colors.textSecondary, marginTop: 5, fontSize: 12}}>Змінити фото</Text>
         </TouchableOpacity>
         
         <View style={styles.editForm}>
@@ -148,37 +169,37 @@ export const ClientProfileScreen = ({ navigation }: any) => {
                 }
                 setPhone(cleaned);
             }} placeholder="Телефон" placeholderTextColor={colors.textSecondary} keyboardType="phone-pad" />
-            <TouchableOpacity style={[styles.saveBtn, {backgroundColor: colors.primary}]} onPress={handleSaveProfile}>
-                <Text style={styles.saveBtnText}>Зберегти зміни</Text>
+            <TouchableOpacity style={[styles.saveBtn, { backgroundColor: colors.primary }]} onPress={handleSaveProfile}>
+                <Text style={[styles.saveBtnText, { color: isDark ? '#000' : '#fff' }]}>Зберегти зміни</Text>
             </TouchableOpacity>
         </View>
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Реферальна програма 🎁</Text>
-        <View style={[styles.card, { backgroundColor: colors.card }]}>
-          <Text style={[styles.cardTitle, { color: colors.text, marginBottom: 10 }]}>Запроси подругу - отримай знижку 10%!</Text>
-          <Text style={{ color: colors.textSecondary, marginBottom: 15 }}>Ваша подруга отримає знижку 10% на перший запис, а ви 10% — на ваш наступний запис за кожну подругу!</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>Реферальна програма 🎁</Text>
+        <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <Text style={[styles.cardTitle, { color: colors.text }]}>Запроси подругу - отримай знижку 10%!</Text>
+          <Text style={{ color: colors.textSecondary, marginBottom: 20, fontSize: 13 }}>Ваша подруга отримає знижку 10% на перший запис, а ви 10% — на ваш наступний запис за кожну подругу!</Text>
           
-          <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: colors.background, padding: 15, borderRadius: 10, borderWidth: 1, borderColor: colors.primary + '50'}}>
-             <Text style={{color: colors.primary, fontWeight: 'bold', fontSize: 18, letterSpacing: 1}}>{referralCode || 'Завантаження...'}</Text>
-             <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                 <TouchableOpacity style={{backgroundColor: colors.primary, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, marginRight: 8}} onPress={shareReferralCode}>
-                     <Text style={{color: '#fff', fontWeight: 'bold'}}>Поділитися 💬</Text>
+          <View style={{backgroundColor: colors.background, padding: 15, borderRadius: 12, borderWidth: 1, borderColor: colors.border, marginBottom: 15}}>
+             <Text style={{color: colors.text, fontWeight: 'bold', fontSize: 18, letterSpacing: 2, textAlign: 'center', marginBottom: 15}}>{referralCode || 'Завантаження...'}</Text>
+             <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
+                 <TouchableOpacity style={[styles.actionBtn, { borderColor: colors.primary }]} onPress={shareReferralCode}>
+                     <Text style={{color: colors.primary, fontWeight: 'bold', fontSize: 12}}>Поділитися 💬</Text>
                  </TouchableOpacity>
-                 <TouchableOpacity style={{backgroundColor: colors.primary, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8}} onPress={copyReferralCode}>
-                     <Text style={{color: '#fff', fontWeight: 'bold'}}>Копіювати</Text>
+                 <TouchableOpacity style={[styles.actionBtn, { borderColor: colors.primary, marginLeft: 10 }]} onPress={copyReferralCode}>
+                     <Text style={{color: colors.primary, fontWeight: 'bold', fontSize: 12}}>Копіювати</Text>
                  </TouchableOpacity>
              </View>
           </View>
           
-          <View style={{flexDirection: 'row', justifyContent: 'space-between', marginTop: 15, borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 15}}>
-             <View style={{alignItems: 'center'}}>
-                 <Text style={{fontSize: 24, fontWeight: 'bold', color: colors.text}}>{referralUses}</Text>
+          <View style={{flexDirection: 'row', justifyContent: 'space-between', borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 15}}>
+             <View style={{alignItems: 'center', flex: 1}}>
+                 <Text style={{fontSize: 24, fontFamily: 'serif', fontWeight: 'bold', color: colors.text}}>{referralUses}</Text>
                  <Text style={{fontSize: 12, color: colors.textSecondary}}>Запрошено</Text>
              </View>
-             <View style={{alignItems: 'center'}}>
-                 <Text style={{fontSize: 24, fontWeight: 'bold', color: '#4CAF50'}}>{referralPendingBonuses}</Text>
+             <View style={{alignItems: 'center', flex: 1, borderLeftWidth: 1, borderLeftColor: colors.border}}>
+                 <Text style={{fontSize: 24, fontFamily: 'serif', fontWeight: 'bold', color: colors.primary}}>{referralPendingBonuses}</Text>
                  <Text style={{fontSize: 12, color: colors.textSecondary}}>Доступно знижок</Text>
              </View>
           </View>
@@ -186,40 +207,48 @@ export const ClientProfileScreen = ({ navigation }: any) => {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Мій Майстер</Text>
-        <TouchableOpacity style={[styles.card, { backgroundColor: colors.card, marginBottom: 20 }]} onPress={() => navigation.navigate('SearchMastersScreen' as never)}>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>Мій Майстер</Text>
+        
+        {myMasterName && (
+           <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border, marginBottom: 15, paddingVertical: 20 }]}>
+             <Text style={{ color: colors.textSecondary, fontSize: 12, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 5 }}>Поточний майстер</Text>
+             <Text style={{ color: colors.text, fontFamily: 'serif', fontStyle: 'italic', fontSize: 22 }}>{myMasterName}</Text>
+           </View>
+        )}
+
+        <TouchableOpacity style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border, marginBottom: 20 }]} onPress={() => navigation.navigate('SearchMastersScreen' as never)}>
           <Text style={[styles.cardTitle, { color: colors.text }]}>Знайти або підключити майстра 🔍</Text>
           <Text style={{ color: colors.textSecondary }}>Пошук за геолокацією або ввід коду</Text>
         </TouchableOpacity>
 
-        <Text style={styles.sectionTitle}>Мої записи</Text>
-        <TouchableOpacity style={[styles.card, { backgroundColor: colors.card }]} onPress={() => navigation.navigate('Gallery' as never)}>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>Вподобання</Text>
+        <TouchableOpacity style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]} onPress={() => navigation.navigate('Gallery' as never)}>
           <Text style={[styles.cardTitle, { color: colors.text }]}>Збережені дизайни (Обране)</Text>
           <Text style={{ color: colors.textSecondary }}>Переглянути збережені фото 💅</Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Налаштування</Text>
-        <View style={[styles.settingRow, { backgroundColor: colors.card }]}>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>Налаштування</Text>
+        <View style={[styles.settingRow, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <Text style={[styles.settingText, { color: colors.text }]}>Темна тема</Text>
           <Switch value={isDark} onValueChange={toggleTheme} trackColor={{true: colors.primary}} />
         </View>
-        <View style={[styles.settingRow, { backgroundColor: colors.card }]}>
+        <View style={[styles.settingRow, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <Text style={[styles.settingText, { color: colors.text }]}>Push-сповіщення</Text>
           <Switch value={pushEnabled} onValueChange={setPushEnabled} trackColor={{true: colors.primary}} />
         </View>
-        <View style={[styles.settingRow, { backgroundColor: colors.card }]}>
+        <View style={[styles.settingRow, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <Text style={[styles.settingText, { color: colors.text }]}>Telegram-бот</Text>
           <Switch value={telegramEnabled} onValueChange={setTelegramEnabled} trackColor={{true: colors.primary}} />
         </View>
       </View>
 
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutButtonText}>Вийти з акаунту</Text>
+      <TouchableOpacity style={[styles.logoutButton, { borderColor: '#8b0000', backgroundColor: 'transparent', borderWidth: 1 }]} onPress={handleLogout}>
+        <Text style={[styles.logoutButtonText, { color: '#8b0000' }]}>Вийти з акаунту</Text>
       </TouchableOpacity>
       
-      <View style={{height: 50}} />
+      <View style={{height: 80}} />
     </ScrollView>
   );
 };
@@ -231,14 +260,15 @@ const styles = StyleSheet.create({
   avatarImage: { width: 80, height: 80, borderRadius: 40, marginBottom: 5 },
   editForm: { width: '100%', marginTop: 20 },
   input: { borderWidth: 1, borderRadius: 10, padding: 12, marginBottom: 10, fontSize: 16 },
-  saveBtn: { padding: 12, borderRadius: 10, alignItems: 'center' },
-  saveBtnText: { color: '#fff', fontWeight: 'bold' },
-  section: { padding: 20 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#FF69B4', marginBottom: 15 },
-  card: { padding: 15, borderRadius: 15, marginBottom: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2, elevation: 2 },
-  cardTitle: { fontSize: 16, fontWeight: '600', marginBottom: 5 },
-  settingRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 15, borderRadius: 15, marginBottom: 10 },
+  saveBtn: { padding: 15, borderRadius: 12, alignItems: 'center', marginTop: 5 },
+  saveBtnText: { fontWeight: 'bold' },
+  section: { padding: 20, paddingBottom: 0 },
+  sectionTitle: { fontSize: 22, fontFamily: 'serif', fontStyle: 'italic', marginBottom: 15 },
+  card: { padding: 20, borderRadius: 16, marginBottom: 10, borderWidth: 1 },
+  cardTitle: { fontSize: 16, fontWeight: 'bold', marginBottom: 5 },
+  actionBtn: { paddingHorizontal: 15, paddingVertical: 10, borderRadius: 20, borderWidth: 1, backgroundColor: 'transparent' },
+  settingRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 15, borderRadius: 12, marginBottom: 10, borderWidth: 1 },
   settingText: { fontSize: 16 },
-  logoutButton: { margin: 20, backgroundColor: '#FFB6C1', padding: 15, borderRadius: 20, alignItems: 'center' },
-  logoutButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' }
+  logoutButton: { margin: 20, padding: 15, borderRadius: 12, alignItems: 'center' },
+  logoutButtonText: { fontSize: 14, fontWeight: 'bold' }
 });

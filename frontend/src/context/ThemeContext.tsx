@@ -6,17 +6,17 @@ export const lightTheme = {
   card: '#ffffff',
   text: '#2C2A29', 
   textSecondary: '#8B8682', 
-  primary: '#D4AF37', 
+  primary: '#e0c0b4', 
   border: '#E8E6E1'
 };
 
 export const darkTheme = {
-  background: '#1A1A1A',
-  card: '#2A2A2A',
+  background: '#161212',
+  card: '#221A1A',
   text: '#F5F5F5',
-  textSecondary: '#AAAAAA',
-  primary: '#FF88C2',
-  border: '#333'
+  textSecondary: '#A9A4A1',
+  primary: '#e0c0b4',
+  border: '#332929'
 };
 
 type ThemeContextType = {

@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, Share, TextInput, ActivityIndicator, Modal, KeyboardAvoidingView, Platform } from 'react-native';
 import api from '../api/client';
 import Checkbox from 'expo-checkbox';
+import { useTheme } from '../context/ThemeContext';
 
 export const ClientsListScreen = () => {
+  const { colors, isDark } = useTheme();
   const [clients, setClients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -121,39 +123,40 @@ export const ClientsListScreen = () => {
       : 'Немає візитів';
 
     return (
-      <TouchableOpacity style={styles.clientCard} onPress={() => openClientDetails(item)}>
+      <TouchableOpacity style={[styles.clientCard, { backgroundColor: colors.card, borderColor: colors.border }]} onPress={() => openClientDetails(item)}>
         <Checkbox 
            value={selectedIds.has(item.id)} 
            onValueChange={() => toggleSelect(item.id)} 
-           color={selectedIds.has(item.id) ? '#FF69B4' : undefined}
+           color={selectedIds.has(item.id) ? colors.primary : undefined}
            style={{marginRight: 10}}
         />
         <View style={styles.clientInfo}>
-           <Text style={styles.clientName}>{item.name}</Text>
-           <Text style={styles.clientPhone}>{item.phone}</Text>
+           <Text style={[styles.clientName, { color: colors.text }]}>{item.name}</Text>
+           <Text style={[styles.clientPhone, { color: colors.primary }]}>{item.phone}</Text>
         </View>
-        <Text style={styles.lastVisit}>{formattedDate}</Text>
+        <Text style={[styles.lastVisit, { color: colors.textSecondary }]}>{formattedDate}</Text>
       </TouchableOpacity>
     );
   };
 
   if (loading) {
-    return <View style={[styles.container, {justifyContent:'center'}]}><ActivityIndicator size="large" color="#FF69B4" /></View>;
+    return <View style={[styles.container, {justifyContent:'center', backgroundColor: colors.background}]}><ActivityIndicator size="large" color={colors.primary} /></View>;
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Мої клієнти {clients.length > 0 && `(${clients.length})`}</Text>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <Text style={[styles.header, { color: colors.text }]}>Мої клієнти {clients.length > 0 && `(${clients.length})`}</Text>
       
       <View style={styles.inviteContainer}>
-         <TouchableOpacity style={styles.shareBtn} onPress={handleShareLink}>
-           <Text style={styles.shareBtnText}>Запросити ще 🔗</Text>
+         <TouchableOpacity style={[styles.shareBtn, { backgroundColor: colors.primary }]} onPress={handleShareLink}>
+           <Text style={[styles.shareBtnText, { color: isDark ? '#000' : '#fff' }]}>Запросити ще 🔗</Text>
          </TouchableOpacity>
       </View>
 
       <TextInput 
-        style={styles.searchInput}
+        style={[styles.searchInput, { backgroundColor: colors.card, borderColor: colors.border, color: colors.text }]}
         placeholder="Пошук клієнтів..."
+        placeholderTextColor={colors.textSecondary}
         value={search}
         onChangeText={setSearch}
       />
@@ -163,17 +166,17 @@ export const ClientsListScreen = () => {
            <Checkbox 
              value={selectedIds.size === filteredClients.length && filteredClients.length > 0} 
              onValueChange={toggleSelectAll} 
-             color="#FF69B4" 
+             color={colors.primary} 
            />
-           <Text style={{marginLeft: 8, color: '#333'}}>Вибрати всіх</Text>
+           <Text style={{marginLeft: 8, color: colors.textSecondary}}>Вибрати всіх</Text>
          </TouchableOpacity>
          
          <TouchableOpacity 
-            style={[styles.bulkBtn, selectedIds.size === 0 && {opacity: 0.5}]} 
+            style={[styles.bulkBtn, { backgroundColor: colors.primary }, selectedIds.size === 0 && {opacity: 0.5}]} 
             disabled={selectedIds.size === 0}
             onPress={() => setShowBulkModal(true)}
          >
-           <Text style={styles.bulkBtnText}>Розсилка ({selectedIds.size})</Text>
+           <Text style={[styles.bulkBtnText, { color: isDark ? '#000' : '#fff' }]}>Розсилка ({selectedIds.size})</Text>
          </TouchableOpacity>
       </View>
 
@@ -187,23 +190,24 @@ export const ClientsListScreen = () => {
       {/* Bulk Message Modal */}
       <Modal visible={showBulkModal} transparent={true} animationType="slide">
          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.modalBg}>
-            <View style={styles.modalCard}>
-               <Text style={styles.modalTitle}>Нове повідомлення</Text>
-               <Text>Буде надіслано: {selectedIds.size} клієнтам</Text>
+            <View style={[styles.modalCard, { backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1 }]}>
+               <Text style={[styles.modalTitle, { color: colors.text }]}>Нове повідомлення</Text>
+               <Text style={{color: colors.textSecondary}}>Буде надіслано: {selectedIds.size} клієнтам</Text>
                <TextInput 
-                  style={styles.modalInput}
+                  style={[styles.modalInput, { borderColor: colors.border, color: colors.text, backgroundColor: colors.background }]}
                   multiline
                   numberOfLines={4}
                   placeholder="Введіть текст розсилки..."
+                  placeholderTextColor={colors.textSecondary}
                   value={bulkMsg}
                   onChangeText={setBulkMsg}
                />
                <View style={styles.modalActions}>
                   <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowBulkModal(false)}>
-                     <Text style={{color: '#888'}}>Скасувати</Text>
+                     <Text style={{color: colors.textSecondary}}>Скасувати</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.saveBtn} onPress={handleSendBulk}>
-                     <Text style={{color: '#fff', fontWeight: 'bold'}}>Відправити</Text>
+                  <TouchableOpacity style={[styles.saveBtn, { backgroundColor: colors.primary }]} onPress={handleSendBulk}>
+                     <Text style={{color: isDark ? '#000' : '#fff', fontWeight: 'bold'}}>Відправити</Text>
                   </TouchableOpacity>
                </View>
             </View>
@@ -213,21 +217,21 @@ export const ClientsListScreen = () => {
       {/* Client Detail / Edit Modal */}
       <Modal visible={!!selectedClient} transparent={true} animationType="fade">
          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.modalBg}>
-            <View style={[styles.modalCard, {width: '90%'}]}>
-               <Text style={styles.modalTitle}>Дані клієнта</Text>
-               <TextInput style={styles.modalInputSingle} placeholder="Ім'я" value={editName} onChangeText={setEditName} />
-               <TextInput style={styles.modalInputSingle} placeholder="Телефон" value={editPhone} onChangeText={setEditPhone} />
-               <TextInput style={styles.modalInput} multiline numberOfLines={3} placeholder="Нотатки (лише для вас)" value={editNotes} onChangeText={setEditNotes} />
+            <View style={[styles.modalCard, { width: '90%', backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1 }]}>
+               <Text style={[styles.modalTitle, { color: colors.text }]}>Дані клієнта</Text>
+               <TextInput style={[styles.modalInputSingle, { borderColor: colors.border, color: colors.text, backgroundColor: colors.background }]} placeholder="Ім'я" placeholderTextColor={colors.textSecondary} value={editName} onChangeText={setEditName} />
+               <TextInput style={[styles.modalInputSingle, { borderColor: colors.border, color: colors.text, backgroundColor: colors.background }]} placeholder="Телефон" placeholderTextColor={colors.textSecondary} value={editPhone} onChangeText={setEditPhone} />
+               <TextInput style={[styles.modalInput, { borderColor: colors.border, color: colors.text, backgroundColor: colors.background }]} multiline numberOfLines={3} placeholder="Нотатки (лише для вас)" placeholderTextColor={colors.textSecondary} value={editNotes} onChangeText={setEditNotes} />
                
                <View style={styles.modalActions}>
                   <TouchableOpacity style={styles.cancelBtn} onPress={() => setSelectedClient(null)}>
-                     <Text style={{color: '#888'}}>Закрити</Text>
+                     <Text style={{color: colors.textSecondary}}>Закрити</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={[styles.saveBtn, {backgroundColor: '#FF3B30', marginRight: 10}]} onPress={handleDeleteClient}>
                      <Text style={{color: '#fff', fontWeight: 'bold'}}>Видалити</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.saveBtn} onPress={handleSaveClient}>
-                     <Text style={{color: '#fff', fontWeight: 'bold'}}>Зберегти</Text>
+                  <TouchableOpacity style={[styles.saveBtn, { backgroundColor: colors.primary }]} onPress={handleSaveClient}>
+                     <Text style={{color: isDark ? '#000' : '#fff', fontWeight: 'bold'}}>Зберегти</Text>
                   </TouchableOpacity>
                </View>
             </View>
@@ -239,25 +243,25 @@ export const ClientsListScreen = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1,  padding: 15 },
-  header: { fontSize: 24, fontWeight: 'bold', color: '#333', marginBottom: 10, marginTop: 40 },
+  header: { fontSize: 24, fontFamily: 'serif', fontStyle: 'italic', marginBottom: 10, marginTop: 40 },
   inviteContainer: { marginBottom: 15 },
-  shareBtn: { backgroundColor: '#FF69B4', paddingVertical: 10, borderRadius: 10, alignItems: 'center' },
-  shareBtnText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
-  searchInput: { backgroundColor: '#fff', padding: 12, borderRadius: 10, marginBottom: 15, borderWidth: 1, borderColor: '#eee' },
+  shareBtn: { paddingVertical: 15, borderRadius: 12, alignItems: 'center' },
+  shareBtnText: { fontSize: 16, fontWeight: 'bold' },
+  searchInput: { padding: 12, borderRadius: 10, marginBottom: 15, borderWidth: 1 },
   actionsRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 },
-  bulkBtn: { backgroundColor: '#FF69B4', paddingHorizontal: 15, paddingVertical: 8, borderRadius: 8 },
-  bulkBtnText: { color: '#fff', fontWeight: '600' },
-  clientCard: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#fff', padding: 15, borderRadius: 15, marginBottom: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2, elevation: 2 },
+  bulkBtn: { paddingHorizontal: 15, paddingVertical: 8, borderRadius: 8 },
+  bulkBtnText: { fontWeight: '600' },
+  clientCard: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 15, borderRadius: 15, marginBottom: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2, elevation: 2, borderWidth: 1 },
   clientInfo: { flex: 1 },
-  clientName: { fontSize: 18, fontWeight: 'bold', color: '#333', marginBottom: 5 },
-  clientPhone: { fontSize: 14, color: '#FF69B4' },
-  lastVisit: { fontSize: 12, color: '#999' },
-  modalBg: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
-  modalCard: { width: '80%', backgroundColor: '#fff', padding: 20, borderRadius: 20 },
-  modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 15, textAlign: 'center' },
-  modalInput: { borderWidth: 1, borderColor: '#eee', borderRadius: 10, padding: 10, height: 100, textAlignVertical: 'top', marginTop: 10, marginBottom: 10 },
-  modalInputSingle: { borderWidth: 1, borderColor: '#eee', borderRadius: 10, padding: 12, marginBottom: 10 },
+  clientName: { fontSize: 18, fontFamily: 'serif', fontWeight: 'bold', marginBottom: 5 },
+  clientPhone: { fontSize: 14 },
+  lastVisit: { fontSize: 12 },
+  modalBg: { flex: 1, backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'center', alignItems: 'center' },
+  modalCard: { width: '85%', padding: 20, borderRadius: 16 },
+  modalTitle: { fontSize: 20, fontFamily: 'serif', fontStyle: 'italic', fontWeight: 'bold', marginBottom: 15, textAlign: 'center' },
+  modalInput: { borderWidth: 1, borderRadius: 10, padding: 12, height: 100, textAlignVertical: 'top', marginTop: 10, marginBottom: 10 },
+  modalInputSingle: { borderWidth: 1, borderRadius: 10, padding: 12, marginBottom: 10 },
   modalActions: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: 10 },
   cancelBtn: { padding: 10, marginRight: 10 },
-  saveBtn: { backgroundColor: '#FF69B4', paddingHorizontal: 20, paddingVertical: 10, borderRadius: 10 }
+  saveBtn: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 10 }
 });

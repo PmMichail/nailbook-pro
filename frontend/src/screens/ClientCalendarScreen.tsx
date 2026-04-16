@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, ImageBackground, RefreshControl } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
@@ -15,8 +15,10 @@ export const ClientCalendarScreen = ({ navigation }: any) => {
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [masterId, setMasterId] = useState<string | null>(null);
+  const [masterName, setMasterName] = useState<string>('ПРОСТІР КРАСИ');
   const [prices, setPrices] = useState<any[]>([]);
   const [selectedPriceId, setSelectedPriceId] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   // Animations
   const floatAnim = useRef(new Animated.Value(-150)).current; 
@@ -32,6 +34,12 @@ export const ClientCalendarScreen = ({ navigation }: any) => {
       if (uStr) {
         const u = JSON.parse(uStr);
         setMasterId(u.masterId);
+        if (u.masterId) {
+            const masterRes = await api.get(`/api/client/master/${u.masterId}`);
+            if (masterRes.data && masterRes.data.name) {
+                setMasterName('МАЙСТЕР ' + masterRes.data.name.toUpperCase());
+            }
+        }
       }
     } catch(e) {}
   };
@@ -63,6 +71,14 @@ export const ClientCalendarScreen = ({ navigation }: any) => {
       const res = await api.get(`/api/client/calendar/${masterId}?date=${selectedDay}`);
       setAvailableSlots(res.data.slots || []);
     } catch(e) {}
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadMasterId();
+    if (masterId) await fetchPrices();
+    if (masterId && selectedDay) await fetchAvailableSlots();
+    setRefreshing(false);
   };
 
   let toastTimeout: any;
@@ -126,11 +142,15 @@ export const ClientCalendarScreen = ({ navigation }: any) => {
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent} 
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
+      >
         
         {/* Hero Section */}
         <View style={styles.heroSection}>
-            <Text style={[styles.overTitle, { color: colors.primary }]}>ПРОСТІР КРАСИ</Text>
+            <Text style={[styles.overTitle, { color: colors.primary }]}>{masterName}</Text>
             <Text style={[styles.heroTitle, { color: colors.text }]}>Створіть свій</Text>
             <Text style={[styles.heroTitle, { color: colors.primary }]}>Стиль</Text>
             <Text style={[styles.heroDesc, { color: colors.textSecondary, borderLeftColor: colors.primary }]}>Оберіть послугу та зручний час для вашого ідеального візиту.</Text>
@@ -148,21 +168,27 @@ export const ClientCalendarScreen = ({ navigation }: any) => {
                         onPress={() => setSelectedPriceId(p.id)}
                         style={[
                             styles.serviceWrapper, 
-                            { backgroundColor: colors.card, borderColor: isSelected ? colors.primary : colors.border }
+                            { borderColor: isSelected ? colors.primary : colors.border }
                         ]}
                     >
-                        <View style={styles.serviceContent}>
+                        <ImageBackground 
+                            source={require('../../assets/gradient.png')} 
+                            style={styles.gradientBg}
+                            imageStyle={{ borderRadius: 12, opacity: 0.9 }}
+                        >
+                        <View style={[styles.serviceContent, { backgroundColor: isDark ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.7)', flex: 1, padding: 20, borderRadius: 12 }]}>
                             <View>
                                 <Text style={[styles.serviceType, { color: colors.primary }]}>ПОСЛУГА</Text>
                                 <Text style={[styles.serviceTitle, { color: colors.text }]}>{p.service}</Text>
                             </View>
                             <View style={{alignItems: 'flex-end'}}>
                                 <Text style={[styles.servicePrice, { color: colors.text }]}>{p.price} ₴</Text>
-                                <View style={[styles.addBtn, { borderColor: colors.primary }, isSelected && { backgroundColor: colors.primary }]}>
+                                <View style={[styles.addBtn, { borderColor: colors.primary, backgroundColor: isSelected ? colors.primary : 'transparent' }]}>
                                     <Text style={[styles.addBtnIcon, { color: isSelected ? '#fff' : colors.primary }]}>{isSelected ? '✓' : '+'}</Text>
                                 </View>
                             </View>
                         </View>
+                        </ImageBackground>
                     </TouchableOpacity>
                 );
             })}
@@ -231,7 +257,7 @@ export const ClientCalendarScreen = ({ navigation }: any) => {
             <Text style={[styles.noteDesc, { color: colors.textSecondary }]}>Будь ласка, приходьте вчасно. У разі запізнення або неможливості прийти — завчасно попередьте майстра у чаті.</Text>
         </View>
 
-        <View style={{height: 120}} />
+        <View style={{height: 180}} />
       </ScrollView>
 
       {/* Floating Action Button */}
@@ -269,10 +295,11 @@ const styles = StyleSheet.create({
   heroTitle: { fontSize: 40, fontFamily: 'serif', fontStyle: 'italic', lineHeight: 46 },
   heroDesc: { fontSize: 13, marginTop: 20, lineHeight: 22, borderLeftWidth: 2, paddingLeft: 15 },
 
-  serviceWrapper: { borderRadius: 12, marginBottom: 16, borderWidth: 1, padding: 20 },
+  serviceWrapper: { borderRadius: 12, marginBottom: 16, borderWidth: 1 },
+  gradientBg: { minHeight: 140, borderRadius: 12, overflow: 'hidden' },
   serviceContent: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
   serviceType: { fontSize: 10, letterSpacing: 2, marginBottom: 5, fontWeight: 'bold' },
-  serviceTitle: { fontSize: 22, fontFamily: 'serif', fontStyle: 'italic' },
+  serviceTitle: { fontSize: 24, fontFamily: 'serif', fontStyle: 'italic' },
   servicePrice: { fontSize: 18, fontFamily: 'serif', marginBottom: 10, fontWeight: 'bold' },
   addBtn: { width: 36, height: 36, borderRadius: 18, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
   addBtnIcon: { fontSize: 18 },

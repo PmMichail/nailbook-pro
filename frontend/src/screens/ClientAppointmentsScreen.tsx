@@ -5,10 +5,13 @@ import { io } from 'socket.io-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../api/client';
 import { useNavigation } from '@react-navigation/native';
+import { useTheme } from '../context/ThemeContext';
+
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
 
 export const ClientAppointmentsScreen = () => {
   const navigation = useNavigation();
+  const { colors, isDark } = useTheme();
   const [appointments, setAppointments] = useState<any[]>([]);
   const [paymentModalVisible, setPaymentModalVisible] = useState(false);
   const [paymentDetails, setPaymentDetails] = useState<any>(null);
@@ -74,40 +77,45 @@ export const ClientAppointmentsScreen = () => {
 
   return (
     <ScrollView 
-      style={styles.container}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      style={[styles.container, { backgroundColor: colors.background }]}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
     >
       <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20}}>
-        <Text style={styles.header}>Мої Записи</Text>
+        <Text style={[styles.header, { color: colors.text }]}>Мої Записи</Text>
       </View>
       
       {appointments.length === 0 ? (
-        <Text style={styles.emptyText}>Ви ще не маєте записів</Text>
+        <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Ви ще не маєте записів</Text>
       ) : (
         appointments.map(app => (
-          <View key={app.id} style={styles.card}>
+          <View key={app.id} style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <View style={styles.cardHeader}>
-              <Text style={styles.dateText}>{new Date(app.date).toLocaleDateString()} о {app.time}</Text>
-              <Text style={[styles.statusBadge, app.status === 'CONFIRMED' && styles.statusConfirmed, app.status === 'CANCELLED' && styles.statusCancelled]}>
+              <Text style={[styles.dateText, { color: colors.text }]}>{new Date(app.date).toLocaleDateString()} о {app.time}</Text>
+              <Text style={[
+                  styles.statusBadge, 
+                  { backgroundColor: isDark ? '#333' : '#eee', color: colors.textSecondary },
+                  app.status === 'CONFIRMED' && { backgroundColor: isDark ? 'rgba(46, 139, 87, 0.2)' : '#e6ffe6', color: '#2e8b57' },
+                  app.status === 'CANCELLED' && { backgroundColor: isDark ? 'rgba(139, 0, 0, 0.2)' : '#ffe6e6', color: '#8b0000' }
+              ]}>
                 {statusMap[app.status] || app.status}
               </Text>
             </View>
-            <Text style={styles.masterText}>Майстер: {app.master?.name || 'Ваш Майстер'}</Text>
+            <Text style={[styles.masterText, { color: colors.textSecondary }]}>Майстер: {app.master?.name || 'Ваш Майстер'}</Text>
             {(app.finalPrice || app.originalPrice || app.price) && (
-              <Text style={styles.priceText}>
+              <Text style={[styles.priceText, { color: colors.primary }]}>
                 До сплати: {app.finalPrice || app.originalPrice || app.price} грн
               </Text>
             )}
             
             {app.status === 'CONFIRMED' && (
-              <TouchableOpacity style={[styles.cancelBtn, {backgroundColor: '#98FB98', marginBottom: 10}]} onPress={() => showPaymentInfo(app.id)}>
+              <TouchableOpacity style={[styles.cancelBtn, { borderColor: '#2e8b57', borderWidth: 1, backgroundColor: 'transparent', marginBottom: 10 }]} onPress={() => showPaymentInfo(app.id)}>
                 <Text style={[styles.cancelBtnText, {color: '#2e8b57'}]}>Реквізити на Оплату</Text>
               </TouchableOpacity>
             )}
 
             {(app.status === 'PENDING' || app.status === 'CONFIRMED') && (
-              <TouchableOpacity style={styles.cancelBtn} onPress={() => clearAppointment(app.id)}>
-                <Text style={styles.cancelBtnText}>Скасувати запис</Text>
+              <TouchableOpacity style={[styles.cancelBtn, { borderColor: '#8b0000', borderWidth: 1, backgroundColor: 'transparent' }]} onPress={() => clearAppointment(app.id)}>
+                <Text style={[styles.cancelBtnText, { color: '#8b0000' }]}>Скасувати запис</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -116,8 +124,8 @@ export const ClientAppointmentsScreen = () => {
 
       <Modal visible={paymentModalVisible} transparent animationType="slide">
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Реквізити на оплату</Text>
+          <View style={[styles.modalContent, { backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1 }]}>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>Реквізити на оплату</Text>
             
             {paymentDetails?.qrCode ? (
                <View style={{alignItems: 'center', marginBottom: 15}}>
@@ -126,34 +134,34 @@ export const ClientAppointmentsScreen = () => {
             ) : null}
 
             {paymentDetails?.paymentLink ? (
-               <TouchableOpacity style={[styles.cancelBtn, {backgroundColor: '#1E90FF', marginBottom: 15}]} onPress={() => Linking.openURL(paymentDetails.paymentLink)}>
-                 <Text style={[styles.cancelBtnText, {color: '#fff'}]}>Відкрити посилання на оплату</Text>
+               <TouchableOpacity style={[styles.cancelBtn, {backgroundColor: colors.primary, marginBottom: 15, borderWidth: 0}]} onPress={() => Linking.openURL(paymentDetails.paymentLink)}>
+                 <Text style={[styles.cancelBtnText, {color: isDark ? '#000' : '#fff'}]}>Відкрити посилання на оплату</Text>
                </TouchableOpacity>
             ) : null}
 
             {paymentDetails?.cardNumber ? (
               <>
-               <Text style={styles.payText}>Картка: {paymentDetails.cardNumber}</Text>
-               <Text style={styles.payText}>Банк: {paymentDetails.bankName || 'Не вказано'}</Text>
+               <Text style={[styles.payText, { color: colors.text }]}>Картка: {paymentDetails.cardNumber}</Text>
+               <Text style={[styles.payText, { color: colors.textSecondary }]}>Банк: {paymentDetails.bankName || 'Не вказано'}</Text>
                
                <TouchableOpacity 
-                 style={{backgroundColor: '#eee', padding: 8, borderRadius: 5, marginTop: 5, marginBottom: 10}}
+                 style={{backgroundColor: colors.border, padding: 8, borderRadius: 5, marginTop: 5, marginBottom: 10}}
                  onPress={async () => {
                     await Clipboard.setStringAsync(paymentDetails.cardNumber);
                     Alert.alert('Скопійовано', 'Номер картки скопійовано в буфер обміну');
                  }}
                >
-                 <Text style={{textAlign: 'center', color: '#555', fontWeight: 'bold'}}>Скопіювати номер картки</Text>
+                 <Text style={{textAlign: 'center', color: colors.text, fontWeight: 'bold'}}>Скопіювати номер картки</Text>
                </TouchableOpacity>
               </>
             ) : null}
 
-            <Text style={[styles.payText, {fontSize: 20, fontWeight:'bold', marginTop: 10, color: '#FF69B4'}]}>
+            <Text style={[styles.payText, {fontSize: 20, fontWeight:'bold', marginTop: 10, color: colors.primary}]}>
                Сума: {paymentDetails?.amount ? paymentDetails.amount + ' грн' : 'Не вказано'}
             </Text>
             
-            <TouchableOpacity style={[styles.cancelBtn, {backgroundColor: '#ccc', marginTop: 20}]} onPress={() => setPaymentModalVisible(false)}>
-              <Text style={[styles.cancelBtnText, {color: '#333'}]}>Закрити</Text>
+            <TouchableOpacity style={[styles.cancelBtn, { borderColor: colors.textSecondary, borderWidth: 1, backgroundColor: 'transparent', marginTop: 20 }]} onPress={() => setPaymentModalVisible(false)}>
+              <Text style={[styles.cancelBtnText, { color: colors.textSecondary }]}>Закрити</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -164,20 +172,18 @@ export const ClientAppointmentsScreen = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1,  padding: 15 },
-  header: { fontSize: 24, fontWeight: 'bold', color: '#333', marginBottom: 20 },
-  emptyText: { textAlign: 'center', color: '#999', marginTop: 40, fontSize: 16 },
-  card: { backgroundColor: '#fff', borderRadius: 20, padding: 20, marginBottom: 15, shadowColor: '#000', shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.1, shadowRadius: 5, elevation: 3 },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
-  dateText: { fontSize: 18, fontWeight: 'bold', color: '#FF69B4' },
-  statusBadge: { backgroundColor: '#eee', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10, fontSize: 12, fontWeight: 'bold', overflow: 'hidden' },
-  statusConfirmed: { backgroundColor: '#98FB98', color: '#2e8b57' },
-  statusCancelled: { backgroundColor: '#FFB6C1', color: '#8b0000' },
-  masterText: { fontSize: 16, color: '#555', marginBottom: 15 },
-  cancelBtn: { backgroundColor: '#ffcccc', padding: 12, borderRadius: 15, alignItems: 'center' },
-  cancelBtnText: { color: '#cc0000', fontWeight: 'bold' },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 20 },
-  modalContent: { backgroundColor: '#fff', borderRadius: 20, padding: 20, elevation: 5 },
-  modalTitle: { fontSize: 20, fontWeight: 'bold', color: '#333', marginBottom: 15, textAlign: 'center' },
-  payText: { fontSize: 16, color: '#333', marginBottom: 8, textAlign: 'center' },
-  priceText: { fontSize: 16, color: '#333', fontWeight: '600', marginBottom: 15 }
+  header: { fontSize: 24, fontFamily: 'serif', fontStyle: 'italic', marginBottom: 20 },
+  emptyText: { textAlign: 'center', marginTop: 40, fontSize: 16 },
+  card: { borderRadius: 16, padding: 20, marginBottom: 15, borderWidth: 1, shadowColor: '#000', shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.1, shadowRadius: 5, elevation: 3 },
+  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 },
+  dateText: { fontSize: 18, fontFamily: 'serif', fontWeight: 'bold' },
+  statusBadge: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10, fontSize: 10, fontWeight: 'bold', overflow: 'hidden' },
+  masterText: { fontSize: 14, marginBottom: 10 },
+  priceText: { fontSize: 16, fontWeight: '600', marginBottom: 20 },
+  cancelBtn: { padding: 15, borderRadius: 12, alignItems: 'center' },
+  cancelBtnText: { fontWeight: 'bold', fontSize: 14 },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'center', padding: 20 },
+  modalContent: { borderRadius: 20, padding: 24, elevation: 5 },
+  modalTitle: { fontSize: 22, fontFamily: 'serif', fontStyle: 'italic', marginBottom: 20, textAlign: 'center' },
+  payText: { fontSize: 16, marginBottom: 8, textAlign: 'center' }
 });

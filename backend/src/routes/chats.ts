@@ -31,7 +31,7 @@ router.get('/', async (req: AuthRequest, res) => {
          if (otherId) {
             otherUser = await prisma.user.findUnique({
                where: { id: otherId },
-               select: { id: true, name: true, avatarUrl: true }
+               select: { id: true, name: true, phone: true, avatarUrl: true }
             });
          }
       }
