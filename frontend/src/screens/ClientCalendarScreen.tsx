@@ -172,7 +172,7 @@ export const ClientCalendarScreen = ({ navigation }: any) => {
                         ]}
                     >
                         <ImageBackground 
-                            source={require('../../assets/gradient.png')} 
+                            source={require('../../assets/gradient.jpg')} 
                             style={styles.gradientBg}
                             imageStyle={{ borderRadius: 12, opacity: 0.9 }}
                         >
