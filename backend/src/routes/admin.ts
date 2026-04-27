@@ -26,15 +26,15 @@ router.use(authenticateAdmin);
 router.get('/masters', async (req, res) => {
    try {
        const masters = await prisma.user.findMany({
-           where: { role: 'MASTER' },
-           select: {
-               id: true, name: true, phone: true, email: true, createdAt: true,
-               subscription: {
-                   select: { plan: true, status: true, trialEndsAt: true, currentPeriodEnd: true }
-               }
-           },
-           orderBy: { createdAt: 'desc' }
-       });
+            where: { role: 'MASTER' },
+            select: {
+                id: true, name: true, phone: true, email: true, createdAt: true, isBanned: true,
+                subscription: {
+                    select: { plan: true, status: true, currentPeriodEnd: true }
+                }
+            },
+            orderBy: { createdAt: 'desc' }
+        });
        res.json(masters);
    } catch(e) {
        res.status(500).json({ error: 'Server error' });
@@ -84,6 +84,20 @@ router.get('/payments', async (req, res) => {
           }
       });
       res.json(payments);
+   } catch(e) {
+       res.status(500).json({ error: 'Server error' });
+   }
+});
+
+// GET /api/admin/clients
+router.get('/clients', async (req, res) => {
+   try {
+       const clients = await prisma.user.findMany({
+           where: { role: 'CLIENT' },
+           select: { id: true, name: true, phone: true, email: true, createdAt: true, isBanned: true, masterId: true },
+           orderBy: { createdAt: 'desc' }
+       });
+       res.json(clients);
    } catch(e) {
        res.status(500).json({ error: 'Server error' });
    }
@@ -206,6 +220,99 @@ router.get('/activity', async (req, res) => {
         res.json(events.slice(0, 50));
     } catch(e) {
         res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// GET /api/admin/regions
+router.get('/regions', async (req, res) => {
+    try {
+        const masters = await prisma.user.findMany({
+            where: { role: 'MASTER' },
+            select: { id: true, city: true, lat: true, lng: true }
+        });
+
+        const clients = await prisma.user.findMany({
+            where: { role: 'CLIENT', masterId: { not: null } },
+            select: { masterId: true }
+        });
+
+        // Grouping logic
+        const regionMap = new Map();
+
+        masters.forEach(m => {
+            let regionKey = 'Невідомо';
+            if (m.city && m.city.trim() !== '') {
+                // Capitalize first letter to normalize
+                const cleanedCity = m.city.trim().charAt(0).toUpperCase() + m.city.trim().slice(1).toLowerCase();
+                regionKey = cleanedCity;
+            } else if (m.lat && m.lng) {
+                // Cluster by ~20km approx (rounding to 1 decimal place)
+                const rndLat = m.lat.toFixed(1);
+                const rndLng = m.lng.toFixed(1);
+                regionKey = `Гео-зона (${rndLat}, ${rndLng})`;
+            }
+
+            if (!regionMap.has(regionKey)) {
+                regionMap.set(regionKey, { region: regionKey, masterCount: 0, clientCount: 0 });
+            }
+            regionMap.get(regionKey).masterCount += 1;
+        });
+
+        clients.forEach(c => {
+            if (c.masterId) {
+                // Find master's region
+                const master = masters.find(m => m.id === c.masterId);
+                if (master) {
+                    let regionKey = 'Невідомо';
+                    if (master.city && master.city.trim() !== '') {
+                        regionKey = master.city.trim().charAt(0).toUpperCase() + master.city.trim().slice(1).toLowerCase();
+                    } else if (master.lat && master.lng) {
+                        regionKey = `Гео-зона (${master.lat.toFixed(1)}, ${master.lng.toFixed(1)})`;
+                    }
+                    if (regionMap.has(regionKey)) {
+                        regionMap.get(regionKey).clientCount += 1;
+                    }
+                }
+            }
+        });
+
+        const sortedRegions = Array.from(regionMap.values()).sort((a, b) => b.masterCount - a.masterCount);
+        res.json(sortedRegions);
+    } catch(e) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// PUT /api/admin/users/:id/ban
+router.put('/users/:id/ban', async (req, res) => {
+    try {
+        const { isBanned } = req.body;
+        const u = await prisma.user.update({
+            where: { id: req.params.id },
+            data: { isBanned }
+        });
+        res.json({ success: true, isBanned: u.isBanned });
+    } catch(e) {
+        res.status(500).json({ error: 'Failed to update ban status' });
+    }
+});
+
+// DELETE /api/admin/users/:id
+router.delete('/users/:id', async (req, res) => {
+    try {
+        const userId = req.params.id;
+        await prisma.masterWeeklySettings.deleteMany({ where: { masterId: userId } });
+        await prisma.priceList.deleteMany({ where: { masterId: userId } });
+        await prisma.appointment.deleteMany({ where: { OR: [{ masterId: userId }, { clientId: userId }] } });
+        await prisma.chatMessage.deleteMany({ where: { senderId: userId } });
+        const userChats = await prisma.chat.findMany({ where: { roomId: { contains: userId } }});
+        await prisma.chatMessage.deleteMany({ where: { chatId: { in: userChats.map(c => c.id) } }});
+        await prisma.chat.deleteMany({ where: { roomId: { contains: userId } } });
+        
+        await prisma.user.delete({ where: { id: userId } });
+        res.json({ success: true });
+    } catch(e) {
+        res.status(500).json({ error: 'Failed to delete user' });
     }
 });
 

@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, TextInput, Alert, FlatList } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, TextInput, Alert, FlatList, Dimensions } from 'react-native';
+import { BarChart } from 'react-native-chart-kit';
 import api from '../api/client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+const screenWidth = Dimensions.get('window').width;
+
 export const AdminDashboardScreen = ({ navigation }: any) => {
-    const [activeTab, setActiveTab] = useState<'OVERVIEW'|'MONITOR'|'SETTINGS'>('OVERVIEW');
+    const [activeTab, setActiveTab] = useState<'OVERVIEW'|'MONITOR'|'REGIONS'|'SETTINGS'>('OVERVIEW');
     
     // Overview Data
     const [stats, setStats] = useState<any>(null);
@@ -12,6 +15,9 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
     
     // Monitor Data
     const [events, setEvents] = useState<any[]>([]);
+    
+    // Regions Data
+    const [regions, setRegions] = useState<any[]>([]);
     
     // Settings Data
     const [proPrice, setProPrice] = useState('299');
@@ -40,6 +46,11 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
                 const resEvents = await api.get('/api/admin/activity');
                 setEvents(resEvents.data || []);
             } catch(e) { console.error('Error events', e); }
+
+            try {
+                const resReg = await api.get('/api/admin/regions');
+                setRegions(resReg.data || []);
+            } catch(e) { console.error('Error regions', e); }
 
             try {
                 const resConfig = await api.get('/api/admin/config');
@@ -85,6 +96,9 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
                 <TouchableOpacity style={[styles.tab, activeTab === 'MONITOR' && styles.activeTab]} onPress={() => setActiveTab('MONITOR')}>
                     <Text style={[styles.tabText, activeTab === 'MONITOR' && styles.activeTabText]}>📡 Монітор</Text>
                 </TouchableOpacity>
+                <TouchableOpacity style={[styles.tab, activeTab === 'REGIONS' && styles.activeTab]} onPress={() => setActiveTab('REGIONS')}>
+                    <Text style={[styles.tabText, activeTab === 'REGIONS' && styles.activeTabText]}>🗺 Регіони</Text>
+                </TouchableOpacity>
                 <TouchableOpacity style={[styles.tab, activeTab === 'SETTINGS' && styles.activeTab]} onPress={() => setActiveTab('SETTINGS')}>
                     <Text style={[styles.tabText, activeTab === 'SETTINGS' && styles.activeTabText]}>⚙️ Налаштування</Text>
                 </TouchableOpacity>
@@ -93,14 +107,14 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
             {activeTab === 'OVERVIEW' && (
                 <ScrollView>
                     <View style={styles.statsContainer}>
-                        <View style={styles.statCard}>
+                        <TouchableOpacity style={styles.statCard} onPress={() => navigation.navigate('Masters')}>
                             <Text style={styles.statVal}>{stats?.totalMasters}</Text>
                             <Text style={styles.statL}>Майстрів</Text>
-                        </View>
-                        <View style={styles.statCard}>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.statCard} onPress={() => navigation.navigate('Clients')}>
                             <Text style={styles.statVal}>{stats?.totalClients}</Text>
                             <Text style={styles.statL}>Клієнтів</Text>
-                        </View>
+                        </TouchableOpacity>
                     </View>
                     <View style={styles.statsContainer}>
                         <View style={styles.statCard}>
@@ -149,6 +163,53 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
                     }}
                     contentContainerStyle={{paddingBottom: 50}}
                 />
+            )}
+
+            {activeTab === 'REGIONS' && (
+                <ScrollView contentContainerStyle={{paddingBottom: 50}}>
+                    {regions.length > 0 ? (
+                        <>
+                            <View style={[styles.settingsCard, {marginBottom: 20}]}>
+                                <Text style={styles.subHeader}>Розподіл Майстрів (Топ 5)</Text>
+                                <View style={{marginTop: 15}}>
+                                    {regions.slice(0, 5).map((r, i) => {
+                                        const maxMasterCount = Math.max(...regions.slice(0, 5).map(x => x.masterCount));
+                                        const percent = maxMasterCount > 0 ? (r.masterCount / maxMasterCount) * 100 : 0;
+                                        return (
+                                            <View key={i} style={{marginBottom: 12}}>
+                                                <View style={{flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4}}>
+                                                    <Text style={{fontWeight: 'bold', color: '#333'}}>{r.region}</Text>
+                                                    <Text style={{fontWeight: 'bold', color: '#666'}}>{r.masterCount}</Text>
+                                                </View>
+                                                <View style={{height: 10, backgroundColor: '#f0f0f0', borderRadius: 5, overflow: 'hidden'}}>
+                                                    <View style={{width: `${percent}%`, height: '100%', backgroundColor: '#FF69B4', borderRadius: 5}} />
+                                                </View>
+                                            </View>
+                                        );
+                                    })}
+                                </View>
+                            </View>
+
+                            <View style={styles.settingsCard}>
+                                <Text style={styles.subHeader}>Зведена Таблиця</Text>
+                                <View style={{flexDirection: 'row', borderBottomWidth: 2, borderBottomColor: '#eee', paddingBottom: 10, marginBottom: 10}}>
+                                    <Text style={{flex: 2, fontWeight: 'bold', color: '#333'}}>Місто / Гео-зона</Text>
+                                    <Text style={{flex: 1, fontWeight: 'bold', color: '#333', textAlign: 'center'}}>Майстри</Text>
+                                    <Text style={{flex: 1, fontWeight: 'bold', color: '#333', textAlign: 'center'}}>Клієнти</Text>
+                                </View>
+                                {regions.map((r, i) => (
+                                    <View key={i} style={{flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: '#f5f5f5', paddingVertical: 12}}>
+                                        <Text style={{flex: 2, color: '#444'}}>{r.region}</Text>
+                                        <Text style={{flex: 1, textAlign: 'center', fontWeight: 'bold', color: '#FF69B4'}}>{r.masterCount}</Text>
+                                        <Text style={{flex: 1, textAlign: 'center', color: '#666'}}>{r.clientCount}</Text>
+                                    </View>
+                                ))}
+                            </View>
+                        </>
+                    ) : (
+                        <Text style={{textAlign: 'center', marginTop: 40, color: '#999'}}>Даних про регіони ще немає.</Text>
+                    )}
+                </ScrollView>
             )}
 
             {activeTab === 'SETTINGS' && (

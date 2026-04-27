@@ -10,7 +10,7 @@ const CURRENT_USER_ID = '123'; // Має братись з Auth Context
 
 export const ChatScreen = ({ route }: any) => {
   const navigation = useNavigation();
-  const { appointmentId, roomId: paramRoomId } = route.params || {};
+  const { appointmentId, roomId: paramRoomId, receiverName } = route.params || {};
   const roomId = paramRoomId || appointmentId || 'mock-123'; 
   
   const [messages, setMessages] = useState<any[]>([]);
@@ -117,7 +117,7 @@ export const ChatScreen = ({ route }: any) => {
               <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
                 <Text style={styles.backText}>◀ Назад</Text>
               </TouchableOpacity>
-              <Text style={styles.headerTitle}>Чат</Text>
+              <Text style={styles.headerTitle}>{receiverName || 'Чат'}</Text>
               <View style={{width: 50}} />
             </View>
 

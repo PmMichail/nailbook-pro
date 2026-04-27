@@ -71,6 +71,36 @@ export const AdminMastersScreen = () => {
         ]);
     };
 
+    const toggleBan = async (masterId: string, currentStatus: boolean) => {
+        Alert.alert('Підтвердження', currentStatus ? 'Розблокувати майстра?' : 'Тимчасово заблокувати майстра?', [
+            { text: 'Скасувати', style: 'cancel' },
+            { text: 'Так', onPress: async () => {
+                try {
+                    await api.put(`/api/admin/users/${masterId}/ban`, { isBanned: !currentStatus });
+                    Alert.alert('Успіх', 'Статус оновлено');
+                    loadMasters();
+                } catch(e) {
+                    Alert.alert('Помилка', 'Не вдалося оновити статус');
+                }
+            }}
+        ]);
+    };
+
+    const deleteUser = async (userId: string, userName: string) => {
+        Alert.alert('УВАГА: НЕЗВОРОТНЯ ДІЯ', `Ви точно хочете повністю видалити акаунт ${userName}? Всі їх прайси та записи будуть знищені!`, [
+            { text: 'Скасувати', style: 'cancel' },
+            { text: 'ВИДАЛИТИ', style: 'destructive', onPress: async () => {
+                try {
+                    await api.delete(`/api/admin/users/${userId}`);
+                    Alert.alert('Успіх', 'Акаунт видалено');
+                    loadMasters();
+                } catch(e) {
+                    Alert.alert('Помилка', 'Не вдалося видалити');
+                }
+            }}
+        ]);
+    };
+
     if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#FF69B4" /></View>;
 
     return (
@@ -88,8 +118,15 @@ export const AdminMastersScreen = () => {
                                 <Text style={styles.subtext}>{m.phone || m.email}</Text>
                                 <Text style={styles.subtext}>Зареєстровано: {new Date(m.createdAt).toLocaleDateString()}</Text>
                             </View>
-                            <View style={[styles.badge, { backgroundColor: isPro ? '#FFD700' : '#ddd' }]}>
-                                <Text style={styles.badgeText}>{isPro ? 'PRO' : 'FREE'}</Text>
+                            <View style={{flexDirection: 'row', gap: 5}}>
+                                {m.isBanned && (
+                                    <View style={[styles.badge, { backgroundColor: '#ffcccc' }]}>
+                                        <Text style={[styles.badgeText, {color: '#cc0000'}]}>BAN</Text>
+                                    </View>
+                                )}
+                                <View style={[styles.badge, { backgroundColor: isPro ? '#FFD700' : '#ddd' }]}>
+                                    <Text style={styles.badgeText}>{isPro ? 'PRO' : 'FREE'}</Text>
+                                </View>
                             </View>
                         </View>
                         
@@ -109,6 +146,12 @@ export const AdminMastersScreen = () => {
                             )}
                             <TouchableOpacity style={[styles.downgradeBtn, {backgroundColor: '#eee', marginLeft: 10}]} onPress={() => resetPassword(m.id)}>
                                 <Text style={[styles.btnTextDowngrade, {color: '#555'}]}>Скинути пароль</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={[styles.downgradeBtn, {backgroundColor: m.isBanned ? '#4CAF50' : '#8b0000', marginLeft: 10}]} onPress={() => toggleBan(m.id, m.isBanned)}>
+                                <Text style={[styles.btnTextDowngrade, {color: '#fff'}]}>{m.isBanned ? 'Розбан' : 'Бан'}</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={[styles.downgradeBtn, {backgroundColor: 'transparent', marginLeft: 'auto', borderWidth: 1, borderColor: '#ff0000'}]} onPress={() => deleteUser(m.id, m.name)}>
+                                <Text style={[styles.btnTextDowngrade, {color: '#ff0000'}]}>Видалити</Text>
                             </TouchableOpacity>
                         </View>
                     </View>

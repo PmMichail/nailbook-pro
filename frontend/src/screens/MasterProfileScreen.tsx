@@ -17,6 +17,9 @@ export const MasterProfileScreen = ({ navigation }: any) => {
   const [salonName, setSalonName] = useState('');
   const [salonLogo, setSalonLogo] = useState<string | null>(null);
   const [address, setAddress] = useState('');
+  const [instagram, setInstagram] = useState('');
+  const [tiktok, setTiktok] = useState('');
+  const [facebook, setFacebook] = useState('');
   
   const [pushEnabled, setPushEnabled] = useState(true);
   const [telegramEnabled, setTelegramEnabled] = useState(false);
@@ -39,6 +42,9 @@ export const MasterProfileScreen = ({ navigation }: any) => {
         setPhone(u.phone || '');
         setSalonName(u.salonName || '');
         setAddress(u.address || '');
+        setInstagram(u.instagram || '');
+        setTiktok(u.tiktok || '');
+        setFacebook(u.facebook || '');
         
         if (u.avatarUrl) {
           const formattedUrl = u.avatarUrl.startsWith('http') ? u.avatarUrl : `${api.defaults.baseURL}/${u.avatarUrl}`;
@@ -113,8 +119,17 @@ export const MasterProfileScreen = ({ navigation }: any) => {
       const res = await api.put('/api/user/profile', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
+
+      // Social networks are saved via salon-info route separately or we can just send them together 
+      // Wait, /api/master/salon-info is where we put instagram, tiktok, facebook
+      await api.put('/api/master/salon-info', {
+         instagram, tiktok, facebook
+      });
       
-      await AsyncStorage.setItem('user', JSON.stringify(res.data));
+      const newUStr = await AsyncStorage.getItem('user') || '{}';
+      const parsedU = JSON.parse(newUStr);
+      const combinedProfile = { ...parsedU, ...res.data, instagram, tiktok, facebook };
+      await AsyncStorage.setItem('user', JSON.stringify(combinedProfile));
       Alert.alert('Успіх', 'Профіль оновлено');
       setPassword('');
       loadProfile();
@@ -172,6 +187,18 @@ export const MasterProfileScreen = ({ navigation }: any) => {
     navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
   };
 
+  const handleDeleteAccount = async () => {
+    Alert.alert('УВАГА: НЕЗВОРОТНЯ ДІЯ', 'Ви точно хочете назавжди видалити свій акаунт майстра? Всі ваші прайси, записи та чати будуть видалені назавжди.', [
+      { text: 'Скасувати', style: 'cancel' },
+      { text: 'ВИДАЛИТИ АКАУНТ', style: 'destructive', onPress: async () => {
+          try {
+            await api.delete('/api/user/profile');
+            await handleLogout();
+          } catch(e) { Alert.alert('Помилка', 'Не вдалося видалити'); }
+      }}
+    ]);
+  };
+
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
@@ -199,8 +226,14 @@ export const MasterProfileScreen = ({ navigation }: any) => {
             <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={name} onChangeText={setName} placeholder="Ваше ім'я" placeholderTextColor={colors.textSecondary} />
             <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={phone} onChangeText={setPhone} placeholder="Телефон" placeholderTextColor={colors.textSecondary} keyboardType="phone-pad" />
             <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={salonName} onChangeText={setSalonName} placeholder="Назва салону (опц.)" placeholderTextColor={colors.textSecondary} />
+            
+            <Text style={{color: colors.textSecondary, marginTop: 10, marginBottom: 5, fontSize: 12}}>Соціальні мережі (посилання або нікнейми)</Text>
+            <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={instagram} onChangeText={setInstagram} placeholder="Instagram (без @)" placeholderTextColor={colors.textSecondary} />
+            <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={tiktok} onChangeText={setTiktok} placeholder="TikTok (без @)" placeholderTextColor={colors.textSecondary} />
+            <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={facebook} onChangeText={setFacebook} placeholder="Обліковий запис Facebook" placeholderTextColor={colors.textSecondary} />
+            
             <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={password} onChangeText={setPassword} placeholder="Новий пароль (залиште порожнім, щоб не змінювати)" placeholderTextColor={colors.textSecondary} secureTextEntry />
-            <TouchableOpacity style={[styles.saveBtn, {backgroundColor: colors.primary}]} onPress={handleSaveProfile}>
+            <TouchableOpacity style={[styles.saveBtn, {backgroundColor: colors.primary, marginTop: 10}]} onPress={handleSaveProfile}>
                 <Text style={styles.saveBtnText}>Зберегти зміни</Text>
             </TouchableOpacity>
         </View>
@@ -264,7 +297,7 @@ export const MasterProfileScreen = ({ navigation }: any) => {
           <Text style={{color: colors.textSecondary, marginBottom: 10, marginTop: 5, fontSize: 13}}>Отримуйте сповіщення про нові записи прямо в Telegram.</Text>
           <TouchableOpacity 
              style={[styles.saveBtn, {backgroundColor: '#0088cc', width: '100%'}]}
-             onPress={() => Linking.openURL(`https://t.me/nailbook_bot?start=${userId}`)}
+             onPress={() => Linking.openURL(`https://t.me/NailBookProBot?start=${userId}`)}
           >
              <Text style={styles.saveBtnText}>💬 Підключити Telegram</Text>
           </TouchableOpacity>
@@ -295,8 +328,12 @@ export const MasterProfileScreen = ({ navigation }: any) => {
         </View>
       </View>
 
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+      <TouchableOpacity style={[styles.logoutButton, { marginBottom: 15 }]} onPress={handleLogout}>
         <Text style={styles.logoutButtonText}>Вийти з акаунту</Text>
+      </TouchableOpacity>
+      
+      <TouchableOpacity onPress={handleDeleteAccount} style={{ alignSelf: 'center', marginBottom: 20 }}>
+          <Text style={{color: '#ff0000', textDecorationLine: 'underline'}}>Видалити мій акаунт назавжди</Text>
       </TouchableOpacity>
       
       <View style={{height: 50}} />

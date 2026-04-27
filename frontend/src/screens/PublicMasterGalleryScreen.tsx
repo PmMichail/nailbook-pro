@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, Modal, ActivityIndicator, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, Modal, ActivityIndicator, Dimensions, Linking } from 'react-native';
 import api from '../api/client';
 import { useTheme } from '../context/ThemeContext';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -18,10 +18,22 @@ export const PublicMasterGalleryScreen = () => {
   
   const [viewerModalVisible, setViewerModalVisible] = useState(false);
   const [viewerImageUri, setViewerImageUri] = useState<string | null>(null);
+  
+  const [masterInfo, setMasterInfo] = useState<any>(null);
 
   useEffect(() => {
-    fetchGallery();
+    if (masterId) {
+      fetchGallery();
+      fetchMasterInfo();
+    }
   }, [masterId]);
+
+  const fetchMasterInfo = async () => {
+    try {
+      const res = await api.get(`/api/client/master/${masterId}`);
+      if (res.data) setMasterInfo(res.data);
+    } catch (e) {}
+  };
 
   const fetchGallery = async () => {
     try {
@@ -90,6 +102,26 @@ export const PublicMasterGalleryScreen = () => {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Text style={[styles.header, { color: colors.text }]}>Роботи майстра: {masterName}</Text>
+      
+      {masterInfo && (masterInfo.instagram || masterInfo.tiktok || masterInfo.facebook) ? (
+        <View style={{flexDirection: 'row', gap: 15, marginBottom: 15, paddingHorizontal: 5}}>
+          {!!masterInfo.instagram && (
+            <TouchableOpacity onPress={() => Linking.openURL(`https://instagram.com/${masterInfo.instagram}`)}>
+               <Text style={{fontSize: 24}}>📷</Text>
+            </TouchableOpacity>
+          )}
+          {!!masterInfo.tiktok && (
+            <TouchableOpacity onPress={() => Linking.openURL(`https://tiktok.com/@${masterInfo.tiktok}`)}>
+               <Text style={{fontSize: 24}}>🎵</Text>
+            </TouchableOpacity>
+          )}
+          {!!masterInfo.facebook && (
+            <TouchableOpacity onPress={() => Linking.openURL(`https://facebook.com/${masterInfo.facebook}`)}>
+               <Text style={{fontSize: 24}}>📘</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      ) : null}
       
       {loading ? (
          <ActivityIndicator size="large" color={colors.primary} style={{marginTop: 50}} />

@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, ActivityIndicator, Modal, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, ActivityIndicator, Modal, RefreshControl, Image } from 'react-native';
 import api from '../api/client';
 import { useTheme } from '../context/ThemeContext';
 import QRCode from 'react-native-qrcode-svg';
 import * as Clipboard from 'expo-clipboard';
+import * as ImagePicker from 'expo-image-picker';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -43,12 +44,13 @@ export const MasterDashboardScreen = () => {
 
   const [priceModalVisible, setPriceModalVisible] = useState(false);
   const [editPriceId, setEditPriceId] = useState<string|null>(null);
-  const [priceForm, setPriceForm] = useState({ service: '', price: '' });
+  const [priceForm, setPriceForm] = useState({ service: '', price: '', imageUrl: '' as string | null });
 
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
   const [confirmApp, setConfirmApp] = useState<any>(null);
   const [confirmPrice, setConfirmPrice] = useState('');
   const [confirmNote, setConfirmNote] = useState('');
+  const [confirmPrepayment, setConfirmPrepayment] = useState('');
 
   const [payCard, setPayCard] = useState('');
   const [payBank, setPayBank] = useState('');
@@ -56,6 +58,7 @@ export const MasterDashboardScreen = () => {
 
   const statusMap: any = {
     'PENDING': 'ОЧІКУЄ ПІДТВЕРДЖЕННЯ',
+    'AWAITING_PREPAYMENT': 'ОЧІКУЄ ПЕРЕДОПЛАТУ',
     'CONFIRMED': 'ПІДТВЕРДЖЕНО',
     'CANCELLED': 'СКАСОВАНО',
     'COMPLETED': 'ВИКОНАНО'
@@ -83,14 +86,7 @@ export const MasterDashboardScreen = () => {
   }, [selectedCalendarDay]);
 
   const fetchPaymentInfo = async () => {
-    try {
-      const res = await api.get('/api/master/payment-details');
-      if (res.data?.info) {
-         setPayCard(res.data.info.cardNumber || '');
-         setPayBank(res.data.info.bankName || '');
-         setPayLink(res.data.info.qrCodeUrl || '');
-      }
-    } catch(e) {}
+    // Moved to PaymentSetupScreen
   };
 
   useFocusEffect(
@@ -142,14 +138,42 @@ export const MasterDashboardScreen = () => {
 
   const savePriceItem = async () => {
     try {
+      let finalImageUrl = priceForm.imageUrl;
+      if (priceForm.imageUrl && !priceForm.imageUrl.startsWith('http')) {
+        const formData = new FormData();
+        const ext = priceForm.imageUrl.split('.').pop() || 'jpg';
+        formData.append('image', {
+           uri: priceForm.imageUrl,
+           name: `price-${Date.now()}.${ext}`,
+           type: `image/${ext}`
+        } as any);
+        const uploadRes = await api.post('/api/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        finalImageUrl = uploadRes.data.url;
+      }
+
       if (editPriceId) {
-         await api.put('/api/master/prices', { id: editPriceId, service: priceForm.service, price: parseInt(priceForm.price, 10) });
+         await api.put('/api/master/prices', { id: editPriceId, service: priceForm.service, price: parseInt(priceForm.price, 10), imageUrl: finalImageUrl });
       } else {
-         await api.post('/api/master/prices', { service: priceForm.service, price: parseInt(priceForm.price, 10) });
+         await api.post('/api/master/prices', { service: priceForm.service, price: parseInt(priceForm.price, 10), imageUrl: finalImageUrl });
       }
       setPriceModalVisible(false);
       fetchPrices();
     } catch(e) { Alert.alert('Помилка', 'Не вдалося зберегти'); }
+  };
+
+  const handlePickPriceImage = async () => {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.5,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setPriceForm({ ...priceForm, imageUrl: result.assets[0].uri });
+      }
   };
 
   const deletePriceItem = async (id: string) => {
@@ -219,23 +243,19 @@ export const MasterDashboardScreen = () => {
     try {
       await api.put(`/api/master/appointments/${confirmApp.id}/confirm`, {
          price: confirmPrice ? parseInt(confirmPrice, 10) : undefined,
-         note: confirmNote
+         note: confirmNote,
+         prepaymentRequired: Boolean(confirmPrepayment),
+         prepaymentAmount: confirmPrepayment ? parseInt(confirmPrepayment, 10) : 0
       });
       setConfirmModalVisible(false);
       fetchAppointments();
-    } catch(e) {}
+      fetchSlots(); // in case status changed wait time etc
+    } catch(e) {
+      Alert.alert('Помилка', 'Неможливо підтвердити');
+    }
   };
 
-  const savePaymentDetails = async () => {
-    try {
-      await api.put('/api/master/payment-details', {
-         cardNumber: payCard,
-         bankName: payBank,
-         paymentLink: payLink
-      });
-      Alert.alert('Успіх', 'Реквізити збережено');
-    } catch(e) {}
-  };
+  // savePaymentDetails is moved to PaymentSetupScreen
 
   const currentDayAppoints = appointments.filter((a: any) => String(a.date).includes(selectedCalendarDay));
   const activeDaySetting = weeklySettings.find(s => s.dayOfWeek === activeEditDay) || weeklySettings[0];
@@ -257,7 +277,9 @@ export const MasterDashboardScreen = () => {
       style={[styles.container, { backgroundColor: colors.background }]}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
     >
-      <Text style={[styles.header, { color: colors.text }]}>Dashboard</Text>
+      <Text style={[styles.header, { color: colors.text }]}>
+        {masterProfile?.salonName ? `Салон ${masterProfile.salonName}` : (masterProfile?.name ? `Майстер ${masterProfile.name}` : 'Дашборд')}
+      </Text>
       
       {/* Top Actions */}
       <View style={{flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20}}>
@@ -375,40 +397,7 @@ export const MasterDashboardScreen = () => {
         )}
       </View>
 
-      <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-        <Text style={[styles.cardTitle, { color: colors.primary }]}>💳 Налаштування оплати</Text>
-        
-        <Text style={[styles.label, {color: colors.textSecondary}]}>Номер картки (IBAN)</Text>
-        <TextInput
-          placeholder="Номер картки (IBAN)"
-          placeholderTextColor={colors.textSecondary}
-          value={payCard}
-          onChangeText={setPayCard}
-          style={[styles.input, {color: colors.text, borderColor: colors.border}]}
-        />
-        
-        <Text style={[styles.label, {color: colors.textSecondary}]}>Назва банку</Text>
-        <TextInput
-          placeholder="ПриватБанк, Monobank..."
-          placeholderTextColor={colors.textSecondary}
-          value={payBank}
-          onChangeText={setPayBank}
-          style={[styles.input, {color: colors.text, borderColor: colors.border}]}
-        />
 
-        <Text style={[styles.label, {color: colors.textSecondary}]}>Посилання на оплату (Банка, Send, опціонально)</Text>
-        <TextInput
-          placeholder="https://send.monobank.ua/..."
-          placeholderTextColor={colors.textSecondary}
-          value={payLink}
-          onChangeText={setPayLink}
-          style={[styles.input, {color: colors.text, borderColor: colors.border}]}
-        />
-        
-        <TouchableOpacity style={[styles.btnPrimary, { backgroundColor: colors.primary }]} onPress={savePaymentDetails}>
-          <Text style={[styles.btnPrimaryText, { color: isDark ? '#000' : '#fff' }]}>Зберегти реквізити</Text>
-        </TouchableOpacity>
-      </View>
 
       {/* Appointments */}
       <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -431,6 +420,7 @@ export const MasterDashboardScreen = () => {
                         setConfirmApp(app);
                         setConfirmPrice(app.price ? app.price.toString() : '');
                         setConfirmNote('');
+                        setConfirmPrepayment('');
                         setConfirmModalVisible(true);
                     }}>
                         <Text style={[styles.actionIcon, { color: '#2e8b57' }]}>✓</Text>
@@ -460,7 +450,7 @@ export const MasterDashboardScreen = () => {
                     </Text>
                 </View>
                 <View style={styles.appActions}>
-                    {app.status === 'CONFIRMED' && (
+                    {(app.status === 'CONFIRMED' || app.status === 'AWAITING_PREPAYMENT') && (
                         <TouchableOpacity style={[styles.actionBtn, {borderColor: colors.primary, borderWidth: 1, backgroundColor: colors.primary}]} onPress={() => updateAppStatus(app.id, 'complete')}>
                             <Text style={[styles.actionIcon, { color: isDark ? '#000' : '#fff' }]}>✓</Text>
                         </TouchableOpacity>
@@ -494,8 +484,11 @@ export const MasterDashboardScreen = () => {
         <Text style={[styles.cardTitle, { color: colors.primary }]}>Мої ціни (Прайс-лист)</Text>
         {prices.map(item => (
           <View key={item.id} style={[styles.row, {marginBottom: 10, alignItems: 'center', borderBottomWidth: 1, borderBottomColor: colors.border, paddingBottom: 10}]}>
+            {item.imageUrl && (
+              <Image source={{ uri: item.imageUrl.startsWith('http') ? item.imageUrl : `${api.defaults.baseURL}/${item.imageUrl}` }} style={{ width: 40, height: 40, borderRadius: 8, marginRight: 10 }} />
+            )}
             <Text style={{color: colors.text, flex: 1}}>{item.service}: {item.price} грн</Text>
-            <TouchableOpacity onPress={() => { setEditPriceId(item.id); setPriceForm({service: item.service, price: item.price.toString()}); setPriceModalVisible(true); }} style={{marginRight: 15, padding: 5, borderWidth: 1, borderColor: colors.border, borderRadius: 8}}>
+            <TouchableOpacity onPress={() => { setEditPriceId(item.id); setPriceForm({service: item.service, price: item.price.toString(), imageUrl: item.imageUrl}); setPriceModalVisible(true); }} style={{marginRight: 15, padding: 5, borderWidth: 1, borderColor: colors.border, borderRadius: 8}}>
                <Text style={{color: colors.text}}>✏️</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => deletePriceItem(item.id)} style={{padding: 5, borderWidth: 1, borderColor: colors.border, borderRadius: 8}}>
@@ -503,7 +496,7 @@ export const MasterDashboardScreen = () => {
             </TouchableOpacity>
           </View>
         ))}
-        <TouchableOpacity style={[styles.btnPrimary, {marginTop: 10, backgroundColor: colors.primary}]} onPress={() => { setEditPriceId(null); setPriceForm({service: '', price: ''}); setPriceModalVisible(true); }}>
+        <TouchableOpacity style={[styles.btnPrimary, {marginTop: 10, backgroundColor: colors.primary}]} onPress={() => { setEditPriceId(null); setPriceForm({service: '', price: '', imageUrl: null}); setPriceModalVisible(true); }}>
            <Text style={[styles.btnPrimaryText, { color: isDark ? '#000' : '#fff' }]}>+ Додати послугу</Text>
         </TouchableOpacity>
       </View>
@@ -529,6 +522,17 @@ export const MasterDashboardScreen = () => {
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, {backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1}]}>
             <Text style={[styles.modalTitle, {color: colors.text}]}>Редагувати послугу</Text>
+
+             <TouchableOpacity style={styles.imageUploadBtn} onPress={handlePickPriceImage}>
+                 {priceForm.imageUrl ? (
+                     <Image source={{uri: priceForm.imageUrl.startsWith('http') ? priceForm.imageUrl : (priceForm.imageUrl.includes('/') ? `${api.defaults.baseURL}/${priceForm.imageUrl}` : priceForm.imageUrl)}} style={{width: 100, height: 100, borderRadius: 15}} />
+                 ) : (
+                     <View style={[styles.imagePlaceholder, {borderColor: colors.border}]}>
+                         <Text style={{color: '#888', textAlign: 'center', fontWeight: 'bold'}}>📷 Фото (Опц.)</Text>
+                     </View>
+                 )}
+             </TouchableOpacity>
+
             <View style={{width: '100%', marginBottom: 10}}>
                 <Text style={[styles.label, {color: colors.textSecondary}]}>Назва послуги:</Text>
                 <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border, width: '100%'}]} placeholder="Манікюр..." placeholderTextColor="#666" value={priceForm.service} onChangeText={t => setPriceForm({...priceForm, service: t})} />
@@ -562,6 +566,13 @@ export const MasterDashboardScreen = () => {
             <View style={{width: '100%', marginBottom: 15}}>
                 <Text style={[styles.label, {color: colors.textSecondary}]}>Примітка клієнту (необов'язково):</Text>
                 <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border, height: 80}]} placeholder="Коментар..." placeholderTextColor="#666" multiline value={confirmNote} onChangeText={setConfirmNote} />
+            </View>
+
+            {/* PREPAYMENT */}
+            <View style={{width: '100%', marginBottom: 15}}>
+                <Text style={[styles.label, {color: colors.textSecondary}]}>Передоплата (PRO):</Text>
+                <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} placeholder="Сума передоплати (напр. 200) або пусто" placeholderTextColor="#666" keyboardType="numeric" value={confirmPrepayment} onChangeText={setConfirmPrepayment} />
+                <Text style={{fontSize: 10, color: colors.textSecondary}}>Якщо вказано, запис скасується через 3 год без оплати.</Text>
             </View>
 
             <TouchableOpacity style={[styles.btnPrimary, {marginBottom: 10, width: '100%', backgroundColor: colors.primary }]} onPress={submitConfirm}>
@@ -612,6 +623,8 @@ const styles = StyleSheet.create({
   btnPrimary: { borderRadius: 12, padding: 15, alignItems: 'center' },
   btnPrimaryText: { fontWeight: 'bold', fontSize: 14 },
   btnSecondary: { backgroundColor: 'transparent', borderRadius: 12, padding: 15, alignItems: 'center', borderWidth: 1 },
+  imageUploadBtn: { alignSelf: 'center', marginBottom: 15 },
+  imagePlaceholder: { width: 100, height: 100, borderRadius: 15, borderWidth: 2, borderStyle: 'dashed', justifyContent: 'center', alignItems: 'center' },
   slotsGrid: { flexDirection: 'row', flexWrap: 'wrap' },
   slotBtn: { padding: 15, borderRadius: 10, margin: 5, width: '45%', alignItems: 'center' },
   slotBtnText: { fontWeight: 'bold' },

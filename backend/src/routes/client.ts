@@ -52,6 +52,33 @@ const authClient = (req: any, res: any, next: any) => {
 
 router.use(authClient);
 
+// GET /master/:id
+router.get('/master/:id', async (req: any, res) => {
+  try {
+     const master = await prisma.user.findUnique({
+       where: { id: req.params.id },
+       select: { id: true, name: true, phone: true, avatarUrl: true, salonName: true }
+     });
+     if (!master) return res.status(404).json({ error: 'Not found' });
+     res.json(master);
+  } catch(e) {
+     res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// PUT /unlink
+router.put('/unlink', async (req: any, res) => {
+  try {
+     await prisma.user.update({
+         where: { id: req.user.id },
+         data: { masterId: null }
+     });
+     res.json({ success: true });
+  } catch(e) {
+     res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // GET /masters/search?city=xxx&lat=yyy&lng=zzz
 router.get('/masters/search', async (req: any, res) => {
   const { city, lat, lng } = req.query;
@@ -110,13 +137,28 @@ router.post('/masters/connect', async (req: any, res) => {
       if (new Date() > connectionCode.expiresAt) {
          return res.status(400).json({ error: 'Термін дії коду минув' });
       }
+
+      const masterId = connectionCode.userId;
+      
+      const sub = await prisma.subscription.findUnique({ where: { masterId } });
+      const isFree = !sub || sub.plan === 'FREE' || ['EXPIRED', 'CANCELLED'].includes(sub.status);
+      
+      if (isFree) {
+        const clientCount = await prisma.user.count({ where: { masterId, role: 'CLIENT', isActiveClient: true } });
+        if (clientCount >= 10) {
+           // Wait, what if the client is already connected to this master? We shouldn't block them.
+           if (req.user.masterId !== masterId) {
+             return res.status(403).json({ error: 'Майстер тимчасово не приймає нових клієнтів (ліміт бази).' });
+           }
+        }
+      }
       
       await prisma.user.update({
          where: { id: req.user.id },
-         data: { masterId: connectionCode.userId, isActiveClient: true }
+         data: { masterId, isActiveClient: true }
       });
       
-      res.json({ success: true, masterId: connectionCode.userId });
+      res.json({ success: true, masterId });
    } catch(e) {
       res.status(500).json({ error: 'Помилка підключення' });
    }
@@ -322,7 +364,11 @@ router.get('/appointments/:id/payment', async (req: any, res) => {
   }
 
   const pDetails: any = app.paymentDetails;
-  const amount = app.finalPrice || app.originalPrice || app.price || 0;
+  let amount = app.finalPrice || app.originalPrice || app.price || 0;
+  
+  if (app.status === 'AWAITING_PREPAYMENT') {
+     amount = app.prepaymentAmount || amount;
+  }
   
   const paymentData = {
     cardNumber: pDetails.cardNumber,
@@ -341,7 +387,9 @@ router.get('/appointments/:id/payment', async (req: any, res) => {
     paymentLink: pDetails.qrCode,
     cardNumber: pDetails.cardNumber,
     bankName: pDetails.bankName,
-    amount
+    amount,
+    prepaymentDeadline: app.prepaymentDeadline,
+    isPrepayment: app.status === 'AWAITING_PREPAYMENT'
   });
 });
 

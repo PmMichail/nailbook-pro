@@ -109,4 +109,25 @@ router.get('/unread-count', async (req: any, res) => {
   }
 });
 
+// DELETE /api/user/profile
+router.delete('/profile', async (req: any, res) => {
+  try {
+    const userId = req.user.id;
+    // Delete prices, settings, etc cascaded or manually if needed
+    await prisma.masterWeeklySettings.deleteMany({ where: { masterId: userId } });
+    await prisma.priceList.deleteMany({ where: { masterId: userId } });
+    await prisma.appointment.deleteMany({ where: { OR: [{ masterId: userId }, { clientId: userId }] } });
+    await prisma.chatMessage.deleteMany({ where: { senderId: userId } });
+    // chats with roomId matching
+    const userChats = await prisma.chat.findMany({ where: { roomId: { contains: userId } }});
+    await prisma.chatMessage.deleteMany({ where: { chatId: { in: userChats.map(c => c.id) } }});
+    await prisma.chat.deleteMany({ where: { roomId: { contains: userId } } });
+    
+    await prisma.user.delete({ where: { id: userId } });
+    res.json({ success: true });
+  } catch(e) {
+    res.status(500).json({ error: 'Помилка видалення акаунта' });
+  }
+});
+
 export default router;

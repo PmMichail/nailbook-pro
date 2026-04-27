@@ -116,6 +116,7 @@ export const ClientTabs = () => {
 
 import { AdminDashboardScreen } from '../screens/AdminDashboardScreen';
 import { AdminMastersScreen } from '../screens/AdminMastersScreen';
+import { AdminClientsScreen } from '../screens/AdminClientsScreen';
 
 import { useTheme } from '../context/ThemeContext';
 
@@ -134,6 +135,7 @@ export const AdminTabs = () => {
     }}>
       <Tab.Screen name="Dashboard" component={AdminDashboardScreen} options={{ tabBarLabel: 'Головна', title: '📊' }} />
       <Tab.Screen name="Masters" component={AdminMastersScreen} options={{ tabBarLabel: 'Майстри', title: '👥' }} />
+      <Tab.Screen name="Clients" component={AdminClientsScreen} options={{ tabBarLabel: 'Клієнти', title: '🤝' }} />
     </Tab.Navigator>
   );
 };

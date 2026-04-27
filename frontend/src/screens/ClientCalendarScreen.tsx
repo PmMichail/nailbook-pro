@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, ImageBackground, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, ImageBackground, RefreshControl, Linking } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
@@ -16,6 +16,7 @@ export const ClientCalendarScreen = ({ navigation }: any) => {
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [masterId, setMasterId] = useState<string | null>(null);
   const [masterName, setMasterName] = useState<string>('ПРОСТІР КРАСИ');
+  const [socialLinks, setSocialLinks] = useState<any>({ instagram: '', tiktok: '', facebook: '' });
   const [prices, setPrices] = useState<any[]>([]);
   const [selectedPriceId, setSelectedPriceId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -36,8 +37,17 @@ export const ClientCalendarScreen = ({ navigation }: any) => {
         setMasterId(u.masterId);
         if (u.masterId) {
             const masterRes = await api.get(`/api/client/master/${u.masterId}`);
-            if (masterRes.data && masterRes.data.name) {
-                setMasterName('МАЙСТЕР ' + masterRes.data.name.toUpperCase());
+            if (masterRes.data) {
+                if (masterRes.data.salonName) {
+                    setMasterName('САЛОН ' + masterRes.data.salonName.toUpperCase());
+                } else if (masterRes.data.name) {
+                    setMasterName('МАЙСТЕР ' + masterRes.data.name.toUpperCase());
+                }
+                setSocialLinks({
+                    instagram: masterRes.data.instagram || '',
+                    tiktok: masterRes.data.tiktok || '',
+                    facebook: masterRes.data.facebook || ''
+                });
             }
         }
       }
@@ -151,6 +161,27 @@ export const ClientCalendarScreen = ({ navigation }: any) => {
         {/* Hero Section */}
         <View style={styles.heroSection}>
             <Text style={[styles.overTitle, { color: colors.primary }]}>{masterName}</Text>
+            
+            {(socialLinks.instagram || socialLinks.tiktok || socialLinks.facebook) ? (
+              <View style={{flexDirection: 'row', gap: 15, marginBottom: 15}}>
+                {!!socialLinks.instagram && (
+                  <TouchableOpacity onPress={() => Linking.openURL(`https://instagram.com/${socialLinks.instagram}`)}>
+                     <Text style={{fontSize: 20}}>📷</Text>
+                  </TouchableOpacity>
+                )}
+                {!!socialLinks.tiktok && (
+                  <TouchableOpacity onPress={() => Linking.openURL(`https://tiktok.com/@${socialLinks.tiktok}`)}>
+                     <Text style={{fontSize: 20}}>🎵</Text>
+                  </TouchableOpacity>
+                )}
+                {!!socialLinks.facebook && (
+                  <TouchableOpacity onPress={() => Linking.openURL(`https://facebook.com/${socialLinks.facebook}`)}>
+                     <Text style={{fontSize: 20}}>📘</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            ) : null}
+
             <Text style={[styles.heroTitle, { color: colors.text }]}>Створіть свій</Text>
             <Text style={[styles.heroTitle, { color: colors.primary }]}>Стиль</Text>
             <Text style={[styles.heroDesc, { color: colors.textSecondary, borderLeftColor: colors.primary }]}>Оберіть послугу та зручний час для вашого ідеального візиту.</Text>
@@ -172,9 +203,9 @@ export const ClientCalendarScreen = ({ navigation }: any) => {
                         ]}
                     >
                         <ImageBackground 
-                            source={require('../../assets/gradient.jpg')} 
+                            source={p.imageUrl ? { uri: p.imageUrl.startsWith('http') ? p.imageUrl : `${api.defaults.baseURL}/${p.imageUrl}` } : require('../../assets/gradient.jpg')} 
                             style={styles.gradientBg}
-                            imageStyle={{ borderRadius: 12, opacity: 0.9 }}
+                            imageStyle={{ borderRadius: 12, opacity: p.imageUrl ? 0.7 : 0.9 }}
                         >
                         <View style={[styles.serviceContent, { backgroundColor: isDark ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.7)', flex: 1, padding: 20, borderRadius: 12 }]}>
                             <View>

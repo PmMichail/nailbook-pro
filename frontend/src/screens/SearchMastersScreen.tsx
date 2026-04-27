@@ -12,10 +12,19 @@ export const SearchMastersScreen = () => {
     const [masters, setMasters] = useState([]);
     const [loading, setLoading] = useState(false);
     const [connectionCode, setConnectionCode] = useState('');
+    const [currentUser, setCurrentUser] = useState<any>(null);
 
     useEffect(() => {
+        loadUser();
         searchNearby();
     }, []);
+
+    const loadUser = async () => {
+        const str = await AsyncStorage.getItem('user');
+        if (str) {
+            setCurrentUser(JSON.parse(str));
+        }
+    };
 
     const searchNearby = async () => {
         setLoading(true);
@@ -35,26 +44,47 @@ export const SearchMastersScreen = () => {
         setLoading(false);
     };
 
-    const renderMaster = ({ item }: { item: any }) => (
-        <TouchableOpacity style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]} onPress={() => navigation.navigate('PublicMasterGalleryScreen', { masterId: item.id, masterName: item.salonName || item.name })}>
-            <View style={styles.header}>
-                <View style={styles.avatarPlaceholder}>
-                    {item.avatarUrl ? (
-                         <Image source={{uri: item.avatarUrl}} style={{width: 50, height: 50, borderRadius: 25}} />
-                    ) : (
-                         <Text style={{color: '#fff', fontSize: 20}}>💅</Text>
-                    )}
+    const renderMaster = ({ item }: { item: any }) => {
+        const isCurrentMaster = currentUser?.masterId === item.id;
+        
+        return (
+            <TouchableOpacity 
+                style={[
+                    styles.card, 
+                    { backgroundColor: colors.card, borderColor: isCurrentMaster ? colors.primary : colors.border },
+                    isCurrentMaster && { borderWidth: 2 }
+                ]} 
+                onPress={() => {
+                   if (isCurrentMaster) {
+                       Alert.alert('Підключено', 'Це вже ваш майстер.');
+                   }
+                   navigation.navigate('PublicMasterGalleryScreen', { masterId: item.id, masterName: item.salonName || item.name });
+                }}
+            >
+                {isCurrentMaster && (
+                    <View style={{ position: 'absolute', top: -12, right: 10, backgroundColor: colors.primary, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, zIndex: 10 }}>
+                        <Text style={{ color: isDark ? '#000' : '#fff', fontSize: 12, fontWeight: 'bold' }}>⭐️ Ваш поточний майстер</Text>
+                    </View>
+                )}
+                <View style={styles.header}>
+                    <View style={styles.avatarPlaceholder}>
+                        {item.avatarUrl ? (
+                             <Image source={{uri: item.avatarUrl}} style={{width: 50, height: 50, borderRadius: 25}} />
+                        ) : (
+                             <Text style={{color: '#fff', fontSize: 20}}>💅</Text>
+                        )}
+                    </View>
+                    <View style={styles.info}>
+                        <Text style={[styles.name, { color: colors.text }]}>{item.salonName || item.name}</Text>
+                        <Text style={styles.city}>
+                           {item.city ? `${item.city}` : 'Місто не вказано'}
+                           {item.address ? ` • ${item.address}` : ''}
+                        </Text>
+                    </View>
                 </View>
-                <View style={styles.info}>
-                    <Text style={[styles.name, { color: colors.text }]}>{item.salonName || item.name}</Text>
-                    <Text style={styles.city}>
-                       {item.city ? `${item.city}` : 'Місто не вказано'}
-                       {item.address ? ` • ${item.address}` : ''}
-                    </Text>
-                </View>
-            </View>
-        </TouchableOpacity>
-    );
+            </TouchableOpacity>
+        );
+    };
 
     const handleConnect = async () => {
        if (!connectionCode) return Alert.alert('Помилка', 'Введіть код');

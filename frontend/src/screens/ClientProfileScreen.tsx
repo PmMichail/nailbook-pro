@@ -14,7 +14,7 @@ export const ClientProfileScreen = ({ navigation }: any) => {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [avatar, setAvatar] = useState<string | null>(null);
-  const [myMasterName, setMyMasterName] = useState<string | null>(null);
+  const [myMaster, setMyMaster] = useState<any>(null);
 
   const [referralCode, setReferralCode] = useState('');
   const [referralUses, setReferralUses] = useState(0);
@@ -45,7 +45,7 @@ export const ClientProfileScreen = ({ navigation }: any) => {
         if (u.masterId) {
             const masterRes = await api.get(`/api/client/master/${u.masterId}`);
             if (masterRes.data && masterRes.data.name) {
-                setMyMasterName(masterRes.data.name);
+                setMyMaster(masterRes.data);
             }
         }
       }
@@ -139,6 +139,18 @@ export const ClientProfileScreen = ({ navigation }: any) => {
     navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
   };
 
+  const handleDeleteAccount = async () => {
+    Alert.alert('УВАГА: НЕЗВОРОТНЯ ДІЯ', 'Ви точно хочете назавжди видалити свій акаунт?', [
+      { text: 'Скасувати', style: 'cancel' },
+      { text: 'ВИДАЛИТИ АКАУНТ', style: 'destructive', onPress: async () => {
+          try {
+            await api.delete('/api/user/profile');
+            await handleLogout();
+          } catch(e) { Alert.alert('Помилка', 'Не вдалося видалити'); }
+      }}
+    ]);
+  };
+
   return (
     <ScrollView 
         style={[styles.container, { backgroundColor: colors.background }]}
@@ -209,13 +221,35 @@ export const ClientProfileScreen = ({ navigation }: any) => {
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Мій Майстер</Text>
         
-        {myMasterName && (
-           <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border, marginBottom: 15, paddingVertical: 20 }]}>
-             <Text style={{ color: colors.textSecondary, fontSize: 12, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 5 }}>Поточний майстер</Text>
-             <Text style={{ color: colors.text, fontFamily: 'serif', fontStyle: 'italic', fontSize: 22 }}>{myMasterName}</Text>
+        {myMaster && (
+           <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border, marginBottom: 15, paddingVertical: 15 }]}>
+             <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                 <View style={{width: 50, height: 50, borderRadius: 25, backgroundColor: '#ddd', marginRight: 15, overflow: 'hidden'}}>
+                     {myMaster.avatarUrl && <Image source={{uri: myMaster.avatarUrl.startsWith('http') ? myMaster.avatarUrl : `${api.defaults.baseURL}/${myMaster.avatarUrl}`}} style={{width: '100%', height: '100%'}} />}
+                 </View>
+                 <View style={{flex: 1}}>
+                     <Text style={{ color: colors.textSecondary, fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 2 }}>Поточний майстер</Text>
+                     <Text style={{ color: colors.text, fontFamily: 'serif', fontStyle: 'italic', fontSize: 20 }}>{myMaster.name}</Text>
+                     <Text style={{ color: colors.textSecondary, fontSize: 13, marginTop: 2 }}>{myMaster.phone}</Text>
+                     {myMaster.salonName && <Text style={{ color: colors.primary, fontSize: 13, marginTop: 1 }}>{myMaster.salonName}</Text>}
+                 </View>
+             </View>
+             <TouchableOpacity style={{marginTop: 15, alignSelf: 'flex-start'}} onPress={() => {
+                 Alert.alert('Підтвердження', 'Відкріпитись від цього майстра?', [
+                     {text: 'Ні', style: 'cancel'},
+                     {text: 'Так', style: 'destructive', onPress: async () => {
+                         try {
+                             await AsyncStorage.setItem('user', JSON.stringify({ ...JSON.parse(await AsyncStorage.getItem('user') || '{}'), masterId: null }));
+                             setMyMaster(null);
+                             await api.put('/api/client/unlink');
+                         } catch(e) {}
+                     }}
+                 ]);
+             }}>
+                 <Text style={{color: '#8b0000', fontSize: 13, fontWeight: 'bold'}}>Відкріпитись</Text>
+             </TouchableOpacity>
            </View>
         )}
-
         <TouchableOpacity style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border, marginBottom: 20 }]} onPress={() => navigation.navigate('SearchMastersScreen' as never)}>
           <Text style={[styles.cardTitle, { color: colors.text }]}>Знайти або підключити майстра 🔍</Text>
           <Text style={{ color: colors.textSecondary }}>Пошук за геолокацією або ввід коду</Text>
@@ -244,8 +278,12 @@ export const ClientProfileScreen = ({ navigation }: any) => {
         </View>
       </View>
 
-      <TouchableOpacity style={[styles.logoutButton, { borderColor: '#8b0000', backgroundColor: 'transparent', borderWidth: 1 }]} onPress={handleLogout}>
+      <TouchableOpacity style={[styles.logoutButton, { borderColor: '#8b0000', backgroundColor: 'transparent', borderWidth: 1, marginBottom: 15 }]} onPress={handleLogout}>
         <Text style={[styles.logoutButtonText, { color: '#8b0000' }]}>Вийти з акаунту</Text>
+      </TouchableOpacity>
+      
+      <TouchableOpacity onPress={handleDeleteAccount} style={{ alignSelf: 'center', marginBottom: 20 }}>
+          <Text style={{color: '#ff0000', textDecorationLine: 'underline'}}>Видалити мій акаунт назавжди</Text>
       </TouchableOpacity>
       
       <View style={{height: 80}} />

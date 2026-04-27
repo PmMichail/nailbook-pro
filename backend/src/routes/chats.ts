@@ -10,9 +10,18 @@ router.get('/', async (req: AuthRequest, res) => {
   try {
     const isMaster = req.user!.role === 'MASTER';
     
+    const userAppointments = await prisma.appointment.findMany({
+        where: { OR: [{ masterId: req.user!.id }, { clientId: req.user!.id }] },
+        select: { id: true }
+    });
+    const appointmentIds = userAppointments.map(a => a.id);
+
     const chats = await prisma.chat.findMany({
       where: {
-        roomId: { contains: req.user!.id }
+        OR: [
+          { roomId: { contains: req.user!.id } },
+          { roomId: { in: appointmentIds } }
+        ]
       },
       include: {
         messages: {
@@ -31,8 +40,31 @@ router.get('/', async (req: AuthRequest, res) => {
          if (otherId) {
             otherUser = await prisma.user.findUnique({
                where: { id: otherId },
-               select: { id: true, name: true, phone: true, avatarUrl: true }
+               select: { id: true, name: true, phone: true, avatarUrl: true, salonName: true }
             });
+         }
+      } else if (chat.roomId && chat.roomId.startsWith('direct-')) {
+         const stripped = chat.roomId.replace('direct-', '');
+         let otherId = null;
+         if (stripped.includes(req.user!.id)) {
+             otherId = stripped.replace(req.user!.id, '').replace(/^-|-$/g, '');
+         }
+         if (otherId && otherId !== 'null' && otherId.length > 5) {
+             otherUser = await prisma.user.findUnique({ 
+                 where: { id: otherId }, 
+                 select: { id: true, name: true, phone: true, avatarUrl: true, salonName: true } 
+             });
+         }
+      } else if (chat.roomId) {
+         // It might be an appointment chat
+         const appointment = await prisma.appointment.findUnique({
+             where: { id: chat.roomId },
+             include: { client: { select: { id: true, name: true, phone: true, avatarUrl: true, salonName: true } }, 
+                        master: { select: { id: true, name: true, phone: true, avatarUrl: true, salonName: true } } }
+         });
+         if (appointment) {
+             if (req.user!.role === 'MASTER') otherUser = appointment.client;
+             else otherUser = appointment.master;
          }
       }
       return { ...chat, otherUser };

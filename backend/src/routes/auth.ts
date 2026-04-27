@@ -183,6 +183,10 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Користувача не знайдено' });
     }
 
+    if (user.isBanned) {
+      return res.status(403).json({ error: 'Ваш акаунт тимчасово заблоковано Адміністратором.' });
+    }
+
     // Auto-promote to ADMIN
     if (user.email === 'admin@nailbook.pro' && user.role !== 'ADMIN') {
         user = await prisma.user.update({

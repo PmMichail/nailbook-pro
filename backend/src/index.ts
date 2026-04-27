@@ -17,8 +17,11 @@ import subscriptionRoutes from './routes/subscription';
 import webhookRoutes from './routes/webhooks';
 import adminRoutes from './routes/admin';
 import { createServer } from 'http';
-import { initSocket } from './socket/index';
+import { initSocket, getIo, getSocketId } from './socket/index';
 import path from 'path';
+import prisma from './models/prismaClient';
+import { sendTelegramMessage } from './services/telegram';
+import { sendPushNotification } from './services/firebase';
 
 dotenv.config();
 
@@ -55,3 +58,48 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+// Auto-cancellation worker for unpaid prepayments
+setInterval(async () => {
+  try {
+    const expiredApps = await prisma.appointment.findMany({
+      where: {
+        status: 'AWAITING_PREPAYMENT',
+        prepaymentDeadline: { lt: new Date() }
+      },
+      include: {
+        client: { include: { pushToken: true } },
+        master: { include: { pushToken: true } }
+      }
+    });
+
+    for (const app of expiredApps) {
+      // Маркуємо як CANCELLED
+      await prisma.appointment.update({
+        where: { id: app.id },
+        data: { status: 'CANCELLED' }
+      });
+
+      const cancelMsg = `Ваш запис на ${app.date.toISOString().split('T')[0]} о ${app.time} автоматично скасовано через відсутність передоплати.`;
+      const masterMsg = `Запис клієнта ${app.client?.name || ''} на ${app.date.toISOString().split('T')[0]} о ${app.time} автоматично скасовано (час на передоплату вийшов).`;
+
+      // Повідомлення клієнту
+      sendTelegramMessage(app.clientId, cancelMsg);
+      if (app.client?.pushToken?.token) {
+        await sendPushNotification(app.client.pushToken.token, 'Запис скасовано', cancelMsg);
+      }
+      const clientSocket = getSocketId(app.clientId);
+      if (clientSocket) getIo().to(clientSocket).emit('appointment_cancelled_auto', { id: app.id });
+
+      // Повідомлення майстру
+      sendTelegramMessage(app.masterId, masterMsg);
+      if (app.master?.pushToken?.token) {
+        await sendPushNotification(app.master.pushToken.token, 'Запис скасовано', masterMsg);
+      }
+      const masterSocket = getSocketId(app.masterId);
+      if (masterSocket) getIo().to(masterSocket).emit('appointment_cancelled_auto', { id: app.id });
+    }
+  } catch (err) {
+    console.error('Error in prepayment expiration worker:', err);
+  }
+}, 5 * 60 * 1000); // Check every 5 minutes

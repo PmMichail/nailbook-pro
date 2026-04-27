@@ -28,17 +28,34 @@ export const ChatsListScreen = () => {
             const otherUser = chat.otherUser || {};
             
             // Fallback logically if backend not yet pushed to Render
-            let fallbackName = 'Новий чат (Оновіть)';
-            if (currentUser.role === 'MASTER' && lastMsg.includes('Майстер код')) fallbackName = 'Запит від Клієнта';
+            let fallbackName = 'Співрозмовник';
+            if (currentUser.role === 'MASTER' && lastMsg.includes('Майстер код')) fallbackName = 'Новий клієнт (за запитом)';
             
+            let displayTime = '';
+            if (chat.messages && chat.messages.length > 0) {
+                const dateObj = new Date(chat.messages[0].createdAt);
+                
+                const today = new Date();
+                const yesterday = new Date();
+                yesterday.setDate(today.getDate() - 1);
+                
+                if (dateObj.toDateString() === today.toDateString()) {
+                   displayTime = dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                } else if (dateObj.toDateString() === yesterday.toDateString()) {
+                   displayTime = 'Вчора';
+                } else {
+                   displayTime = dateObj.toLocaleDateString([], {day: 'numeric', month: 'short'});
+                }
+            }
+
             return {
                 id: chat.id,
-                roomId: chat.roomId, // this is the dynamic room
-                userName: otherUser.name || otherUser.phone || fallbackName,
+                roomId: chat.roomId,
+                userName: otherUser.name || otherUser.salonName || otherUser.phone || fallbackName,
                 avatar: otherUser.avatarUrl || 'https://via.placeholder.com/100x100.png',
                 lastMessage: lastMsg,
-                time: 'Зараз', // could be parsed from chat.messages[0].createdAt
-                unreadCount: 0 // to be implemented if tracking isRead
+                time: displayTime,
+                unreadCount: 0 
             };
         });
         

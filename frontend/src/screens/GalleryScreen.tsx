@@ -21,6 +21,7 @@ export const GalleryScreen = () => {
   const [uploadModalVisible, setUploadModalVisible] = useState(false);
   const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
   const [uploadTags, setUploadTags] = useState<string>('');
+  const [isPublic, setIsPublic] = useState(false);
   const [uploading, setUploading] = useState(false);
 
   // Full-screen Image Viewer Modal
@@ -133,6 +134,7 @@ export const GalleryScreen = () => {
 
       const parsedTags = uploadTags.split(/[\\s,]+/).filter(t => t.length > 0).map(t => t.startsWith('#') ? t : `#${t}`);
       formData.append('tags', JSON.stringify(parsedTags));
+      formData.append('isPublic', isPublic.toString());
 
       await api.post(`/api/gallery`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
@@ -233,6 +235,13 @@ export const GalleryScreen = () => {
               onChangeText={setUploadTags}
             />
 
+            <TouchableOpacity 
+              style={{flexDirection: 'row', alignItems: 'center', marginBottom: 20, width: '100%'}} 
+              onPress={() => setIsPublic(!isPublic)}>
+               <View style={[styles.checkbox, isPublic && styles.checkboxActive]} />
+               <Text style={{color: colors.text, marginLeft: 10, flex: 1}}>Показати в загальній галереї додатку</Text>
+            </TouchableOpacity>
+
             {uploading ? (
                <ActivityIndicator size="large" color={colors.primary} style={{marginVertical: 15}} />
             ) : (
@@ -291,5 +300,7 @@ const styles = StyleSheet.create({
   viewerBg: { flex: 1, backgroundColor: 'rgba(0,0,0,0.9)', justifyContent: 'center', alignItems: 'center' },
   viewerCloseBtn: { position: 'absolute', top: 50, right: 20, zIndex: 10, padding: 10, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 20 },
   viewerCloseText: { color: '#fff', fontSize: 24, fontWeight: 'bold' },
-  viewerImage: { width: '100%', height: '80%' }
+  viewerImage: { width: '100%', height: '80%' },
+  checkbox: { width: 20, height: 20, borderWidth: 1, borderColor: '#FF69B4', borderRadius: 4 },
+  checkboxActive: { backgroundColor: '#FF69B4' }
 });

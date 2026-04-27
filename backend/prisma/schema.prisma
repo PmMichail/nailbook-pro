@@ -28,6 +28,7 @@ enum Role {
 model User {
   id        String   @id @default(uuid())
   role      Role     @default(CLIENT)
+  isBanned  Boolean  @default(false)
   phone     String?  @unique
   email     String?  @unique
   name      String
@@ -50,6 +51,9 @@ model User {
   notes     String?
   salonName String?
   salonLogo String?
+  instagram String?
+  tiktok    String?
+  facebook  String?
 
   // Relations for MASTER
   appointments   Appointment[]          @relation("MasterAppointments")
@@ -132,6 +136,7 @@ model MasterWeeklySettings {
 
 enum AppointmentStatus {
   PENDING
+  AWAITING_PREPAYMENT
   CONFIRMED
   CANCELLED
   COMPLETED
@@ -158,6 +163,9 @@ model Appointment {
   paymentStatus  PaymentStatus @default(UNPAID)
   paymentDetails Json?
   remindersSent  Json? // { "24h": true, "2h": true }
+
+  prepaymentAmount   Int?
+  prepaymentDeadline DateTime?
 
   date      DateTime
   time      String
@@ -242,6 +250,7 @@ model GalleryItem {
   imageUrl  String
   tags      String[]
   likesNum  Int        @default(0)
+  isPublic  Boolean    @default(true)
   masterId  String
   master    User       @relation("MasterGallery", fields: [masterId], references: [id])
   likes     Like[]
@@ -275,10 +284,19 @@ model PaymentInfo {
   id         String   @id @default(uuid())
   masterId   String   @unique
   master     User     @relation(fields: [masterId], references: [id])
-  cardNumber String
-  bankName   String
-  fullName   String
+  cardNumber String?
+  bankName   String?
+  fullName   String?
   qrCodeUrl  String?
+
+  // Global settings for Prepayment (PRO only)
+  requirePrepaymentGlobal Boolean @default(false)
+  globalPrepaymentAmount  Int?    // Optional predefined amount
+
+  // LiqPay FOP settings
+  liqpayPublicKey         String?
+  liqpayPrivateKey        String?
+
   updatedAt  DateTime @updatedAt
 }
 
@@ -321,6 +339,7 @@ model PriceList {
   service   String
   price     Int
   duration  Int?
+  imageUrl  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

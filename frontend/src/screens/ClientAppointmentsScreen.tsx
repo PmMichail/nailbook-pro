@@ -19,6 +19,7 @@ export const ClientAppointmentsScreen = () => {
 
   const statusMap: any = {
     'PENDING': 'ОЧІКУЄ ПІДТВЕРДЖЕННЯ',
+    'AWAITING_PREPAYMENT': 'ОЧІКУЄ ПЕРЕДОПЛАТУ',
     'CONFIRMED': 'ПІДТВЕРДЖЕНО',
     'CANCELLED': 'СКАСОВАНО',
     'COMPLETED': 'ВИКОНАНО'
@@ -94,7 +95,7 @@ export const ClientAppointmentsScreen = () => {
               <Text style={[
                   styles.statusBadge, 
                   { backgroundColor: isDark ? '#333' : '#eee', color: colors.textSecondary },
-                  app.status === 'CONFIRMED' && { backgroundColor: isDark ? 'rgba(46, 139, 87, 0.2)' : '#e6ffe6', color: '#2e8b57' },
+                  (app.status === 'CONFIRMED' || app.status === 'AWAITING_PREPAYMENT') && { backgroundColor: isDark ? 'rgba(46, 139, 87, 0.2)' : '#e6ffe6', color: '#2e8b57' },
                   app.status === 'CANCELLED' && { backgroundColor: isDark ? 'rgba(139, 0, 0, 0.2)' : '#ffe6e6', color: '#8b0000' }
               ]}>
                 {statusMap[app.status] || app.status}
@@ -107,13 +108,13 @@ export const ClientAppointmentsScreen = () => {
               </Text>
             )}
             
-            {app.status === 'CONFIRMED' && (
+            {(app.status === 'CONFIRMED' || app.status === 'AWAITING_PREPAYMENT') && (
               <TouchableOpacity style={[styles.cancelBtn, { borderColor: '#2e8b57', borderWidth: 1, backgroundColor: 'transparent', marginBottom: 10 }]} onPress={() => showPaymentInfo(app.id)}>
                 <Text style={[styles.cancelBtnText, {color: '#2e8b57'}]}>Реквізити на Оплату</Text>
               </TouchableOpacity>
             )}
 
-            {(app.status === 'PENDING' || app.status === 'CONFIRMED') && (
+            {(app.status === 'PENDING' || app.status === 'CONFIRMED' || app.status === 'AWAITING_PREPAYMENT') && (
               <TouchableOpacity style={[styles.cancelBtn, { borderColor: '#8b0000', borderWidth: 1, backgroundColor: 'transparent' }]} onPress={() => clearAppointment(app.id)}>
                 <Text style={[styles.cancelBtnText, { color: '#8b0000' }]}>Скасувати запис</Text>
               </TouchableOpacity>
@@ -125,7 +126,15 @@ export const ClientAppointmentsScreen = () => {
       <Modal visible={paymentModalVisible} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1 }]}>
-            <Text style={[styles.modalTitle, { color: colors.text }]}>Реквізити на оплату</Text>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>{paymentDetails?.isPrepayment ? 'Необхідна Передоплата' : 'Реквізити на оплату'}</Text>
+            
+            {paymentDetails?.isPrepayment && (
+              <View style={{backgroundColor: 'rgba(255, 165, 0, 0.2)', padding: 10, borderRadius: 10, marginBottom: 15}}>
+                 <Text style={{color: colors.text, textAlign: 'center', fontWeight: 'bold'}}>Увага!</Text>
+                 <Text style={{color: colors.text, textAlign: 'center', fontSize: 12}}>Сплатіть передоплату та надішліть скріншот майстру в чат.</Text>
+                 <Text style={{color: colors.text, textAlign: 'center', fontSize: 12, marginTop: 5}}>Запис скасується автоматично до: {new Date(paymentDetails.prepaymentDeadline).toLocaleTimeString('uk-UA', {hour: '2-digit', minute:'2-digit'})}</Text>
+              </View>
+            )}
             
             {paymentDetails?.qrCode ? (
                <View style={{alignItems: 'center', marginBottom: 15}}>
