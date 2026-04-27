@@ -142,7 +142,7 @@ export const MasterDashboardScreen = () => {
       if (priceForm.imageUrl && !priceForm.imageUrl.startsWith('http')) {
         const formData = new FormData();
         const ext = priceForm.imageUrl.split('.').pop() || 'jpg';
-        formData.append('image', {
+        formData.append('photo', {
            uri: priceForm.imageUrl,
            name: `price-${Date.now()}.${ext}`,
            type: `image/${ext}`
