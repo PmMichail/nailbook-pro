@@ -116,9 +116,13 @@ export const MasterProfileScreen = ({ navigation }: any) => {
         } as any);
       }
 
-      const res = await api.put('/api/user/profile', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+      const token = await AsyncStorage.getItem('token');
+      const fetchResponse = await fetch(`${api.defaults.baseURL}/api/user/profile`, {
+          method: 'PUT',
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData
       });
+      const res = { data: await fetchResponse.json() };
 
       // Social networks are saved via salon-info route separately or we can just send them together 
       // Wait, /api/master/salon-info is where we put instagram, tiktok, facebook

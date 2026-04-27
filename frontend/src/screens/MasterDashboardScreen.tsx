@@ -147,10 +147,14 @@ export const MasterDashboardScreen = () => {
            name: `price-${Date.now()}.${ext}`,
            type: `image/${ext}`
         } as any);
-        const uploadRes = await api.post('/api/upload', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
+        const token = await AsyncStorage.getItem('token');
+        const uploadResponse = await fetch(`${api.defaults.baseURL}/api/upload`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` },
+            body: formData
         });
-        finalImageUrl = uploadRes.data.url;
+        const uploadRes = await uploadResponse.json();
+        finalImageUrl = uploadRes.url;
       }
 
       if (editPriceId) {

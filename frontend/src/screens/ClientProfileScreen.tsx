@@ -121,9 +121,13 @@ export const ClientProfileScreen = ({ navigation }: any) => {
         } as any);
       }
 
-      const res = await api.put('/api/user/profile', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+      const token = await AsyncStorage.getItem('token');
+      const fetchResponse = await fetch(`${api.defaults.baseURL}/api/user/profile`, {
+          method: 'PUT',
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData
       });
+      const res = { data: await fetchResponse.json() };
       
       await AsyncStorage.setItem('user', JSON.stringify(res.data));
       Alert.alert('Успіх', 'Профіль оновлено');
