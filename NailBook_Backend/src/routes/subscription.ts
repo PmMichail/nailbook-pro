@@ -150,7 +150,7 @@ router.post('/checkout', async (req: any, res) => {
     // We will save the HTML in a temporary cache or just generate it on the fly in a GET request.
     // The best way for React Native WebBrowser is to have a GET endpoint that renders the form.
     // We will return the URL to our new GET endpoint:
-    const paymentUrl = \`\${serverUrl}/api/master/subscription/pay?order=\${orderId}\`;
+    const paymentUrl = `${serverUrl}/api/master/subscription/pay?order=${orderId}`;
 
     res.json({
       paymentUrl,
@@ -168,7 +168,7 @@ router.get('/pay', async (req: any, res) => {
   const { order } = req.query;
   const publicKey = process.env.LIQPAY_PUBLIC_KEY || '';
   const privateKey = process.env.LIQPAY_PRIVATE_KEY || '';
-  const serverUrl = process.env.SERVER_URL || \`\${req.protocol}://\${req.get('host')}\`;
+  const serverUrl = process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`;
 
   let proPrice = 299;
   const config = await prisma.systemConfig.findUnique({ where: { key: 'PRO_PRICE' } });
@@ -184,8 +184,8 @@ router.get('/pay', async (req: any, res) => {
      currency: 'UAH',
      description: 'Підписка PRO на NailsBook',
      order_id: order,
-     server_url: \`\${serverUrl}/api/webhooks/liqpay\`,
-     result_url: \`\${serverUrl}/api/webhooks/liqpay/success\`,
+     server_url: `${serverUrl}/api/webhooks/liqpay`,
+     result_url: `${serverUrl}/api/webhooks/liqpay/success`,
      sandbox: 1
   };
 
@@ -195,7 +195,7 @@ router.get('/pay', async (req: any, res) => {
   const crypto = await import('crypto');
   const signatureString = crypto.createHash('sha1').update(privateKey + dataString + privateKey).digest('base64');
 
-  const formHtml = \`
+  const formHtml = `
     <html>
       <head><title>NailsBook Payment</title></head>
       <body onload="document.forms['liqpay'].submit();" style="display:flex; justify-content:center; align-items:center; height:100vh; font-family: sans-serif;">
@@ -204,12 +204,12 @@ router.get('/pay', async (req: any, res) => {
               <p>Перенаправлення на сторінку безпечної оплати LiqPay...</p>
           </div>
           <form id="liqpay" name="liqpay" action="https://www.liqpay.ua/api/3/checkout" method="POST" style="display:none;">
-              <input type="hidden" name="data" value="\${dataString}" />
-              <input type="hidden" name="signature" value="\${signatureString}" />
+              <input type="hidden" name="data" value="${dataString}" />
+              <input type="hidden" name="signature" value="${signatureString}" />
           </form>
       </body>
     </html>
-  \`;
+  `;
 
   res.send(formHtml);
 });
