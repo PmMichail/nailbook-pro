@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+console.error("\n\n==========================================\nNAILBOOK PRO BACKEND STARTING!\n==========================================\n\n");
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
@@ -49,6 +50,7 @@ app.use('/api/master/statistics', statistics_1.default);
 app.use('/api/master/subscription', subscription_1.default);
 app.use('/api/webhooks', webhooks_1.default);
 app.use('/api/admin', admin_1.default);
+app.get('/api/version', (req, res) => res.json({ version: "V_NEW_999" }));
 const server = (0, http_1.createServer)(app);
 (0, index_1.initSocket)(server);
 const PORT = process.env.PORT || 3000;
