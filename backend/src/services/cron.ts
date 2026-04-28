@@ -77,5 +77,39 @@ export const startCronJobs = () => {
       console.error('Cron error', e);
     }
   });
-  console.log('Cron jobs started (checking reminders every 15 minutes)');
+
+  // Check once a day (e.g., at 10:00 AM) for Trial expirations
+  cron.schedule('0 10 * * *', async () => {
+     try {
+         const now = new Date();
+         const in48hours = new Date(now.getTime() + 48 * 60 * 60 * 1000);
+         const in24hours = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+         
+         const expiringTrials = await prisma.subscription.findMany({
+             where: {
+                 status: 'TRIAL',
+                 trialEndsAt: {
+                     gte: in24hours,
+                     lte: in48hours
+                 }
+                 // We could add a field to track if reminder sent, but running once a day 
+                 // and checking a 24h window (between 24h and 48h from now) ensures it fires exactly once per user.
+             },
+             include: { master: { include: { pushToken: true } } }
+         });
+
+         for (const sub of expiringTrials) {
+             const msg = "Твій пробний період закінчується через 2 дні, не втрать доступ до бази клієнтів!";
+             if (sub.master?.pushToken?.token) {
+                 await sendPushNotification(sub.master.pushToken.token, 'Увага!', msg);
+             } else {
+                 await sendTelegramMessage(sub.masterId, '⚠️ ' + msg);
+             }
+         }
+     } catch(e) {
+         console.error('Trial Reminder Cron error', e);
+     }
+  });
+
+  console.log('Cron jobs started (checking reminders every 15 minutes, trial check daily at 10:00)');
 };

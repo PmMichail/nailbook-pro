@@ -171,6 +171,11 @@ export const RegisterScreen = ({ navigation }: any) => {
         <Text style={styles.primaryButtonText}>{t('register_btn')}</Text>
       </TouchableOpacity>
       
+      <Text style={{textAlign: 'center', fontSize: 11, color: colors.textSecondary, marginBottom: 15}}>
+          Натискаючи кнопку, ви погоджуєтесь з нашою{'\n'}
+          <Text style={{color: colors.primary, textDecorationLine: 'underline'}} onPress={() => navigation.navigate('TermsScreen')}>Публічною Офертою</Text>
+      </Text>
+
       <TouchableOpacity style={styles.secondaryButton} onPress={() => navigation.navigate('Login')}>
         <Text style={styles.secondaryButtonText}>{t('login_btn')}</Text>
       </TouchableOpacity>
