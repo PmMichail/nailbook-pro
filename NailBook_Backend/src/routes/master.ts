@@ -304,6 +304,30 @@ router.put('/appointments/:id/confirm', async (req: any, res) => {
   res.json(app);
 });
 
+// PUT /appointments/:id/confirm-prepayment
+router.put('/appointments/:id/confirm-prepayment', async (req: any, res) => {
+  const app = await prisma.appointment.update({
+    where: { id: req.params.id },
+    data: { status: 'CONFIRMED' },
+    include: { client: { include: { pushToken: true } }, master: true }
+  });
+  sendTelegramMessage(app.clientId, `Оплату авансу підтверджено! Ваш запис на ${app.date.toISOString().split('T')[0]} о ${app.time} ПІДТВЕРДЖЕНО.`);
+  if (app.client?.pushToken?.token) {
+      await sendPushNotification(
+          app.client.pushToken.token,
+          'Запис підтверджено',
+          `Майстер підтвердив отримання передоплати. Запис на ${app.date.toISOString().split('T')[0]} підтверджено.`
+      );
+  }
+  
+  const socketId = getSocketId(app.clientId);
+  if (socketId) {
+     getIo().to(socketId).emit('appointment_updated', app);
+  }
+
+  res.json(app);
+});
+
 // PUT /appointments/:id/cancel
 router.put('/appointments/:id/cancel', async (req: any, res) => {
   const app = await prisma.appointment.update({

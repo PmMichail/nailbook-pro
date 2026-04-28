@@ -238,20 +238,27 @@ export const ClientProfileScreen = ({ navigation }: any) => {
                      {myMaster.salonName && <Text style={{ color: colors.primary, fontSize: 13, marginTop: 1 }}>{myMaster.salonName}</Text>}
                  </View>
              </View>
-             <TouchableOpacity style={{marginTop: 15, alignSelf: 'flex-start'}} onPress={() => {
-                 Alert.alert('Підтвердження', 'Відкріпитись від цього майстра?', [
-                     {text: 'Ні', style: 'cancel'},
-                     {text: 'Так', style: 'destructive', onPress: async () => {
-                         try {
-                             await AsyncStorage.setItem('user', JSON.stringify({ ...JSON.parse(await AsyncStorage.getItem('user') || '{}'), masterId: null }));
-                             setMyMaster(null);
-                             await api.put('/api/client/unlink');
-                         } catch(e) {}
-                     }}
-                 ]);
-             }}>
-                 <Text style={{color: '#8b0000', fontSize: 13, fontWeight: 'bold'}}>Відкріпитись</Text>
-             </TouchableOpacity>
+             <View style={{flexDirection: 'row', justifyContent: 'space-between', marginTop: 15, alignItems: 'center', width: '100%'}}>
+                 <TouchableOpacity onPress={() => {
+                     navigation.navigate('ChatScreen', { roomId: `direct-${myMaster.id}`, otherUser: myMaster });
+                 }}>
+                     <Text style={{color: colors.primary, fontSize: 14, fontWeight: 'bold'}}>💬 Написати</Text>
+                 </TouchableOpacity>
+                 <TouchableOpacity onPress={() => {
+                     Alert.alert('Підтвердження', 'Відкріпитись від цього майстра?', [
+                         {text: 'Ні', style: 'cancel'},
+                         {text: 'Так', style: 'destructive', onPress: async () => {
+                             try {
+                                 await AsyncStorage.setItem('user', JSON.stringify({ ...JSON.parse(await AsyncStorage.getItem('user') || '{}'), masterId: null }));
+                                 setMyMaster(null);
+                                 await api.put('/api/client/unlink');
+                             } catch(e) {}
+                         }}
+                     ]);
+                 }}>
+                     <Text style={{color: '#8b0000', fontSize: 13, fontWeight: 'bold'}}>Відкріпитись</Text>
+                 </TouchableOpacity>
+             </View>
            </View>
         )}
         <TouchableOpacity style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border, marginBottom: 20 }]} onPress={() => navigation.navigate('SearchMastersScreen' as never)}>

@@ -34,9 +34,17 @@ export const MasterClientsScreen = () => {
                         if (item.phone) Linking.openURL(`tel:${item.phone}`);
                     }}>📱 {item.phone || 'Немає номеру'}</Text>
                 </View>
-                {item.isActiveClient === false && (
-                    <Text style={{color: 'red', fontWeight: 'bold', fontSize: 12}}>Відключений</Text>
-                )}
+                <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    {item.isActiveClient === false && (
+                        <Text style={{color: 'red', fontWeight: 'bold', fontSize: 12, marginRight: 10}}>Відключений</Text>
+                    )}
+                    <TouchableOpacity 
+                        style={{backgroundColor: colors.primary, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10}}
+                        onPress={() => navigation.navigate('ChatScreen', { roomId: `direct-${item.id}`, otherUser: item })}
+                    >
+                        <Text style={{color: '#fff', fontWeight: 'bold', fontSize: 12}}>💬 Написати</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
             <View style={styles.historySection}>
                 <Text style={{fontWeight: 'bold', color: colors.text, marginBottom: 5}}>Останні записи:</Text>

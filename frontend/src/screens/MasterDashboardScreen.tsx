@@ -56,6 +56,9 @@ export const MasterDashboardScreen = () => {
   const [payBank, setPayBank] = useState('');
   const [payLink, setPayLink] = useState('');
 
+  const [summaryModalVisible, setSummaryModalVisible] = useState(false);
+  const [selectedSummaryDate, setSelectedSummaryDate] = useState<string>('');
+
   const statusMap: any = {
     'PENDING': 'ОЧІКУЄ ПІДТВЕРДЖЕННЯ',
     'AWAITING_PREPAYMENT': 'ОЧІКУЄ ПЕРЕДОПЛАТУ',
@@ -230,7 +233,7 @@ export const MasterDashboardScreen = () => {
     }
   };
 
-  const updateAppStatus = async (id: string, action: 'confirm' | 'cancel' | 'complete') => {
+  const updateAppStatus = async (id: string, action: 'confirm' | 'cancel' | 'complete' | 'confirm_prepayment') => {
     try {
       if (action === 'cancel') {
          await api.put(`/api/master/appointments/${id}/cancel`);
@@ -238,6 +241,10 @@ export const MasterDashboardScreen = () => {
       } else if (action === 'complete') {
          await api.put(`/api/master/appointments/${id}/complete`);
          Alert.alert('Успіх', 'Запис позначено як виконаний!');
+         fetchAppointments();
+      } else if (action === 'confirm_prepayment') {
+         await api.put(`/api/master/appointments/${id}/confirm-prepayment`);
+         Alert.alert('Успіх', 'Оплату підтверджено!');
          fetchAppointments();
       }
     } catch(e) {}
@@ -311,7 +318,14 @@ export const MasterDashboardScreen = () => {
             <TouchableOpacity 
               key={ix} 
               style={[styles.dayCircle, { width: 45, height: 45, borderRadius: 22.5, borderColor: colors.primary }, activeEditDay === ix + 1 && { backgroundColor: colors.primary }]}
-              onPress={() => setActiveEditDay(ix + 1)}
+              onPress={() => {
+                setActiveEditDay(ix + 1);
+                const d = new Date();
+                const dayIndex = d.getDay() || 7;
+                d.setDate(d.getDate() - dayIndex + (ix + 1));
+                setSelectedSummaryDate(d.toISOString().split('T')[0]);
+                setSummaryModalVisible(true);
+              }}
             >
               <Text style={{ color: activeEditDay === ix + 1 ? (isDark ? '#000' : '#fff') : colors.text, fontSize: 12, fontWeight: 'bold' }}>{day}</Text>
               <Text style={{ color: activeEditDay === ix + 1 ? (isDark ? '#000' : '#fff') : colors.textSecondary, fontSize: 10 }}>{currentWeek[ix]}</Text>
@@ -454,9 +468,19 @@ export const MasterDashboardScreen = () => {
                     </Text>
                 </View>
                 <View style={styles.appActions}>
-                    {(app.status === 'CONFIRMED' || app.status === 'AWAITING_PREPAYMENT') && (
+                    {app.status === 'CONFIRMED' && (
                         <TouchableOpacity style={[styles.actionBtn, {borderColor: colors.primary, borderWidth: 1, backgroundColor: colors.primary}]} onPress={() => updateAppStatus(app.id, 'complete')}>
                             <Text style={[styles.actionIcon, { color: isDark ? '#000' : '#fff' }]}>✓</Text>
+                        </TouchableOpacity>
+                    )}
+                    {app.status === 'AWAITING_PREPAYMENT' && (
+                        <TouchableOpacity style={[styles.actionBtn, {borderColor: '#ff8c00', borderWidth: 1, backgroundColor: isDark ? 'rgba(255, 140, 0, 0.2)' : '#fff8dc'}]} onPress={() => {
+                            Alert.alert('Аванс', 'Підтвердити отримання передоплати?', [
+                                {text: 'Ні', style: 'cancel'},
+                                {text: 'Так', onPress: () => updateAppStatus(app.id, 'confirm_prepayment')}
+                            ]);
+                        }}>
+                            <Text style={[styles.actionIcon, { color: '#ff8c00', fontSize: 14 }]}>💰</Text>
                         </TouchableOpacity>
                     )}
                     {app.status !== 'CANCELLED' && app.status !== 'COMPLETED' && (
@@ -603,6 +627,43 @@ export const MasterDashboardScreen = () => {
             </TouchableOpacity>
 
             <TouchableOpacity style={[styles.btnPrimary, {marginTop: 15, width: '100%', backgroundColor: colors.primary }]} onPress={() => setQrModalVisible(false)}>
+              <Text style={[styles.btnPrimaryText, { color: isDark ? '#000' : '#fff' }]}>Закрити</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Summary Modal */}
+      <Modal visible={summaryModalVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, {backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1, maxHeight: '80%'}]}>
+            <Text style={[styles.modalTitle, {color: colors.text, marginBottom: 10}]}>Деталі за {selectedSummaryDate}</Text>
+            <ScrollView style={{width: '100%'}}>
+              {(() => {
+                 const dayApps = appointments.filter((a: any) => String(a.date).includes(selectedSummaryDate) && a.status !== 'CANCELLED');
+                 const totalClients = dayApps.length;
+                 const totalIncome = dayApps.reduce((acc, a) => acc + (a.finalPrice || a.price || 0), 0);
+                 
+                 if (totalClients === 0) return <Text style={{color: colors.textSecondary, textAlign: 'center', marginVertical: 20}}>Немає записів на цей день</Text>;
+                 
+                 return (
+                    <>
+                       <View style={{flexDirection: 'row', justifyContent: 'space-between', marginBottom: 15, backgroundColor: isDark ? '#333' : '#eee', padding: 10, borderRadius: 10}}>
+                           <Text style={{color: colors.text, fontWeight: 'bold'}}>Клієнтів: {totalClients}</Text>
+                           <Text style={{color: colors.primary, fontWeight: 'bold'}}>До сплати: {totalIncome} грн</Text>
+                       </View>
+                       {dayApps.map(app => (
+                           <View key={app.id} style={{borderBottomWidth: 1, borderBottomColor: colors.border, paddingBottom: 10, marginBottom: 10}}>
+                               <Text style={{color: colors.text, fontWeight: 'bold', fontSize: 16}}>{app.time} - {app.client?.name || 'Без імені'}</Text>
+                               <Text style={{color: colors.textSecondary}} onPress={() => app.client?.phone && Linking.openURL(`tel:${app.client.phone}`)}>📱 {app.client?.phone || 'Немає номеру'}</Text>
+                               <Text style={{color: colors.textSecondary}}>💅 {app.service || 'Не вказано'} ({app.finalPrice || app.price || 0} грн)</Text>
+                           </View>
+                       ))}
+                    </>
+                 );
+              })()}
+            </ScrollView>
+            <TouchableOpacity style={[styles.btnPrimary, {marginTop: 15, width: '100%', backgroundColor: colors.primary }]} onPress={() => setSummaryModalVisible(false)}>
               <Text style={[styles.btnPrimaryText, { color: isDark ? '#000' : '#fff' }]}>Закрити</Text>
             </TouchableOpacity>
           </View>
