@@ -500,10 +500,12 @@ router.put('/prices', async (req: any, res) => {
 
 // DELETE /prices/:id
 router.delete('/prices/:id', async (req: any, res) => {
+  console.error(`[PRICE DELETE] Attempting to delete price id: ${req.params.id}`);
   try {
     await prisma.priceList.delete({ where: { id: req.params.id } });
     res.json({ success: true });
   } catch(e) {
+    console.error(`[PRICE DELETE ERROR]`, e);
     res.status(500).json({ error: 'Failed to delete price' });
   }
 });
