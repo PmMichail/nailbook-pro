@@ -14,7 +14,7 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "buildNumber": "37",
+      "buildNumber": "38",
       "supportsTablet": true,
       "bundleIdentifier": "com.nailbook.pro",
       "infoPlist": {
