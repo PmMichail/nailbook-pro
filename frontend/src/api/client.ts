@@ -1,7 +1,8 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
+// Hardcoding the production URL to guarantee it connects to Render
+const API_URL = 'https://nailbook-pro-backend.onrender.com';
 
 const api = axios.create({
   baseURL: API_URL,
