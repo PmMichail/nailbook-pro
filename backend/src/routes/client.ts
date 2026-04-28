@@ -352,6 +352,14 @@ router.delete('/appointments/:id', async (req: any, res) => {
   res.json({ success: true, app });
 });
 
+// DELETE /appointments/:id/history
+router.delete('/appointments/:id/history', async (req: any, res) => {
+  await prisma.appointment.delete({
+    where: { id: req.params.id }
+  });
+  res.json({ success: true });
+});
+
 // GET /appointments/:id/payment
 router.get('/appointments/:id/payment', async (req: any, res) => {
   const app = await prisma.appointment.findUnique({

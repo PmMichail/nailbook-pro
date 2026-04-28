@@ -66,6 +66,20 @@ export const ClientAppointmentsScreen = () => {
     }
   };
 
+  const deleteFromHistory = (id: string) => {
+    Alert.alert('Підтвердження', 'Видалити цей запис з історії?', [
+       { text: 'Скасувати', style: 'cancel' },
+       { text: 'Видалити', style: 'destructive', onPress: async () => {
+           try {
+             await api.delete(`/api/client/appointments/${id}/history`);
+             fetchAppointments();
+           } catch(e) {
+             Alert.alert('Помилка видалення');
+           }
+       }}
+    ]);
+  };
+
   const showPaymentInfo = async (id: string) => {
     try {
       const res = await api.get(`/api/client/appointments/${id}/payment`);
@@ -117,6 +131,12 @@ export const ClientAppointmentsScreen = () => {
             {(app.status === 'PENDING' || app.status === 'CONFIRMED' || app.status === 'AWAITING_PREPAYMENT') && (
               <TouchableOpacity style={[styles.cancelBtn, { borderColor: '#8b0000', borderWidth: 1, backgroundColor: 'transparent' }]} onPress={() => clearAppointment(app.id)}>
                 <Text style={[styles.cancelBtnText, { color: '#8b0000' }]}>Скасувати запис</Text>
+              </TouchableOpacity>
+            )}
+
+            {(app.status === 'CANCELLED' || app.status === 'COMPLETED') && (
+              <TouchableOpacity style={[styles.cancelBtn, { borderColor: colors.textSecondary, borderWidth: 1, backgroundColor: 'transparent' }]} onPress={() => deleteFromHistory(app.id)}>
+                <Text style={[styles.cancelBtnText, { color: colors.textSecondary }]}>Видалити з історії 🗑️</Text>
               </TouchableOpacity>
             )}
           </View>

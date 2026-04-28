@@ -157,6 +157,22 @@ router.put('/:id/read', async (req: AuthRequest, res) => {
   } catch (error) {
     res.status(500).json({ error: 'Помилка сервера' });
   }
+// Видалити чат
+router.delete('/:id', async (req: AuthRequest, res) => {
+  try {
+    const chatId = req.params.id;
+    // спочатку видаляємо всі повідомлення цього чату
+    await prisma.message.deleteMany({
+      where: { chatId }
+    });
+    // потім сам чат
+    await prisma.chat.delete({
+      where: { id: chatId }
+    });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Помилка сервера' });
+  }
 });
 
 export default router;

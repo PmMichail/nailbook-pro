@@ -23,11 +23,12 @@ export const GlobalHeader = () => {
       if (uStr) {
          const u = JSON.parse(uStr);
          if (u.salonName) setSalonName(u.salonName);
-         if (u.salonLogo) {
-             const formattedLogo = u.salonLogo.startsWith('http') ? u.salonLogo : `${api.defaults.baseURL}/${u.salonLogo}`;
+         if (u.salonLogo || u.avatarUrl) {
+             const logoUrl = u.salonLogo || u.avatarUrl;
+             const formattedLogo = logoUrl.startsWith('http') ? logoUrl : `${api.defaults.baseURL}/${logoUrl}`;
              setSalonLogo(formattedLogo);
          } else if (u.masterId) {
-             // If client, fetch master's info to show
+             // If client without avatar, fetch master's info to show their logo
              const masterRes = await api.get(`/api/client/master/${u.masterId}`);
              if (masterRes.data) {
                 if (masterRes.data.salonName) setSalonName(masterRes.data.salonName);

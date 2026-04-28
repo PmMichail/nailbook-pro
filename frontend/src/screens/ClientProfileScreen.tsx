@@ -228,14 +228,14 @@ export const ClientProfileScreen = ({ navigation }: any) => {
         {myMaster && (
            <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border, marginBottom: 15, paddingVertical: 15 }]}>
              <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                 <View style={{width: 50, height: 50, borderRadius: 25, backgroundColor: '#ddd', marginRight: 15, overflow: 'hidden'}}>
-                     {myMaster.avatarUrl && <Image source={{uri: myMaster.avatarUrl.startsWith('http') ? myMaster.avatarUrl : `${api.defaults.baseURL}/${myMaster.avatarUrl}`}} style={{width: '100%', height: '100%'}} />}
+                 <View style={{width: 60, height: 60, borderRadius: 30, backgroundColor: colors.border, marginRight: 15, overflow: 'hidden'}}>
+                     {(myMaster.salonLogo || myMaster.avatarUrl) && <Image source={{uri: (myMaster.salonLogo || myMaster.avatarUrl).startsWith('http') ? (myMaster.salonLogo || myMaster.avatarUrl) : `${api.defaults.baseURL}/${(myMaster.salonLogo || myMaster.avatarUrl)}`}} style={{width: '100%', height: '100%'}} />}
                  </View>
                  <View style={{flex: 1}}>
-                     <Text style={{ color: colors.textSecondary, fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 2 }}>Поточний майстер</Text>
-                     <Text style={{ color: colors.text, fontFamily: 'serif', fontStyle: 'italic', fontSize: 20 }}>{myMaster.name}</Text>
-                     <Text style={{ color: colors.textSecondary, fontSize: 13, marginTop: 2 }}>{myMaster.phone}</Text>
-                     {myMaster.salonName && <Text style={{ color: colors.primary, fontSize: 13, marginTop: 1 }}>{myMaster.salonName}</Text>}
+                     <Text style={{ color: colors.textSecondary, fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Поточний майстер</Text>
+                     <Text style={{ color: colors.text, fontFamily: 'serif', fontStyle: 'italic', fontSize: 24, fontWeight: 'bold' }}>{myMaster.name}</Text>
+                     {myMaster.salonName && <Text style={{ color: colors.primary, fontSize: 16, marginTop: 4, fontWeight: 'bold' }}>💅 {myMaster.salonName}</Text>}
+                     <Text style={{ color: colors.textSecondary, fontSize: 14, marginTop: 4 }}>{myMaster.phone}</Text>
                  </View>
              </View>
              <View style={{flexDirection: 'row', justifyContent: 'space-between', marginTop: 15, alignItems: 'center', width: '100%'}}>

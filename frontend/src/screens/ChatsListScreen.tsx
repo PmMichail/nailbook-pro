@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, RefreshControl, Alert } from 'react-native';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../context/ThemeContext';
@@ -78,10 +78,25 @@ export const ChatsListScreen = () => {
       setRefreshing(false);
   }, []);
 
+  const deleteChat = async (chatId: string, userName: string) => {
+    Alert.alert('Підтвердження', `Видалити чат з ${userName}?`, [
+      { text: 'Скасувати', style: 'cancel' },
+      { text: 'Видалити', style: 'destructive', onPress: async () => {
+          try {
+              await api.delete(`/api/chats/${chatId}`);
+              setChats(prev => prev.filter(c => c.id !== chatId));
+          } catch(e) {
+              Alert.alert('Помилка', 'Не вдалося видалити чат');
+          }
+      }}
+    ]);
+  };
+
   const renderItem = ({ item }: { item: any }) => (
     <TouchableOpacity 
       style={[styles.chatListItem, { backgroundColor: colors.card, borderColor: colors.border }]} 
       onPress={() => navigation.navigate('ChatScreen', { roomId: item.roomId, receiverName: item.userName })}
+      onLongPress={() => deleteChat(item.id, item.userName)}
     >
       <Image source={{ uri: item.avatar }} style={[styles.avatar, { borderColor: colors.border, borderWidth: 1 }]} />
       
