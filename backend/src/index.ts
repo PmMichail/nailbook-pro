@@ -50,6 +50,7 @@ app.use('/api/master/statistics', statisticsRoutes);
 app.use('/api/master/subscription', subscriptionRoutes);
 app.use('/api/webhooks', webhookRoutes);
 app.use('/api/admin', adminRoutes);
+app.get('/api/version', (req, res) => res.json({ version: "V_NEW_999" }));
 
 const server = createServer(app);
 initSocket(server);

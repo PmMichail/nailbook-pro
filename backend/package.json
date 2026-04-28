@@ -6,8 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsx watch src/index.ts",
-    "build": "rm -rf dist && npx prisma generate",
-    "start": "npx tsx src/index.ts"
+    "build": "rm -rf dist node_modules/.cache && npx prisma generate",
+    "start": "npx tsx --no-cache src/index.ts"
   },
   "keywords": [],
   "author": "",
