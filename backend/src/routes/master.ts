@@ -643,7 +643,7 @@ router.post('/send-bulk-notification', async (req: any, res) => {
 // PUT /salon-info
 router.put('/salon-info', async (req: any, res) => {
   try {
-    const { salonName, salonLogo, lat, lng, instagram, tiktok, facebook } = req.body;
+    const { salonName, salonLogo, lat, lng, instagram, tiktok, facebook, address, city } = req.body;
     const updateData: any = {};
     if (salonName !== undefined) updateData.salonName = salonName;
     if (salonLogo !== undefined) updateData.salonLogo = salonLogo;
@@ -652,6 +652,8 @@ router.put('/salon-info', async (req: any, res) => {
     if (instagram !== undefined) updateData.instagram = instagram;
     if (tiktok !== undefined) updateData.tiktok = tiktok;
     if (facebook !== undefined) updateData.facebook = facebook;
+    if (address !== undefined) updateData.address = address;
+    if (city !== undefined) updateData.city = city;
     
     const updated = await prisma.user.update({
       where: { id: req.user.id },
@@ -663,7 +665,9 @@ router.put('/salon-info', async (req: any, res) => {
       salonLogo: updated.salonLogo,
       instagram: updated.instagram,
       tiktok: updated.tiktok,
-      facebook: updated.facebook
+      facebook: updated.facebook,
+      address: updated.address,
+      city: updated.city
     });
   } catch(e) { res.status(500).json({ error: 'Server error' }); }
 });

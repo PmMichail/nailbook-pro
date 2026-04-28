@@ -205,17 +205,17 @@ export const ClientCalendarScreen = ({ navigation }: any) => {
                         <ImageBackground 
                             source={p.imageUrl ? { uri: p.imageUrl.startsWith('http') ? p.imageUrl : `${api.defaults.baseURL}/${p.imageUrl}` } : require('../../assets/gradient.jpg')} 
                             style={styles.gradientBg}
-                            imageStyle={{ borderRadius: 12, opacity: p.imageUrl ? 0.7 : 0.9 }}
+                            imageStyle={{ borderRadius: 12, opacity: 1.0 }}
                         >
-                        <View style={[styles.serviceContent, { backgroundColor: isDark ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.7)', flex: 1, padding: 20, borderRadius: 12 }]}>
+                        <View style={[styles.serviceContent, { backgroundColor: p.imageUrl ? 'rgba(0,0,0,0.3)' : 'transparent', flex: 1, padding: 20, borderRadius: 12 }]}>
                             <View>
-                                <Text style={[styles.serviceType, { color: colors.primary }]}>ПОСЛУГА</Text>
-                                <Text style={[styles.serviceTitle, { color: colors.text }]}>{p.service}</Text>
+                                <Text style={[styles.serviceType, { color: '#fff', textShadowColor: 'rgba(0,0,0,0.5)', textShadowOffset: {width: 1, height: 1}, textShadowRadius: 2 }]}>ПОСЛУГА</Text>
+                                <Text style={[styles.serviceTitle, { color: '#fff', textShadowColor: 'rgba(0,0,0,0.5)', textShadowOffset: {width: 1, height: 1}, textShadowRadius: 2 }]}>{p.service}</Text>
                             </View>
                             <View style={{alignItems: 'flex-end'}}>
-                                <Text style={[styles.servicePrice, { color: colors.text }]}>{p.price} ₴</Text>
-                                <View style={[styles.addBtn, { borderColor: colors.primary, backgroundColor: isSelected ? colors.primary : 'transparent' }]}>
-                                    <Text style={[styles.addBtnIcon, { color: isSelected ? '#fff' : colors.primary }]}>{isSelected ? '✓' : '+'}</Text>
+                                <Text style={[styles.servicePrice, { color: '#fff', textShadowColor: 'rgba(0,0,0,0.5)', textShadowOffset: {width: 1, height: 1}, textShadowRadius: 2 }]}>{p.price} ₴</Text>
+                                <View style={[styles.addBtn, { borderColor: '#fff', backgroundColor: isSelected ? colors.primary : 'transparent' }]}>
+                                    <Text style={[styles.addBtnIcon, { color: '#fff' }]}>{isSelected ? '✓' : '+'}</Text>
                                 </View>
                             </View>
                         </View>

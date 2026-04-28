@@ -135,7 +135,6 @@ export const AdminTabs = () => {
     }}>
       <Tab.Screen name="Dashboard" component={AdminDashboardScreen} options={{ tabBarLabel: 'Головна', title: '📊' }} />
       <Tab.Screen name="Masters" component={AdminMastersScreen} options={{ tabBarLabel: 'Майстри', title: '👥' }} />
-      <Tab.Screen name="Clients" component={AdminClientsScreen} options={{ tabBarLabel: 'Клієнти', title: '🤝' }} />
     </Tab.Navigator>
   );
 };

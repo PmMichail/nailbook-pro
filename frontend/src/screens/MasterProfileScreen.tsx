@@ -152,6 +152,7 @@ export const MasterProfileScreen = ({ navigation }: any) => {
       }
       const location = await Location.getCurrentPositionAsync({});
       let addressString = '';
+      let cityString = '';
       try {
         const reverseGeocode = await Location.reverseGeocodeAsync({
            latitude: location.coords.latitude,
@@ -159,14 +160,16 @@ export const MasterProfileScreen = ({ navigation }: any) => {
         });
         if (reverseGeocode && reverseGeocode.length > 0) {
            const place = reverseGeocode[0];
-           addressString = `${place.city || ''}, ${place.street || ''} ${place.streetNumber || ''}`.trim();
+           cityString = place.city || place.subregion || place.region || '';
+           addressString = `${cityString ? cityString + ', ' : ''}${place.street || ''} ${place.streetNumber || ''}`.trim();
         }
       } catch(e) { console.log('Reverse geocode error', e); }
 
       await api.put('/api/master/salon-info', {
         lat: location.coords.latitude,
         lng: location.coords.longitude,
-        ...(addressString ? { address: addressString } : {})
+        ...(addressString ? { address: addressString } : {}),
+        ...(cityString ? { city: cityString } : {})
       });
       
       const uStr = await AsyncStorage.getItem('user');

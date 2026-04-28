@@ -5,11 +5,13 @@ import { io, Socket } from 'socket.io-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import api from '../api/client';
+import { useTheme } from '../context/ThemeContext';
+
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
-const CURRENT_USER_ID = '123'; // Має братись з Auth Context
 
 export const ChatScreen = ({ route }: any) => {
   const navigation = useNavigation();
+  const { colors, isDark } = useTheme();
   const { appointmentId, roomId: paramRoomId, receiverName } = route.params || {};
   const roomId = paramRoomId || appointmentId || 'mock-123'; 
   
@@ -105,7 +107,7 @@ export const ChatScreen = ({ route }: any) => {
   };
 
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: '#1E1E1E'}}>
+    <SafeAreaView style={{flex: 1, backgroundColor: colors.background}}>
       <KeyboardAvoidingView 
         style={{flex: 1}} 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -113,17 +115,17 @@ export const ChatScreen = ({ route }: any) => {
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={{flex: 1}}>
-            <View style={styles.header}>
+            <View style={[styles.header, { borderColor: colors.border, backgroundColor: colors.card }]}>
               <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-                <Text style={styles.backText}>◀ Назад</Text>
+                <Text style={{ color: colors.primary, fontSize: 16 }}>◀ Назад</Text>
               </TouchableOpacity>
-              <Text style={styles.headerTitle}>{receiverName || 'Чат'}</Text>
+              <Text style={{ color: colors.text, fontSize: 18, fontWeight: 'bold' }}>{receiverName || 'Чат'}</Text>
               <View style={{width: 50}} />
             </View>
 
             {loading ? (
               <View style={{flex:1, justifyContent:'center', alignItems:'center'}}>
-                  <Text style={{color:'#fff'}}>Завантаження повідомлень...</Text>
+                  <Text style={{color: colors.textSecondary}}>Завантаження повідомлень...</Text>
               </View>
             ) : (
               <>
@@ -131,27 +133,31 @@ export const ChatScreen = ({ route }: any) => {
                   ref={scrollViewRef}
                   contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end', padding: 15 }}
                   onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
-                  style={styles.messagesContainer}
+                  style={{ flex: 1 }}
                 >
             {messages.map((msg, index) => {
               const isMyMsg = msg.senderId === currentUserId;
               return (
                 <View key={msg.id || index} style={[styles.msgWrapper, isMyMsg ? styles.myMsgWrapper : styles.theirMsgWrapper]}>
-                  <View style={[styles.bubble, isMyMsg ? styles.myBubble : styles.theirBubble]}>
+                  <View style={[
+                      styles.bubble, 
+                      isMyMsg ? { backgroundColor: colors.primary, borderBottomRightRadius: 5 } 
+                              : { backgroundColor: isDark ? '#333' : '#F0F0F0', borderBottomLeftRadius: 5 }
+                  ]}>
                     {msg.imageUrl && (
                       <Image source={{ uri: msg.imageUrl }} style={styles.chatImage} />
                     )}
                 {msg.text && (
-                  <Text style={[styles.msgText, isMyMsg ? styles.myMsgText : styles.theirMsgText]}>
+                  <Text style={{ fontSize: 16, color: isMyMsg ? '#fff' : colors.text }}>
                     {msg.text}
                   </Text>
                 )}
                 <View style={styles.msgFooter}>
-                  <Text style={styles.msgTime}>
+                  <Text style={{ fontSize: 10, color: isMyMsg ? 'rgba(255,255,255,0.8)' : colors.textSecondary, marginRight: 5 }}>
                     {new Date(msg.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                   </Text>
                   {isMyMsg && (
-                    <Text style={styles.readStatus}>{msg.isRead ? '✓✓' : '✓'}</Text>
+                    <Text style={{ fontSize: 10, color: 'rgba(255,255,255,0.9)' }}>{msg.isRead ? '✓✓' : '✓'}</Text>
                   )}
                 </View>
               </View>
@@ -160,21 +166,22 @@ export const ChatScreen = ({ route }: any) => {
         })}
       </ScrollView>
 
-      <View style={styles.inputContainer}>
+      <View style={[styles.inputContainer, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <TouchableOpacity style={styles.attachBtn} onPress={pickImage}>
-          <Text style={styles.attachIcon}>📷</Text>
+          <Text style={{ fontSize: 24, color: colors.primary }}>📷</Text>
         </TouchableOpacity>
         
         <TextInput 
-          style={styles.input}
+          style={[styles.input, { backgroundColor: isDark ? '#222' : '#f0f0f0', color: colors.text }]}
           placeholder="Повідомлення..."
+          placeholderTextColor={colors.textSecondary}
           value={inputText}
           onChangeText={setInputText}
           multiline
         />
 
-        <TouchableOpacity style={styles.sendBtn} onPress={handleSend}>
-          <Text style={styles.sendIcon}>⬆️</Text>
+        <TouchableOpacity style={[styles.sendBtn, { backgroundColor: colors.primary }]} onPress={handleSend}>
+          <Text style={{ fontSize: 18, color: '#fff' }}>⬆️</Text>
         </TouchableOpacity>
       </View>
           </>
@@ -187,30 +194,16 @@ export const ChatScreen = ({ route }: any) => {
 };
 
 const styles = StyleSheet.create({
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 15, borderBottomWidth: 1, borderColor: '#333' },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 15, borderBottomWidth: 1 },
   backBtn: { padding: 5 },
-  backText: { color: '#FF69B4', fontSize: 16 },
-  headerTitle: { color: '#FFF', fontSize: 18, fontWeight: 'bold' },
-  container: { flex: 1, backgroundColor: '#1E1E1E' }, 
-  messagesContainer: { flex: 1, padding: 15 },
   msgWrapper: { marginBottom: 15, flexDirection: 'row' },
   myMsgWrapper: { justifyContent: 'flex-end' },
   theirMsgWrapper: { justifyContent: 'flex-start' },
-  bubble: { maxWidth: '80%', padding: 12, borderRadius: 20, shadowColor: '#000', shadowOffset: {width: 0, height: 1}, shadowOpacity: 0.1, shadowRadius: 1, elevation: 1 },
-  myBubble: { backgroundColor: '#FF69B4', borderBottomRightRadius: 5 }, // Рожевий
-  theirBubble: { backgroundColor: '#F0F0F0', borderBottomLeftRadius: 5 }, // Світло-сірий
-  chatImage: { width: 200, height: 200, borderRadius: 10, marginBottom: 5 },
-  msgText: { fontSize: 16 },
-  myMsgText: { color: '#fff' },
-  theirMsgText: { color: '#333' },
+  bubble: { maxWidth: '85%', padding: 12, borderRadius: 20, shadowColor: '#000', shadowOffset: {width: 0, height: 1}, shadowOpacity: 0.1, shadowRadius: 1, elevation: 1 },
+  chatImage: { width: 220, height: 220, borderRadius: 10, marginBottom: 5 },
   msgFooter: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: 5, alignItems: 'center' },
-  msgTime: { fontSize: 10, color: 'rgba(255,255,255,0.7)', marginRight: 5 },
-  readStatus: { fontSize: 10, color: 'rgba(255,255,255,0.9)' },
-  
-  inputContainer: { flexDirection: 'row', alignItems: 'center', padding: 10, backgroundColor: '#fff', borderTopWidth: 1, borderColor: '#eee' },
+  inputContainer: { flexDirection: 'row', alignItems: 'center', padding: 10, borderTopWidth: 1 },
   attachBtn: { padding: 10 },
-  attachIcon: { fontSize: 24 },
-  input: { flex: 1, backgroundColor: '#f9f9f9', borderRadius: 20, paddingHorizontal: 15, paddingTop: 12, paddingBottom: 12, fontSize: 16, maxHeight: 100 },
-  sendBtn: { backgroundColor: '#98FB98', width: 45, height: 45, borderRadius: 22.5, justifyContent: 'center', alignItems: 'center', marginLeft: 10 },
-  sendIcon: { fontSize: 18 }
+  input: { flex: 1, borderRadius: 20, paddingHorizontal: 15, paddingTop: 12, paddingBottom: 12, fontSize: 16, maxHeight: 100 },
+  sendBtn: { width: 45, height: 45, borderRadius: 22.5, justifyContent: 'center', alignItems: 'center', marginLeft: 10 },
 });

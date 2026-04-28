@@ -107,23 +107,40 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
             {activeTab === 'OVERVIEW' && (
                 <ScrollView>
                     <View style={styles.statsContainer}>
-                        <TouchableOpacity style={styles.statCard} onPress={() => navigation.navigate('Masters')}>
-                            <Text style={styles.statVal}>{stats?.totalMasters}</Text>
-                            <Text style={styles.statL}>Майстрів</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.statCard} onPress={() => navigation.navigate('Clients')}>
-                            <Text style={styles.statVal}>{stats?.totalClients}</Text>
-                            <Text style={styles.statL}>Клієнтів</Text>
-                        </TouchableOpacity>
+                        <View style={styles.statCard}>
+                            <Text style={styles.statVal}>{stats?.totalMasters || 0}</Text>
+                            <Text style={styles.statL}>Всього майстрів</Text>
+                        </View>
+                        <View style={styles.statCard}>
+                            <Text style={styles.statVal}>{stats?.totalClients || 0}</Text>
+                            <Text style={styles.statL}>Всього клієнтів</Text>
+                        </View>
                     </View>
                     <View style={styles.statsContainer}>
                         <View style={styles.statCard}>
-                            <Text style={styles.statVal}>{stats?.activePro}</Text>
-                            <Text style={styles.statL}>PRO Підписки</Text>
+                            <Text style={styles.statVal}>{stats?.totalMasters ? (stats.totalClients / stats.totalMasters).toFixed(1) : 0}</Text>
+                            <Text style={styles.statL}>Клієнтів на майстра (сер.)</Text>
                         </View>
+                    </View>
+                    <Text style={styles.subHeader}>Підписки</Text>
+                    <View style={styles.statsContainer}>
+                        <View style={[styles.statCard, { borderColor: '#FFD700', borderWidth: 1 }]}>
+                            <Text style={styles.statVal}>{stats?.activePro || 0}</Text>
+                            <Text style={styles.statL}>PRO Оплачені</Text>
+                        </View>
+                        <View style={[styles.statCard, { borderColor: '#4CAF50', borderWidth: 1 }]}>
+                            <Text style={styles.statVal}>{stats?.activeTrials || 0}</Text>
+                            <Text style={styles.statL}>PRO Тріал (пробні)</Text>
+                        </View>
+                        <View style={[styles.statCard, { borderColor: '#ff0000', borderWidth: 1 }]}>
+                            <Text style={[styles.statVal, {color: '#ff0000'}]}>{stats?.canceledOrExpired || 0}</Text>
+                            <Text style={styles.statL}>Прострочені</Text>
+                        </View>
+                    </View>
+                    <View style={[styles.statsContainer, {marginTop: -5}]}>
                         <View style={styles.statCard}>
-                            <Text style={styles.statVal}>{stats?.revenue} ₴</Text>
-                            <Text style={styles.statL}>Дохід (успішний)</Text>
+                            <Text style={[styles.statVal, {color: 'green'}]}>{stats?.revenue || 0} ₴</Text>
+                            <Text style={styles.statL}>Загальний дохід</Text>
                         </View>
                     </View>
 
