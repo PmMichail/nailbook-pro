@@ -1,3 +1,4 @@
+console.error("\n\n==========================================\nNAILBOOK PRO BACKEND STARTING!\n==========================================\n\n");
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
