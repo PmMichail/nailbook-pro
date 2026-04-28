@@ -34,15 +34,16 @@ const requireClient = (req: any, res: any, next: any) => {
 
 router.use(optionalAuth);
 
-// GET /gallery (all works from all masters for the common feed)
+// GET /gallery (Anonymous Global Feed)
 router.get('/', async (req, res) => {
   const items = await prisma.galleryItem.findMany({
-    orderBy: { createdAt: 'desc' },
-    include: { master: { select: { name: true, linkSlug: true } } }
+    where: { isPublic: true },
+    orderBy: { createdAt: 'desc' }
+    // No include master! It's anonymous.
   });
-  // formatting local urls to absolute, and enforce https for cloudinary
   const formatted = items.map(i => ({
     ...i,
+    master: undefined, // ensure no master data
     imageUrl: i.imageUrl.startsWith('http') 
         ? i.imageUrl.replace(/^http:\/\//i, 'https://')
         : `https://localhost:3000/${i.imageUrl}`
@@ -50,10 +51,10 @@ router.get('/', async (req, res) => {
   res.json(formatted);
 });
 
-// GET /gallery/master/:masterId (specific master's works)
+// GET /gallery/master/:masterId (Private Portfolio for a Master)
 router.get('/master/:masterId', async (req, res) => {
   const items = await prisma.galleryItem.findMany({
-    where: { masterId: req.params.masterId },
+    where: { masterId: req.params.masterId, isPublic: false },
     orderBy: { createdAt: 'desc' }
   });
   const formatted = items.map(i => ({
@@ -65,9 +66,9 @@ router.get('/master/:masterId', async (req, res) => {
   res.json(formatted);
 });
 
-// POST /gallery (add new work - Master only)
+// POST /gallery (add new work)
 router.post('/', requireMaster, uploadCloud.single('image'), async (req: any, res) => {
-  const { tags } = req.body;
+  const { tags, isPublic } = req.body;
   let imageUrl = req.file ? req.file.path.replace(/\\/g, '/') : null;
   if (imageUrl) {
      imageUrl = imageUrl.replace(/^http:\/\//i, 'https://');
@@ -77,22 +78,33 @@ router.post('/', requireMaster, uploadCloud.single('image'), async (req: any, re
   
   const tagsArray = tags ? JSON.parse(tags) : [];
 
-  const newItem = await prisma.galleryItem.create({
-    data: {
-      masterId: req.user.id,
-      imageUrl,
-      tags: tagsArray
+  const sub = await prisma.subscription.findUnique({ where: { masterId: req.user.id } });
+  const isFree = !sub || sub.plan === 'FREE' || ['EXPIRED', 'CANCELLED'].includes(sub.status);
+
+  const wantsToBePublic = isPublic === 'true' || isPublic === true;
+
+  if (wantsToBePublic) {
+    if (isFree) {
+      const publicCount = await prisma.galleryItem.count({ where: { masterId: req.user.id, isPublic: true } });
+      if (publicCount >= 1) return res.status(403).json({ error: 'Ліміт FREE: лише 1 фото в загальну галерею.' });
     }
+  } else {
+    if (isFree) {
+      const privateCount = await prisma.galleryItem.count({ where: { masterId: req.user.id, isPublic: false } });
+      if (privateCount >= 5) return res.status(403).json({ error: 'Ліміт FREE: лише 5 фото в портфоліо.' });
+    }
+  }
+
+  const newItem = await prisma.galleryItem.create({
+    data: { masterId: req.user.id, imageUrl, tags: tagsArray, isPublic: wantsToBePublic }
   });
-  res.status(201).json(newItem);
+  return res.status(201).json(newItem);
 });
 
 // DELETE /gallery/:id (delete work - Master only)
 router.delete('/:id', requireMaster, async (req: any, res) => {
-  // ensure master owns it
   const it = await prisma.galleryItem.findUnique({ where: { id: req.params.id } });
   if (!it || it.masterId !== req.user.id) return res.status(403).json({ error: 'Forbidden' });
-  
   await prisma.galleryItem.delete({ where: { id: req.params.id } });
   res.json({ success: true });
 });

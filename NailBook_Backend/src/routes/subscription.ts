@@ -120,11 +120,17 @@ router.post('/checkout', async (req: any, res) => {
         return res.status(500).json({ error: 'LiqPay не сконфігуровано' });
     }
 
+    let proPrice = 299;
+    const config = await prisma.systemConfig.findUnique({ where: { key: 'PRO_PRICE' } });
+    if (config && config.value) {
+        proPrice = parseInt(config.value, 10);
+    }
+
     const payload = {
        public_key: publicKey,
        version: 3,
        action: 'pay',
-       amount: 299,
+       amount: proPrice,
        currency: 'UAH',
        description: 'Підписка PRO на NailsBook',
        order_id: orderId,

@@ -243,15 +243,27 @@ router.put('/appointments/archive-old', async (req: any, res) => {
 
 // PUT /appointments/:id/confirm
 router.put('/appointments/:id/confirm', async (req: any, res) => {
-  const { price, note } = req.body || {};
+  const { price, note, prepaymentRequired, prepaymentAmount } = req.body || {};
   const masterId = req.user.id;
 
   // Get master payment info
   const paymentInfo = await prisma.paymentInfo.findUnique({ where: { masterId } });
   
-  const updateData: any = { status: 'CONFIRMED' };
+  const isPrepayment = prepaymentRequired && prepaymentAmount > 0;
+  
+  const updateData: any = { 
+     status: isPrepayment ? 'AWAITING_PREPAYMENT' : 'CONFIRMED' 
+  };
+  
   if (price !== undefined) {
     updateData.finalPrice = parseInt(price, 10);
+  }
+  
+  if (isPrepayment) {
+     updateData.prepaymentAmount = parseInt(prepaymentAmount, 10);
+     const deadline = new Date();
+     deadline.setHours(deadline.getHours() + 3);
+     updateData.prepaymentDeadline = deadline;
   }
   
   if (paymentInfo) {
@@ -268,15 +280,18 @@ router.put('/appointments/:id/confirm', async (req: any, res) => {
     include: { client: { include: { pushToken: true } }, master: true }
   });
   
-  let msg = `Ваш запис на ${app.date.toISOString().split('T')[0]} о ${app.time} ПІДТВЕРДЖЕНО.`;
-  if (note) msg += ` Примітка майстра: ${note}`;
+  let msg = isPrepayment 
+      ? `Ваш запис на ${app.date.toISOString().split('T')[0]} о ${app.time} очікує передоплату (${prepaymentAmount} грн) до ${updateData.prepaymentDeadline?.toLocaleTimeString('uk-UA', {hour: '2-digit', minute:'2-digit'})}. Зробіть переказ, інакше він скасується.`
+      : `Ваш запис на ${app.date.toISOString().split('T')[0]} о ${app.time} ПІДТВЕРДЖЕНО.`;
+      
+  if (note && !isPrepayment) msg += ` Примітка майстра: ${note}`;
   
   sendTelegramMessage(app.clientId, msg);
   if (app.client?.pushToken?.token) {
       await sendPushNotification(
           app.client.pushToken.token,
-          'Запис підтверджено',
-          `Майстер ${app.master?.name || ''} підтвердив Ваш запис на ${app.date.toISOString().split('T')[0]} о ${app.time}.`
+          isPrepayment ? 'Очікується передоплата' : 'Запис підтверджено',
+          msg
       );
   }
 
@@ -396,12 +411,27 @@ router.get('/payment-details', async (req: any, res) => {
 // PUT /payment-details
 router.put('/payment-details', async (req: any, res) => {
   const masterId = req.user.id;
-  const { cardNumber, bankName, paymentLink } = req.body;
+  const { 
+     cardNumber, bankName, paymentLink, 
+     requirePrepaymentGlobal, globalPrepaymentAmount,
+     liqpayPublicKey, liqpayPrivateKey
+  } = req.body;
+  
+  const updateObj = { 
+     cardNumber, 
+     bankName, 
+     fullName: '', 
+     qrCodeUrl: paymentLink,
+     requirePrepaymentGlobal: Boolean(requirePrepaymentGlobal),
+     globalPrepaymentAmount: globalPrepaymentAmount ? parseInt(globalPrepaymentAmount, 10) : null,
+     liqpayPublicKey,
+     liqpayPrivateKey
+  };
   
   const p = await prisma.paymentInfo.upsert({
     where: { masterId },
-    update: { cardNumber, bankName, fullName: '', qrCodeUrl: paymentLink },
-    create: { masterId, cardNumber, bankName, fullName: '', qrCodeUrl: paymentLink }
+    update: updateObj,
+    create: { masterId, ...updateObj }
   });
   
   res.json({ success: true, info: p });
@@ -440,21 +470,44 @@ router.get('/prices', async (req: any, res) => {
 
 // POST /prices
 router.post('/prices', async (req: any, res) => {
-  const { service, price, duration } = req.body;
+  const { service, price, duration, imageUrl } = req.body;
+  
+  const sub = await prisma.subscription.findUnique({ where: { masterId: req.user.id } });
+  const isFree = !sub || sub.plan === 'FREE' || ['EXPIRED', 'CANCELLED'].includes(sub.status);
+  
+  if (isFree) {
+    const pricesCount = await prisma.priceList.count({ where: { masterId: req.user.id } });
+    if (pricesCount >= 1) {
+      return res.status(403).json({ error: 'Ліміт тарифу FREE: лише 1 послуга. Оновіть до PRO.' });
+    }
+  }
+
   const p = await prisma.priceList.create({
-    data: { masterId: req.user.id, service, price, duration }
+    data: { masterId: req.user.id, service, price, duration, imageUrl }
   });
   res.json(p);
 });
 
 // PUT /prices
 router.put('/prices', async (req: any, res) => {
-  const { id, service, price, duration } = req.body;
+  const { id, service, price, duration, imageUrl } = req.body;
   const p = await prisma.priceList.update({
     where: { id },
-    data: { service, price, duration }
+    data: { service, price, duration, imageUrl }
   });
   res.json(p);
+});
+
+// DELETE /prices/:id
+router.delete('/prices/:id', async (req: any, res) => {
+  console.error(`[PRICE DELETE] Attempting to delete price id: ${req.params.id}`);
+  try {
+    await prisma.priceList.delete({ where: { id: req.params.id } });
+    res.json({ success: true });
+  } catch(e) {
+    console.error(`[PRICE DELETE ERROR]`, e);
+    res.status(500).json({ error: 'Failed to delete price' });
+  }
 });
 
 // ==================== CLIENT BOOK ====================
@@ -566,20 +619,28 @@ router.post('/send-bulk-notification', async (req: any, res) => {
 // PUT /salon-info
 router.put('/salon-info', async (req: any, res) => {
   try {
-    const { salonName, salonLogo, lat, lng } = req.body;
+    const { salonName, salonLogo, lat, lng, instagram, tiktok, facebook } = req.body;
     const updateData: any = {};
     if (salonName !== undefined) updateData.salonName = salonName;
     if (salonLogo !== undefined) updateData.salonLogo = salonLogo;
     if (lat !== undefined) updateData.lat = parseFloat(lat);
     if (lng !== undefined) updateData.lng = parseFloat(lng);
+    if (instagram !== undefined) updateData.instagram = instagram;
+    if (tiktok !== undefined) updateData.tiktok = tiktok;
+    if (facebook !== undefined) updateData.facebook = facebook;
     
     const updated = await prisma.user.update({
       where: { id: req.user.id },
       data: updateData
     });
 
-    
-    res.json({ salonName: updated.salonName, salonLogo: updated.salonLogo });
+    res.json({ 
+      salonName: updated.salonName, 
+      salonLogo: updated.salonLogo,
+      instagram: updated.instagram,
+      tiktok: updated.tiktok,
+      facebook: updated.facebook
+    });
   } catch(e) { res.status(500).json({ error: 'Server error' }); }
 });
 

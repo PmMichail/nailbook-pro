@@ -35,13 +35,18 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Phone already registered' });
     }
 
+    // Since the frontend might send referral code as inviteCode, we support both
+    const effectiveReferralCode = referralCode || inviteCode;
+    
     // Referral Code Validation
     let validReferralCodeObj = null;
-    if (role !== 'MASTER' && referralCode) {
+    if (role !== 'MASTER' && effectiveReferralCode) {
       validReferralCodeObj = await prisma.referralCode.findUnique({
-        where: { code: referralCode }
+        where: { code: effectiveReferralCode }
       });
-      if (!validReferralCodeObj) {
+      // If it explicitly was sent as referralCode but is invalid, we return error.
+      // If it was sent as inviteCode, we don't throw yet, as it might be a valid master slug.
+      if (!validReferralCodeObj && referralCode) {
         return res.status(400).json({ error: 'Недійсний реферальний код.' });
       }
     }
@@ -93,14 +98,14 @@ router.post('/register', async (req, res) => {
                  return res.status(403).json({ error: 'Ваш майстер досягнув ліміту клієнтів. Зв\'яжіться з ним безпосередньо.' });
              }
          }
-       } else {
-         return res.status(400).json({ error: 'Майстра за таким кодом не знайдено' });
+       } else if (!validReferralCodeObj) {
+         return res.status(400).json({ error: 'Майстра або реферального коду не знайдено' });
        }
     }
 
-        // Apply Referral Record
+    // Apply Referral Record
     if (validReferralCodeObj && !resolvedMasterId) {
-      const owner = await prisma.user.findUnique({ where: { id: validReferralCodeObj.ownerId } });
+      const owner = await prisma.user.findUnique({ where: { id: validReferralCodeObj.clientId } });
       if (owner && owner.masterId) {
           resolvedMasterId = owner.masterId;
       }
@@ -117,7 +122,6 @@ router.post('/register', async (req, res) => {
         address,
         isActiveClient: userRole === 'CLIENT' ? true : false,
         linkSlug,
-        defaultDuration: userRole === 'MASTER' ? 120 : null,
         masterId: resolvedMasterId
       },
     });
@@ -177,6 +181,10 @@ router.post('/login', async (req, res) => {
 
     if (!user) {
       return res.status(400).json({ error: 'Користувача не знайдено' });
+    }
+
+    if (user.isBanned) {
+      return res.status(403).json({ error: 'Ваш акаунт тимчасово заблоковано Адміністратором.' });
     }
 
     // Auto-promote to ADMIN

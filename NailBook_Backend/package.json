@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsx watch src/index.ts"
+    "dev": "tsx watch src/index.ts",
+    "build": "rm -rf dist node_modules/.cache && npx prisma generate",
+    "start": "npx tsx --no-cache src/index.ts"
   },
   "keywords": [],
   "author": "",

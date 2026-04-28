@@ -52,6 +52,33 @@ const authClient = (req: any, res: any, next: any) => {
 
 router.use(authClient);
 
+// GET /master/:id
+router.get('/master/:id', async (req: any, res) => {
+  try {
+     const master = await prisma.user.findUnique({
+       where: { id: req.params.id },
+       select: { id: true, name: true, phone: true, avatarUrl: true, salonName: true }
+     });
+     if (!master) return res.status(404).json({ error: 'Not found' });
+     res.json(master);
+  } catch(e) {
+     res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// PUT /unlink
+router.put('/unlink', async (req: any, res) => {
+  try {
+     await prisma.user.update({
+         where: { id: req.user.id },
+         data: { masterId: null }
+     });
+     res.json({ success: true });
+  } catch(e) {
+     res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // GET /masters/search?city=xxx&lat=yyy&lng=zzz
 router.get('/masters/search', async (req: any, res) => {
   const { city, lat, lng } = req.query;
@@ -86,7 +113,7 @@ router.get('/masters/search', async (req: any, res) => {
            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
            const distance = R * c;
            
-           return distance <= 20; // Within 20km
+           return distance <= 10; // Within 10km
         });
      }
      
@@ -110,13 +137,28 @@ router.post('/masters/connect', async (req: any, res) => {
       if (new Date() > connectionCode.expiresAt) {
          return res.status(400).json({ error: 'Термін дії коду минув' });
       }
+
+      const masterId = connectionCode.userId;
+      
+      const sub = await prisma.subscription.findUnique({ where: { masterId } });
+      const isFree = !sub || sub.plan === 'FREE' || ['EXPIRED', 'CANCELLED'].includes(sub.status);
+      
+      if (isFree) {
+        const clientCount = await prisma.user.count({ where: { masterId, role: 'CLIENT', isActiveClient: true } });
+        if (clientCount >= 10) {
+           // Wait, what if the client is already connected to this master? We shouldn't block them.
+           if (req.user.masterId !== masterId) {
+             return res.status(403).json({ error: 'Майстер тимчасово не приймає нових клієнтів (ліміт бази).' });
+           }
+        }
+      }
       
       await prisma.user.update({
          where: { id: req.user.id },
-         data: { masterId: connectionCode.userId, isActiveClient: true }
+         data: { masterId, isActiveClient: true }
       });
       
-      res.json({ success: true, masterId: connectionCode.userId });
+      res.json({ success: true, masterId });
    } catch(e) {
       res.status(500).json({ error: 'Помилка підключення' });
    }
@@ -202,8 +244,8 @@ router.post('/appointments', async (req: any, res) => {
   let appliedDiscountReason = '';
 
   // 1. Check if New Client First Booking Discount
-  const previousAppointments = await prisma.appointment.count({ where: { clientId: req.user.id } });
-  if (previousAppointments === 0) {
+  const previousCompleted = await prisma.appointment.count({ where: { clientId: req.user.id, status: 'COMPLETED' } });
+  if (previousCompleted === 0) {
      const referredAsNew = await prisma.referralUse.findFirst({
         where: { referredClientId: req.user.id }
      });
@@ -218,9 +260,14 @@ router.post('/appointments', async (req: any, res) => {
      // User's own code
      const myCode = await prisma.referralCode.findUnique({ where: { clientId: req.user.id } });
      if (myCode) {
-        const unusedBonus = await prisma.referralUse.findFirst({
-           where: { code: myCode.code, isCodeOwnerDiscountUsed: false }
+        // Find a referral that hasn't been used yet AND where the referred client has at least 1 COMPLETED appointment
+        const possibleBonuses = await prisma.referralUse.findMany({
+           where: { code: myCode.code, isCodeOwnerDiscountUsed: false },
+           include: { referredClient: { include: { myAppointments: { where: { status: 'COMPLETED' } } } } }
         });
+        
+        const unusedBonus = possibleBonuses.find((b: any) => b.referredClient?.myAppointments?.length > 0);
+        
         if (unusedBonus) {
            finalPrice = Math.floor(price * 0.9);
            appliedDiscountReason = 'Реферальний бонус 10% за друга';
@@ -317,7 +364,11 @@ router.get('/appointments/:id/payment', async (req: any, res) => {
   }
 
   const pDetails: any = app.paymentDetails;
-  const amount = app.finalPrice || app.originalPrice || app.price || 0;
+  let amount = app.finalPrice || app.originalPrice || app.price || 0;
+  
+  if (app.status === 'AWAITING_PREPAYMENT') {
+     amount = app.prepaymentAmount || amount;
+  }
   
   const paymentData = {
     cardNumber: pDetails.cardNumber,
@@ -336,7 +387,9 @@ router.get('/appointments/:id/payment', async (req: any, res) => {
     paymentLink: pDetails.qrCode,
     cardNumber: pDetails.cardNumber,
     bankName: pDetails.bankName,
-    amount
+    amount,
+    prepaymentDeadline: app.prepaymentDeadline,
+    isPrepayment: app.status === 'AWAITING_PREPAYMENT'
   });
 });
 
@@ -375,25 +428,25 @@ router.get('/referral-stats', async (req: any, res) => {
       return res.json({ uses: 0, pendingBonuses: 0, totalDiscountApplied: 0 });
     }
     
-    // Calculate how many of the referred clients actually created an appointment??
-    // Actually simplicity: each ReferralUse where isCodeOwnerDiscountUsed = false means 1 available bonus (10% discount).
-    
-    // Find people the current user referred
-    const uses = await prisma.referralUse.findMany({
-      where: { code: rc.code }
+    // Calculate how many of the referred clients actually completed an appointment
+    const allUses = await prisma.referralUse.findMany({
+      where: { code: rc.code },
+      include: { referredClient: { include: { myAppointments: { where: { status: 'COMPLETED' } } } } }
     });
     
-    const pendingBonuses = uses.filter((u: any) => !u.isCodeOwnerDiscountUsed).length;
+    // Only count uses that have at least 1 completed appointment
+    const validUses = allUses.filter((u: any) => u.referredClient?.myAppointments?.length > 0);
+    
+    const pendingBonuses = validUses.filter((u: any) => !u.isCodeOwnerDiscountUsed).length;
+    const totalDiscountApplied = validUses.filter((u: any) => u.isCodeOwnerDiscountUsed).length * 10;
     
     res.json({
-      code: rc.code,
-      uses: uses.length,
+      uses: validUses.length, // Number of successfully processed friends
       pendingBonuses,
-      usesDetails: uses
+      totalDiscountApplied
     });
-
-  } catch(e) {
-    console.error(e);
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Server error' });
   }
 });
