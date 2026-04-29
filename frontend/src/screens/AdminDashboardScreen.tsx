@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
     logoutBtn: { backgroundColor: '#ffebe6', padding: 10, borderRadius: 10 },
     logoutTxt: { color: 'red', fontWeight: 'bold' },
     
-    tabContainer: { flexDirection: 'row', backgroundColor: '#e2e8f0', pading: 5, borderRadius: 10, marginBottom: 20 },
+    tabContainer: { flexDirection: 'row', backgroundColor: '#e2e8f0', padding: 5, borderRadius: 10, marginBottom: 20 },
     tab: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: 8 },
     activeTab: { backgroundColor: '#fff', shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 3, elevation: 2 },
     tabText: { color: '#64748b', fontWeight: '600' },

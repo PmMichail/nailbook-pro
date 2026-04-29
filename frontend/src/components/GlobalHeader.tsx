@@ -44,7 +44,7 @@ export const GlobalHeader = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background, borderBottomColor: colors.border }]}>
-       <TouchableOpacity style={{marginRight: 15}} onPress={() => navigation.openDrawer && navigation.openDrawer()}>
+       <TouchableOpacity style={{marginRight: 15}} onPress={() => (navigation as any).openDrawer && (navigation as any).openDrawer()}>
           <Text style={{fontSize: 24, color: colors.textSecondary}}>≡</Text>
        </TouchableOpacity>
        

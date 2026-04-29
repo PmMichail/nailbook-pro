@@ -123,7 +123,5 @@ const styles = StyleSheet.create({
   label: { fontSize: 14, marginBottom: 5 },
   input: { borderWidth: 1, borderRadius: 10, padding: 10, marginBottom: 15, fontSize: 16 },
   btnPrimary: { borderRadius: 20, padding: 15, alignItems: 'center' },
-  btnPrimaryText: { fontWeight: 'bold', fontSize: 16 },
-  btnPrimary: { borderRadius: 20, padding: 15, alignItems: 'center' },
   btnPrimaryText: { fontWeight: 'bold', fontSize: 16 }
 });

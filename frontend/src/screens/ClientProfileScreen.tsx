@@ -15,6 +15,7 @@ export const ClientProfileScreen = ({ navigation }: any) => {
   const [phone, setPhone] = useState('');
   const [avatar, setAvatar] = useState<string | null>(null);
   const [myMaster, setMyMaster] = useState<any>(null);
+  const [userId, setUserId] = useState<string>('');
 
   const [referralCode, setReferralCode] = useState('');
   const [referralUses, setReferralUses] = useState(0);
@@ -35,6 +36,7 @@ export const ClientProfileScreen = ({ navigation }: any) => {
       const uStr = await AsyncStorage.getItem('user');
       if (uStr) {
         const u = JSON.parse(uStr);
+        setUserId(u.id || '');
         setName(u.name || '');
         setPhone(u.phone || '');
         if (u.avatarUrl) {
@@ -153,6 +155,14 @@ export const ClientProfileScreen = ({ navigation }: any) => {
           } catch(e) { Alert.alert('Помилка', 'Не вдалося видалити'); }
       }}
     ]);
+  };
+
+  const handleContactMaster = () => {
+     if (myMaster) {
+         const sortedIds = [myMaster.id, userId].sort();
+         const roomId = sortedIds.join('_');
+         navigation.navigate('ChatsListNav', { screen: 'ChatScreen', params: { roomId, otherUser: myMaster } });
+     }
   };
 
   return (
