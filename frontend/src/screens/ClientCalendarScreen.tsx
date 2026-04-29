@@ -207,7 +207,7 @@ export const ClientCalendarScreen = ({ navigation }: any) => {
                             style={styles.gradientBg}
                             imageStyle={{ borderRadius: 12, opacity: 1.0 }}
                         >
-                        <View style={[styles.serviceContent, { backgroundColor: p.imageUrl ? 'rgba(0,0,0,0.3)' : 'transparent', flex: 1, padding: 20, borderRadius: 12 }]}>
+                        <View style={[styles.serviceContent, { backgroundColor: p.imageUrl ? 'rgba(0,0,0,0.1)' : 'transparent', flex: 1, padding: 20, borderRadius: 12 }]}>
                             <View>
                                 <Text style={[styles.serviceType, { color: '#fff', textShadowColor: 'rgba(0,0,0,0.5)', textShadowOffset: {width: 1, height: 1}, textShadowRadius: 2 }]}>ПОСЛУГА</Text>
                                 <Text style={[styles.serviceTitle, { color: '#fff', textShadowColor: 'rgba(0,0,0,0.5)', textShadowOffset: {width: 1, height: 1}, textShadowRadius: 2 }]}>{p.service}</Text>

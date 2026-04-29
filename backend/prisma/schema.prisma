@@ -90,6 +90,7 @@ model User {
 
   // Client Management Flag
   isActiveClient Boolean @default(true)
+  totalClientsRegistered Int @default(0)
 
   // Payments
   payments      Payment[] @relation("MasterPayments")

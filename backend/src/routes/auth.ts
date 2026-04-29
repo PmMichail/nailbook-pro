@@ -82,20 +82,8 @@ router.post('/register', async (req, res) => {
          const sub = await prisma.subscription.findUnique({ where: { masterId: master.id } });
          // Automatically consider PRO if no sub record exists yet or if it's active PRO/TRIAL
          if (sub && (sub.plan === 'FREE' || ['EXPIRED', 'CANCELLED'].includes(sub.status))) {
-             const thirtyDaysAgo = new Date();
-             thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-             const clientCount = await prisma.user.count({ 
-                 where: { 
-                     masterId: master.id, 
-                     role: 'CLIENT',
-                     OR: [
-                         { isActiveClient: true },
-                         { myAppointments: { some: { date: { gte: thirtyDaysAgo } } } }
-                     ]
-                 } 
-             });
-             if (clientCount >= 10) {
-                 return res.status(403).json({ error: 'Ваш майстер досягнув ліміту клієнтів. Зв\'яжіться з ним безпосередньо.' });
+             if (master.totalClientsRegistered >= 10) {
+                 return res.status(403).json({ error: 'Ваш майстер досягнув ліміту реєстрацій клієнтів (10). Зв\'яжіться з ним.' });
              }
          }
        } else if (!validReferralCodeObj) {
@@ -125,6 +113,14 @@ router.post('/register', async (req, res) => {
         masterId: resolvedMasterId
       },
     });
+
+    // Increment total clients for Master if applicable
+    if (userRole === 'CLIENT' && resolvedMasterId) {
+      await prisma.user.update({
+        where: { id: resolvedMasterId },
+        data: { totalClientsRegistered: { increment: 1 } }
+      });
+    }
 
     if (validReferralCodeObj) {
       await prisma.referralUse.create({

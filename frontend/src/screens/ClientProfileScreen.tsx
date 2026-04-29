@@ -239,9 +239,7 @@ export const ClientProfileScreen = ({ navigation }: any) => {
                  </View>
              </View>
              <View style={{flexDirection: 'row', justifyContent: 'space-between', marginTop: 15, alignItems: 'center', width: '100%'}}>
-                 <TouchableOpacity onPress={() => {
-                     navigation.navigate('ChatScreen', { roomId: `direct-${myMaster.id}`, otherUser: myMaster });
-                 }}>
+                 <TouchableOpacity onPress={handleContactMaster}>
                      <Text style={{color: colors.primary, fontSize: 14, fontWeight: 'bold'}}>💬 Написати</Text>
                  </TouchableOpacity>
                  <TouchableOpacity onPress={() => {

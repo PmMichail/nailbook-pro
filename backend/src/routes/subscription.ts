@@ -112,8 +112,8 @@ router.post('/checkout', async (req: any, res) => {
     const orderId = `sub_${masterId}_${Date.now()}`;
     
     // Fallback constants
-    const publicKey = process.env.LIQPAY_PUBLIC_KEY || '';
-    const privateKey = process.env.LIQPAY_PRIVATE_KEY || '';
+    const publicKey = process.env.LIQPAY_PUBLIC_KEY || 'i89524650072';
+    const privateKey = process.env.LIQPAY_PRIVATE_KEY || 'fc6PWMwymjvXs6RNIGTTyuMsuY7zv1XWWMEsxVHP';
     const serverUrl = process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`;
 
     if (!publicKey || !privateKey) {
@@ -166,8 +166,8 @@ router.post('/checkout', async (req: any, res) => {
 // Endpoint to serve the HTML form to the WebBrowser
 router.get('/pay', async (req: any, res) => {
   const { order } = req.query;
-  const publicKey = process.env.LIQPAY_PUBLIC_KEY || '';
-  const privateKey = process.env.LIQPAY_PRIVATE_KEY || '';
+  const publicKey = process.env.LIQPAY_PUBLIC_KEY || 'i89524650072';
+  const privateKey = process.env.LIQPAY_PRIVATE_KEY || 'fc6PWMwymjvXs6RNIGTTyuMsuY7zv1XWWMEsxVHP';
   const serverUrl = process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`;
 
   let proPrice = 299;

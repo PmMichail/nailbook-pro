@@ -52,6 +52,7 @@ export const MasterProfileScreen = ({ navigation }: any) => {
         }
         if (u.salonLogo) {
           const formattedLogo = u.salonLogo.startsWith('http') ? u.salonLogo : `${api.defaults.baseURL}/${u.salonLogo}`;
+          setSalonLogo(formattedLogo);
         }
       }
       

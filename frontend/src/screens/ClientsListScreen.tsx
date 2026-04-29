@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, Share, TextI
 import api from '../api/client';
 import Checkbox from 'expo-checkbox';
 import { useTheme } from '../context/ThemeContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 
 export const ClientsListScreen = () => {
   const { colors, isDark } = useTheme();
@@ -20,9 +22,15 @@ export const ClientsListScreen = () => {
   const [editName, setEditName] = useState('');
   const [editPhone, setEditPhone] = useState('');
   const [editNotes, setEditNotes] = useState('');
+  
+  const [currentUserId, setCurrentUserId] = useState('');
+  const navigation = useNavigation<any>();
 
   useEffect(() => {
     loadClients();
+    AsyncStorage.getItem('user').then(u => {
+        if(u) setCurrentUserId(JSON.parse(u).id);
+    });
   }, []);
 
   const loadClients = async () => {
@@ -110,6 +118,13 @@ export const ClientsListScreen = () => {
           }
       }}
     ]);
+  };
+
+  const handleChat = () => {
+      const sortedIds = [currentUserId, selectedClient.id].sort();
+      const roomId = sortedIds.join('_');
+      setSelectedClient(null);
+      navigation.navigate('ChatsListNav', { screen: 'ChatScreen', params: { roomId, otherUser: selectedClient } });
   };
 
   const filteredClients = clients.filter(c => 
@@ -226,6 +241,9 @@ export const ClientsListScreen = () => {
                <View style={styles.modalActions}>
                   <TouchableOpacity style={styles.cancelBtn} onPress={() => setSelectedClient(null)}>
                      <Text style={{color: colors.textSecondary}}>Закрити</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.saveBtn, {backgroundColor: '#FFB6C1', marginRight: 10}]} onPress={handleChat}>
+                     <Text style={{color: '#000', fontWeight: 'bold'}}>💬 Написати</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={[styles.saveBtn, {backgroundColor: '#FF3B30', marginRight: 10}]} onPress={handleDeleteClient}>
                      <Text style={{color: '#fff', fontWeight: 'bold'}}>Видалити</Text>

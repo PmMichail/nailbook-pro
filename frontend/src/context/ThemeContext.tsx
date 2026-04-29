@@ -4,10 +4,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export const lightTheme = {
   background: '#FAF9F6', 
   card: '#ffffff',
-  text: '#2C2A29', 
-  textSecondary: '#8B8682', 
-  primary: '#e0c0b4', 
-  border: '#E8E6E1'
+  text: '#1C1A19', 
+  textSecondary: '#6B6662', 
+  primary: '#C88D7A', 
+  border: '#D8D4CE'
 };
 
 export const darkTheme = {
