@@ -50,7 +50,7 @@ app.use('/api/notifications', notificationsRoutes);
 app.use('/api/calendar', calendarRoutes);
 app.use('/api/webhooks', webhookRoutes);
 app.use('/api/admin', adminRoutes);
-app.get('/api/version', (req, res) => res.json({ version: "V_NEW_999" }));
+app.get('/api/version', (req, res) => res.json({ version: "V_NEW_999_TEST_2" }));
 
 const server = createServer(app);
 initSocket(server);
