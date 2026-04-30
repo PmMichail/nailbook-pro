@@ -6,7 +6,7 @@ import Purchases from 'react-native-purchases';
 
 // Keys provided by user
 const API_KEY_IOS = "test_ZmSbPrLAaDuIfvjPTGCwtDCXMFR";
-const API_KEY_ANDROID = "goog_dummy_key_here";
+const API_KEY_ANDROID = "goog_zwzVaWsrqGBNEpPxFoHxsUUBFdu";
 
 export const SubscriptionScreen = ({ navigation }: any) => {
   const { t } = useTranslation();
