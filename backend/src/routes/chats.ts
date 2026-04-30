@@ -42,7 +42,7 @@ router.get('/', async (req: AuthRequest, res) => {
 
       if (chat.roomId && chat.roomId.includes('_')) {
          const ids = chat.roomId.split('_');
-         const otherId = ids.find(id => id !== req.user!.id);
+         const otherId = ids.find(id => id !== req.user!.id && id !== 'direct');
          console.error(`[CHATS PROD LOG] Split '_' extracted otherId: ${otherId}`);
          if (otherId) {
             otherUser = await prisma.user.findUnique({

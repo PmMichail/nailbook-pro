@@ -6,6 +6,7 @@ import { RegisterScreen } from './src/screens/RegisterScreen';
 import { TermsScreen } from './src/screens/TermsScreen';
 import { MasterTabs, ClientTabs, AdminTabs } from './src/navigation/Navigator';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
+import './src/i18n';
 import { UnreadProvider } from './src/context/UnreadContext';
 import { DefaultTheme, DarkTheme as NavDarkTheme } from '@react-navigation/native';
 import './src/i18n';
