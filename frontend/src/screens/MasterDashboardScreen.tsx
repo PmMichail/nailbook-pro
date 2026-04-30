@@ -7,6 +7,16 @@ import * as Clipboard from 'expo-clipboard';
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Calendar, LocaleConfig } from 'react-native-calendars';
+
+LocaleConfig.locales['uk'] = {
+  monthNames: ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'],
+  monthNamesShort: ['Січ','Лют','Бер','Кві','Тра','Чер','Лип','Сер','Вер','Жов','Лис','Гру'],
+  dayNames: ['Неділя','Понеділок','Вівторок','Середа','Четвер','П\'ятниця','Субота'],
+  dayNamesShort: ['Нд','Пн','Вк','Ср','Чт','Пт','Сб'],
+  today: 'Сьогодні'
+};
+LocaleConfig.defaultLocale = 'uk';
 
 const DAYS = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'НД'];
 
@@ -27,12 +37,13 @@ export const MasterDashboardScreen = () => {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedCalendarDay, setSelectedCalendarDay] = useState(new Date().toISOString().split('T')[0]);
+  const [isAppointmentsExpanded, setIsAppointmentsExpanded] = useState(true);
   
   // Weekly Settings State
   const [weeklySettings, setWeeklySettings] = useState<any[]>(
     Array.from({length: 7}, (_, i) => ({ dayOfWeek: i+1, workStart: '09:00', workEnd: '18:00', timePerClient: 120, breakStart: '', breakEnd: '', isWorking: i+1 < 6 }))
   );
-  const [activeEditDay, setActiveEditDay] = useState(1); // 1-7
+  const [activeEditDay, setActiveEditDay] = useState(new Date().getDay() || 7); // 1-7
   
   const [slots, setSlots] = useState<any[]>([]);
   const [appointments, setAppointments] = useState<any[]>([]);
@@ -382,11 +393,37 @@ export const MasterDashboardScreen = () => {
 
       {/* Slots Grid */}
       <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-        <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15}}>
-          <TouchableOpacity onPress={() => changeDay(-1)} style={{padding: 5}}><Text style={{fontSize: 20, color: colors.primary}}>◀</Text></TouchableOpacity>
-          <Text style={[styles.cardTitle, { color: colors.primary, marginBottom: 0 }]}>{selectedCalendarDay}</Text>
-          <TouchableOpacity onPress={() => changeDay(1)} style={{padding: 5}}><Text style={{fontSize: 20, color: colors.primary}}>▶</Text></TouchableOpacity>
-        </View>
+        <Calendar
+          current={selectedCalendarDay}
+          onDayPress={(day: any) => setSelectedCalendarDay(day.dateString)}
+          markedDates={{
+             ...appointments.reduce((acc: any, app: any) => {
+                 if (app.status !== 'CANCELLED') {
+                     const d = new Date(app.date).toISOString().split('T')[0];
+                     acc[d] = { marked: true, dotColor: colors.primary };
+                 }
+                 return acc;
+             }, {}),
+             [selectedCalendarDay]: { 
+                 selected: true, 
+                 selectedColor: colors.primary, 
+                 marked: appointments.some((a: any) => new Date(a.date).toISOString().split('T')[0] === selectedCalendarDay && a.status !== 'CANCELLED'), 
+                 dotColor: '#ffffff' 
+             }
+          }}
+          theme={{
+            calendarBackground: colors.card,
+            textSectionTitleColor: colors.textSecondary,
+            selectedDayBackgroundColor: colors.primary,
+            selectedDayTextColor: '#ffffff',
+            todayTextColor: colors.primary,
+            dayTextColor: colors.text,
+            textDisabledColor: colors.border,
+            monthTextColor: colors.text,
+            arrowColor: colors.primary,
+          }}
+          style={{ marginBottom: 15 }}
+        />
         {loading ? <ActivityIndicator color={colors.primary} /> : (
             <View style={styles.slotsGrid}>
                 {slots.map((s, i) => {
@@ -450,23 +487,31 @@ export const MasterDashboardScreen = () => {
             </View>
         ))}
 
-        <Text style={[styles.cardTitle, {marginTop: 20, color: colors.text}]}>Сьогоднішні записи (або обраний день)</Text>
-        {currentDayAppoints.filter((a) => a.status !== 'PENDING').length === 0 && <Text style={[styles.subtext, {color: colors.textSecondary}]}>Немає записів</Text>}
-        {currentDayAppoints.filter((a) => a.status !== 'PENDING').map((app: any) => (
-            <View key={app.id} style={[styles.appointmentItem, {borderBottomColor: colors.border}]}>
-                <View style={styles.appInfo}>
-                    <TouchableOpacity onPress={() => setSelectedClient(app)}>
-                      <Text style={[styles.appName, {color: colors.text, fontWeight: 'bold', fontFamily: 'serif'}]}>
-                        Клієнт: {app.client?.name || app.client?.phone || app.clientId.substring(0,6)}
-                      </Text>
-                    </TouchableOpacity>
-                    <Text style={[{color: colors.textSecondary, fontSize: 12, marginVertical: 3}]}>
-                      Дата: {new Date(app.date).toISOString().split('T')[0]} о {app.time}
-                    </Text>
-                    <Text style={[styles.appStatus, app.status === 'CONFIRMED' && {color: '#2e8b57'}, app.status === 'CANCELLED' && {color: '#8b0000'}]}>
-                      {statusMap[app.status] || app.status}
-                    </Text>
-                </View>
+        <TouchableOpacity onPress={() => setIsAppointmentsExpanded(!isAppointmentsExpanded)}>
+            <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 20}}>
+                <Text style={[styles.cardTitle, {color: colors.text, marginBottom: 0}]}>Записи на {selectedCalendarDay}</Text>
+                <Text style={{fontSize: 20, color: colors.textSecondary}}>{isAppointmentsExpanded ? '▲' : '▼'}</Text>
+            </View>
+        </TouchableOpacity>
+        
+        {isAppointmentsExpanded && (
+            <View style={{marginTop: 15}}>
+                {currentDayAppoints.filter((a: any) => a.status !== 'PENDING').length === 0 && <Text style={[styles.subtext, {color: colors.textSecondary}]}>Немає записів</Text>}
+                {currentDayAppoints.filter((a: any) => a.status !== 'PENDING').map((app: any) => (
+                    <View key={app.id} style={[styles.appointmentItem, {borderBottomColor: colors.border}]}>
+                        <View style={styles.appInfo}>
+                            <TouchableOpacity onPress={() => setSelectedClient(app)}>
+                              <Text style={[styles.appName, {color: colors.text, fontWeight: 'bold', fontFamily: 'serif'}]}>
+                                Клієнт: {app.client?.name || app.client?.phone || app.clientId.substring(0,6)}
+                              </Text>
+                            </TouchableOpacity>
+                            <Text style={[{color: colors.textSecondary, fontSize: 12, marginVertical: 3}]}>
+                              Дата: {new Date(app.date).toISOString().split('T')[0]} о {app.time}
+                            </Text>
+                            <Text style={[styles.appStatus, app.status === 'CONFIRMED' && {color: '#2e8b57'}, app.status === 'CANCELLED' && {color: '#8b0000'}]}>
+                              {statusMap[app.status] || app.status}
+                            </Text>
+                        </View>
                 <View style={styles.appActions}>
                     {app.status === 'CONFIRMED' && (
                         <TouchableOpacity style={[styles.actionBtn, {borderColor: colors.primary, borderWidth: 1, backgroundColor: colors.primary}]} onPress={() => updateAppStatus(app.id, 'complete')}>
@@ -505,6 +550,8 @@ export const MasterDashboardScreen = () => {
                 </View>
             </View>
         ))}
+        </View>
+        )}
       </View>
 
       {/* Прайс-лист */}

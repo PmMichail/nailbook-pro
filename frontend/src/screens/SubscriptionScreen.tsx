@@ -122,7 +122,7 @@ export const SubscriptionScreen = ({ navigation }: any) => {
          <Text style={styles.featureItem}>✔️ Пріоритетна підтримка</Text>
       </View>
 
-      {!isPro ? (
+      {!isPro || sub?.status === 'TRIAL' ? (
          <View style={{marginTop: 30}}>
             {sub?.status === 'ACTIVE' && sub?.plan === 'FREE' && (
                 <TouchableOpacity style={styles.trialButton} onPress={handleStartTrial}>
