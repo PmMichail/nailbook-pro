@@ -40,18 +40,24 @@ export const MasterClientsScreen = () => {
                     }}>📱 {item.phone || 'Немає номеру'}</Text>
                 </View>
                 <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    {item.isLocked && (
+                        <Text style={{fontSize: 16, marginRight: 8}}>🔒</Text>
+                    )}
                     {item.isActiveClient === false && (
                         <Text style={{color: 'red', fontWeight: 'bold', fontSize: 12, marginRight: 10}}>Відключений</Text>
                     )}
                     <TouchableOpacity 
-                        style={{backgroundColor: colors.primary, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10}}
+                        style={{backgroundColor: item.isLocked ? '#ccc' : colors.primary, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10}}
+                        disabled={item.isLocked}
                         onPress={() => {
                             const sortedIds = [currentUserId, item.id].sort();
                             const roomId = sortedIds.join('_');
                             navigation.navigate('ChatsListNav', { screen: 'ChatScreen', params: { roomId, otherUser: item } });
                         }}
                     >
-                        <Text style={{color: '#fff', fontWeight: 'bold', fontSize: 12}}>💬 Написати</Text>
+                        <Text style={{color: item.isLocked ? '#888' : '#fff', fontWeight: 'bold', fontSize: 12}}>
+                            {item.isLocked ? 'PRO версія' : '💬 Написати'}
+                        </Text>
                     </TouchableOpacity>
                 </View>
             </View>

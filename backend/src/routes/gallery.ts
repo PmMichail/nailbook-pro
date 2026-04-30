@@ -53,12 +53,18 @@ router.get('/', async (req, res) => {
 
 // GET /gallery/master/:masterId (Private Portfolio for a Master)
 router.get('/master/:masterId', async (req, res) => {
+  const masterId = req.params.masterId;
   const items = await prisma.galleryItem.findMany({
-    where: { masterId: req.params.masterId, isPublic: false },
+    where: { masterId: masterId, isPublic: false },
     orderBy: { createdAt: 'desc' }
   });
-  const formatted = items.map(i => ({
+
+  const sub = await prisma.subscription.findUnique({ where: { masterId: masterId } });
+  const isFree = !sub || sub.plan === 'FREE' || ['EXPIRED', 'CANCELLED'].includes(sub.status);
+
+  const formatted = items.map((i, index) => ({
     ...i,
+    isLocked: isFree && index >= 5, // Lock photos beyond the 5th for LITE
     imageUrl: i.imageUrl.startsWith('http') 
         ? i.imageUrl.replace(/^http:\/\//i, 'https://')
         : `https://localhost:3000/${i.imageUrl}`

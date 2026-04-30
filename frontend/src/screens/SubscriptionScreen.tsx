@@ -109,14 +109,16 @@ export const SubscriptionScreen = ({ navigation }: any) => {
       <View style={styles.features}>
          <Text style={styles.featureTitle}>Тариф LITE (Безкоштовно):</Text>
          <Text style={styles.featureItem}>✔️ Базовий календар записів</Text>
-         <Text style={styles.featureItem}>❌ Обмеження: до 10 клієнтів</Text>
-         <Text style={styles.featureItem}>❌ Немає масових розсилок</Text>
-         <Text style={styles.featureItem}>❌ Немає детальної статистики</Text>
+         <Text style={styles.featureItem}>❌ Обмеження: до 10 активних клієнтів (інші заблоковані)</Text>
+         <Text style={styles.featureItem}>❌ Обмеження: до 5 фото в портфоліо та 1 в загальну стрічку</Text>
+         <Text style={styles.featureItem}>❌ Обмеження: лише 1 послуга в прайс-листі</Text>
+         <Text style={styles.featureItem}>❌ Немає масових розсилок та аналітики</Text>
          
          <Text style={[styles.featureTitle, {marginTop: 20}]}>✨ Тариф PRO (299 грн/міс):</Text>
          <Text style={styles.featureItem}>✔️ Безлімітна кількість клієнтів</Text>
-         <Text style={styles.featureItem}>✔️ Масові розсилки Push та Telegram</Text>
-         <Text style={styles.featureItem}>✔️ Детальна статистика та аналітика</Text>
+         <Text style={styles.featureItem}>✔️ Безлімітне портфоліо та прайс-лист</Text>
+         <Text style={styles.featureItem}>✔️ Масові розсилки (Push та Telegram)</Text>
+         <Text style={styles.featureItem}>✔️ Детальна фінансова статистика</Text>
          <Text style={styles.featureItem}>✔️ Пріоритетна підтримка</Text>
       </View>
 

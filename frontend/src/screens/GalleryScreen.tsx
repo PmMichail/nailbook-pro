@@ -152,19 +152,28 @@ export const GalleryScreen = () => {
   };
 
   const renderItem = ({ item }: any) => (
-    <View style={[styles.imageCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+    <View style={[styles.imageCard, { backgroundColor: colors.card, borderColor: colors.border, opacity: item.isLocked ? 0.6 : 1 }]}>
       <TouchableOpacity 
         onPress={() => {
+           if (item.isLocked) {
+               Alert.alert('Обмеження LITE', 'Це фото заблоковано через ліміт безкоштовного тарифу (макс. 5 фото). Придбайте PRO для безліміту.');
+               return;
+           }
            setViewerImageUri(item.imageUrl);
            setViewerModalVisible(true);
         }} 
         activeOpacity={0.8}
       >
-        <Image source={{ uri: item.imageUrl }} style={styles.image} />
+        <Image source={{ uri: item.imageUrl }} style={styles.image} blurRadius={item.isLocked ? 10 : 0} />
+        {item.isLocked && (
+            <View style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.3)'}}>
+                <Text style={{fontSize: 40}}>🔒</Text>
+            </View>
+        )}
       </TouchableOpacity>
       <View style={styles.imageFooter}>
-        <TouchableOpacity onPress={() => handleLike(item.id)} style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Text style={styles.likes}>❤️ {item.likesNum || 0} {activeTab === 'FAV' && '(Видалити)'}</Text>
+        <TouchableOpacity disabled={item.isLocked} onPress={() => handleLike(item.id)} style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Text style={[styles.likes, { color: item.isLocked ? '#888' : '#FF69B4' }]}>❤️ {item.likesNum || 0} {activeTab === 'FAV' && '(Видалити)'}</Text>
         </TouchableOpacity>
         <View style={styles.tagsContainer}>
           {item.tags?.map((t: string, idx: number) => (

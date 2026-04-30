@@ -489,7 +489,16 @@ router.get('/prices', async (req: any, res) => {
     where: { masterId: req.user.id },
     orderBy: { createdAt: 'asc' }
   });
-  res.json(prices);
+  
+  const sub = await prisma.subscription.findUnique({ where: { masterId: req.user.id } });
+  const isFree = !sub || sub.plan === 'FREE' || ['EXPIRED', 'CANCELLED'].includes(sub.status);
+
+  const formatted = prices.map((p, index) => ({
+      ...p,
+      isLocked: isFree && index >= 1
+  }));
+
+  res.json(formatted);
 });
 
 // POST /prices
@@ -542,15 +551,25 @@ router.get('/clients', async (req: any, res) => {
     const clients = await prisma.user.findMany({
       where: { masterId: req.user.id, role: 'CLIENT', isActiveClient: true },
       select: { 
-        id: true, name: true, phone: true, avatarUrl: true, notes: true,
+        id: true, name: true, phone: true, avatarUrl: true, notes: true, isActiveClient: true,
         myAppointments: {
            where: { masterId: req.user.id },
            orderBy: { date: 'desc' },
            take: 1
         }
-      }
+      },
+      orderBy: { createdAt: 'asc' } // Ensure consistent order for locking
     });
-    res.json(clients);
+
+    const sub = await prisma.subscription.findUnique({ where: { masterId: req.user.id } });
+    const isFree = !sub || sub.plan === 'FREE' || ['EXPIRED', 'CANCELLED'].includes(sub.status);
+
+    const formatted = clients.map((c, index) => ({
+       ...c,
+       isLocked: isFree && index >= 10
+    }));
+
+    res.json(formatted);
   } catch(e) { res.status(500).json({ error: 'Server error' }); }
 });
 

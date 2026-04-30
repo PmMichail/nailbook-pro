@@ -511,22 +511,29 @@ export const MasterDashboardScreen = () => {
       <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <Text style={[styles.cardTitle, { color: colors.primary }]}>Мої ціни (Прайс-лист)</Text>
         {prices.map(item => (
-          <View key={item.id} style={[styles.row, {marginBottom: 10, alignItems: 'center', borderBottomWidth: 1, borderBottomColor: colors.border, paddingBottom: 10}]}>
+          <View key={item.id} style={[styles.row, {marginBottom: 10, alignItems: 'center', borderBottomWidth: 1, borderBottomColor: colors.border, paddingBottom: 10, opacity: item.isLocked ? 0.5 : 1}]}>
             {item.imageUrl && (
               <Image source={{ uri: item.imageUrl.startsWith('http') ? item.imageUrl : `${api.defaults.baseURL}/${item.imageUrl}` }} style={{ width: 40, height: 40, borderRadius: 8, marginRight: 10 }} />
             )}
-            <Text style={{color: colors.text, flex: 1}}>{item.service}: {item.price} грн</Text>
-            <TouchableOpacity onPress={() => { setEditPriceId(item.id); setPriceForm({service: item.service, price: item.price.toString(), imageUrl: item.imageUrl}); setPriceModalVisible(true); }} style={{marginRight: 15, padding: 5, borderWidth: 1, borderColor: colors.border, borderRadius: 8}}>
-               <Text style={{color: colors.text}}>✏️</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => deletePriceItem(item.id)} style={{padding: 5, borderWidth: 1, borderColor: colors.border, borderRadius: 8}}>
-               <Text style={{color: colors.text}}>🗑️</Text>
-            </TouchableOpacity>
+            <Text style={{color: colors.text, flex: 1}}>{item.service}: {item.isLocked ? '🔒 Тільки PRO' : `${item.price} грн`}</Text>
+            
+            {!item.isLocked && (
+               <>
+                 <TouchableOpacity onPress={() => { setEditPriceId(item.id); setPriceForm({service: item.service, price: item.price.toString(), imageUrl: item.imageUrl}); setPriceModalVisible(true); }} style={{marginRight: 15, padding: 5, borderWidth: 1, borderColor: colors.border, borderRadius: 8}}>
+                    <Text style={{color: colors.text}}>✏️</Text>
+                 </TouchableOpacity>
+                 <TouchableOpacity onPress={() => deletePriceItem(item.id)} style={{padding: 5, borderWidth: 1, borderColor: colors.border, borderRadius: 8}}>
+                    <Text style={{color: colors.text}}>🗑️</Text>
+                 </TouchableOpacity>
+               </>
+            )}
           </View>
         ))}
-        <TouchableOpacity style={[styles.btnPrimary, {marginTop: 10, backgroundColor: colors.primary}]} onPress={() => { setEditPriceId(null); setPriceForm({service: '', price: '', imageUrl: null}); setPriceModalVisible(true); }}>
-           <Text style={[styles.btnPrimaryText, { color: isDark ? '#000' : '#fff' }]}>+ Додати послугу</Text>
-        </TouchableOpacity>
+        {(!prices.length || !prices[prices.length - 1]?.isLocked) && (
+            <TouchableOpacity style={[styles.btnPrimary, {marginTop: 10, backgroundColor: colors.primary}]} onPress={() => { setEditPriceId(null); setPriceForm({service: '', price: '', imageUrl: null}); setPriceModalVisible(true); }}>
+               <Text style={[styles.btnPrimaryText, { color: isDark ? '#000' : '#fff' }]}>+ Додати послугу</Text>
+            </TouchableOpacity>
+        )}
       </View>
 
       {/* Client Details Modal */}
