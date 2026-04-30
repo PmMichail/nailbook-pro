@@ -3,15 +3,20 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, 
 import api from '../api/client';
 import { useTheme } from '../context/ThemeContext';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const MasterClientsScreen = () => {
     const { colors } = useTheme();
     const navigation = useNavigation<any>();
     const [clients, setClients] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [currentUserId, setCurrentUserId] = useState('');
 
     useEffect(() => {
         fetchClients();
+        AsyncStorage.getItem('user').then(u => {
+            if (u) setCurrentUserId(JSON.parse(u).id);
+        });
     }, []);
 
     const fetchClients = async () => {
@@ -40,7 +45,11 @@ export const MasterClientsScreen = () => {
                     )}
                     <TouchableOpacity 
                         style={{backgroundColor: colors.primary, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10}}
-                        onPress={() => navigation.navigate('ChatScreen', { roomId: `direct-${item.id}`, otherUser: item })}
+                        onPress={() => {
+                            const sortedIds = [currentUserId, item.id].sort();
+                            const roomId = sortedIds.join('_');
+                            navigation.navigate('ChatsListNav', { screen: 'ChatScreen', params: { roomId, otherUser: item } });
+                        }}
                     >
                         <Text style={{color: '#fff', fontWeight: 'bold', fontSize: 12}}>💬 Написати</Text>
                     </TouchableOpacity>
