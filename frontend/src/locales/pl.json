@@ -1,0 +1,16 @@
+{
+  "settings": "Ustawienia",
+  "language": "Język",
+  "darkTheme": "Ciemny motyw",
+  "pushNotifications": "Powiadomienia Push",
+  "telegramBot": "Bot Telegram",
+  "logout": "Wyloguj się",
+  "deleteAccount": "Usuń konto",
+  "deleteAccountConfirm": "UWAGA: NIEODWRACALNA AKCJA. Czy na pewno chcesz trwale usunąć swoje konto?",
+  "cancel": "Anuluj",
+  "delete": "USUŃ KONTO",
+  "success": "Sukces",
+  "error": "Błąd",
+  "saved": "Zapisano",
+  "languageChanged": "Język zmieniony"
+}

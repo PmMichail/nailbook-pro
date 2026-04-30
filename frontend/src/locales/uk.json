@@ -1,0 +1,16 @@
+{
+  "settings": "Налаштування",
+  "language": "Мова",
+  "darkTheme": "Темна тема",
+  "pushNotifications": "Push-сповіщення",
+  "telegramBot": "Telegram-бот",
+  "logout": "Вийти",
+  "deleteAccount": "Видалити акаунт",
+  "deleteAccountConfirm": "УВАГА: НЕЗВОРОТНЯ ДІЯ. Ви точно хочете назавжди видалити свій акаунт?",
+  "cancel": "Скасувати",
+  "delete": "ВИДАЛИТИ АКАУНТ",
+  "success": "Успіх",
+  "error": "Помилка",
+  "saved": "Збережено",
+  "languageChanged": "Мову змінено"
+}

@@ -1,0 +1,16 @@
+{
+  "settings": "Settings",
+  "language": "Language",
+  "darkTheme": "Dark theme",
+  "pushNotifications": "Push notifications",
+  "telegramBot": "Telegram bot",
+  "logout": "Log out",
+  "deleteAccount": "Delete account",
+  "deleteAccountConfirm": "WARNING: IRREVERSIBLE ACTION. Are you sure you want to permanently delete your account?",
+  "cancel": "Cancel",
+  "delete": "DELETE ACCOUNT",
+  "success": "Success",
+  "error": "Error",
+  "saved": "Saved",
+  "languageChanged": "Language changed"
+}

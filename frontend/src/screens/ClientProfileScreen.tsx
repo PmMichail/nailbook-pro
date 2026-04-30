@@ -201,6 +201,7 @@ export const ClientProfileScreen = ({ navigation }: any) => {
         </View>
       </View>
 
+      {myMaster?.referralEnabled !== false && (
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Реферальна програма 🎁</Text>
         <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -231,6 +232,7 @@ export const ClientProfileScreen = ({ navigation }: any) => {
           </View>
         </View>
       </View>
+      )}
 
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Мій Майстер</Text>
@@ -238,14 +240,14 @@ export const ClientProfileScreen = ({ navigation }: any) => {
         {myMaster && (
            <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border, marginBottom: 15, paddingVertical: 15 }]}>
              <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                 <View style={{width: 60, height: 60, borderRadius: 30, backgroundColor: colors.border, marginRight: 15, overflow: 'hidden'}}>
-                     {(myMaster.salonLogo || myMaster.avatarUrl) && <Image source={{uri: (myMaster.salonLogo || myMaster.avatarUrl).startsWith('http') ? (myMaster.salonLogo || myMaster.avatarUrl) : `${api.defaults.baseURL}/${(myMaster.salonLogo || myMaster.avatarUrl)}`}} style={{width: '100%', height: '100%'}} />}
+                 <View style={{width: 80, height: 80, borderRadius: 40, backgroundColor: colors.border, marginRight: 15, overflow: 'hidden', borderWidth: 2, borderColor: colors.primary}}>
+                     {(myMaster.salonLogo || myMaster.avatarUrl) && <Image source={{uri: (myMaster.salonLogo || myMaster.avatarUrl).startsWith('http') ? (myMaster.salonLogo || myMaster.avatarUrl) : `${api.defaults.baseURL}/${(myMaster.salonLogo || myMaster.avatarUrl)}`}} style={{width: '100%', height: '100%', resizeMode: 'cover'}} />}
                  </View>
                  <View style={{flex: 1}}>
-                     <Text style={{ color: colors.textSecondary, fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Поточний майстер</Text>
-                     <Text style={{ color: colors.text, fontFamily: 'serif', fontStyle: 'italic', fontSize: 24, fontWeight: 'bold' }}>{myMaster.name}</Text>
-                     {myMaster.salonName && <Text style={{ color: colors.primary, fontSize: 16, marginTop: 4, fontWeight: 'bold' }}>💅 {myMaster.salonName}</Text>}
-                     <Text style={{ color: colors.textSecondary, fontSize: 14, marginTop: 4 }}>{myMaster.phone}</Text>
+                     <Text style={{ color: colors.textSecondary, fontSize: 12, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Поточний майстер</Text>
+                     <Text style={{ color: colors.text, fontFamily: 'serif', fontStyle: 'italic', fontSize: 28, fontWeight: 'bold' }}>{myMaster.name}</Text>
+                     {myMaster.salonName && <Text style={{ color: colors.primary, fontSize: 18, marginTop: 4, fontWeight: 'bold' }}>💅 {myMaster.salonName}</Text>}
+                     <Text style={{ color: colors.textSecondary, fontSize: 15, marginTop: 4 }}>{myMaster.phone}</Text>
                  </View>
              </View>
              <View style={{flexDirection: 'row', justifyContent: 'space-between', marginTop: 15, alignItems: 'center', width: '100%'}}>

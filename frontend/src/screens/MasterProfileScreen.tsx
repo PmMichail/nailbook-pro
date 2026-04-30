@@ -23,6 +23,7 @@ export const MasterProfileScreen = ({ navigation }: any) => {
   
   const [pushEnabled, setPushEnabled] = useState(true);
   const [telegramEnabled, setTelegramEnabled] = useState(false);
+  const [referralEnabled, setReferralEnabled] = useState(true);
 
   const [subData, setSubData] = useState<any>(null);
   const [activeClients, setActiveClients] = useState(0);
@@ -45,6 +46,7 @@ export const MasterProfileScreen = ({ navigation }: any) => {
         setInstagram(u.instagram || '');
         setTiktok(u.tiktok || '');
         setFacebook(u.facebook || '');
+        if (u.referralEnabled !== undefined) setReferralEnabled(u.referralEnabled);
         
         if (u.avatarUrl) {
           const formattedUrl = u.avatarUrl.startsWith('http') ? u.avatarUrl : `${api.defaults.baseURL}/${u.avatarUrl}`;
@@ -98,6 +100,10 @@ export const MasterProfileScreen = ({ navigation }: any) => {
       if (password) {
         formData.append('password', password);
       }
+      formData.append('instagram', instagram);
+      formData.append('tiktok', tiktok);
+      formData.append('facebook', facebook);
+      formData.append('referralEnabled', referralEnabled ? 'true' : 'false');
       
       if (avatar && !avatar.startsWith('http')) {
         const ext = avatar.split('.').pop() || 'jpg';
@@ -299,6 +305,10 @@ export const MasterProfileScreen = ({ navigation }: any) => {
         <View style={[styles.settingRow, { backgroundColor: colors.card }]}>
           <Text style={[styles.settingText, { color: colors.text }]}>Push-сповіщення</Text>
           <Switch value={pushEnabled} onValueChange={setPushEnabled} trackColor={{true: colors.primary}} />
+        </View>
+        <View style={[styles.settingRow, { backgroundColor: colors.card }]}>
+          <Text style={[styles.settingText, { color: colors.text }]}>Реферальна програма</Text>
+          <Switch value={referralEnabled} onValueChange={(val) => { setReferralEnabled(val); handleSaveProfile(); }} trackColor={{true: colors.primary}} />
         </View>
         <View style={[styles.settingRow, { backgroundColor: colors.card, flexDirection: 'column', alignItems: 'flex-start' }]}>
           <Text style={[styles.settingText, { color: colors.text, fontWeight: 'bold' }]}>Сповіщення Telegram</Text>

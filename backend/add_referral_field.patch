@@ -1,0 +1,10 @@
+--- prisma/schema.prisma
++++ prisma/schema.prisma
+@@ -19,6 +19,7 @@
+   city       String?
+   address    String?
+   password   String
++  referralEnabled Boolean @default(true)
+ 
+   proStatus  String   @default("NONE") // NONE, TRIAL, ACTIVE
+   proUntil   DateTime?

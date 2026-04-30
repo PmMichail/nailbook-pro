@@ -77,7 +77,7 @@ export const SearchMastersScreen = () => {
                     <View style={styles.info}>
                         <Text style={[styles.name, { color: colors.text }]}>{item.salonName || item.name}</Text>
                         <Text style={styles.city}>
-                           {item.city ? `${item.city}` : 'Місто не вказано'}
+                           {item.city ? `${item.city}` : ''}
                            {item.address ? ` • ${item.address}` : ''}
                         </Text>
                     </View>

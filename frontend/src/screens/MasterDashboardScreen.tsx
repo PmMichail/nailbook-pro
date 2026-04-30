@@ -305,8 +305,8 @@ export const MasterDashboardScreen = () => {
       
       {/* Top Actions */}
       <View style={{flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20}}>
-        <TouchableOpacity style={[styles.btnPrimary, {flex: 1, marginRight: 5, backgroundColor: colors.primary}]} onPress={() => setQrModalVisible(true)}>
-          <Text style={[styles.btnPrimaryText, { color: isDark ? '#000' : '#fff' }]}>QR Код</Text>
+        <TouchableOpacity style={[styles.btnSecondary, {flex: 1, marginRight: 5, borderColor: colors.primary, borderWidth: 1}]} onPress={() => setQrModalVisible(true)}>
+          <Text style={{color: colors.primary, fontWeight: 'bold'}}>QR Код</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.btnSecondary, {flex: 0.5, borderColor: colors.primary}]} onPress={() => navigation.navigate('StatisticsScreen' as never)}>
           <Text style={{color: colors.primary, fontWeight: 'bold'}}>Статист.</Text>

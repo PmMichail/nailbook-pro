@@ -3,11 +3,24 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Switch } f
 import { useNavigation } from '@react-navigation/native';
 import * as Location from 'expo-location';
 import api from '../api/client';
-
+import { useTranslation } from 'react-i18next';
+import { useTheme } from '../context/ThemeContext';
 export const SettingsScreen = () => {
   const navigation = useNavigation<any>();
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const { t, i18n } = useTranslation();
+  const { colors, isDark } = useTheme();
   const [calendarConnected, setCalendarConnected] = useState(false);
+
+  const changeLanguage = () => {
+      Alert.alert(t('language'), 'Оберіть мову / Choose language', [
+          { text: 'Українська', onPress: () => i18n.changeLanguage('uk') },
+          { text: 'English', onPress: () => i18n.changeLanguage('en') },
+          { text: 'Polski', onPress: () => i18n.changeLanguage('pl') },
+          { text: 'Deutsch', onPress: () => i18n.changeLanguage('de') },
+          { text: t('cancel'), style: 'cancel' }
+      ]);
+  };
 
   const handleFixLocation = async () => {
     try {
@@ -41,10 +54,10 @@ export const SettingsScreen = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.header}>Налаштування</Text>
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
+      <Text style={[styles.header, { color: colors.text }]}>{t('settings')}</Text>
 
-      <View style={styles.section}>
+      <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <Text style={styles.sectionTitle}>Акаунт & Інтеграції</Text>
         <TouchableOpacity style={styles.menuItem} onPress={handleFixLocation}>
           <Text style={styles.menuText}>📍 Зафіксувати мою геолокацію</Text>
@@ -69,17 +82,17 @@ export const SettingsScreen = () => {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Додаток</Text>
+      <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
+        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Додаток</Text>
         
         <View style={styles.menuItem}>
-          <Text style={styles.menuText}>Темна тема</Text>
-          <Switch value={isDarkMode} onValueChange={setIsDarkMode} />
+          <Text style={[styles.menuText, { color: colors.text }]}>{t('darkTheme')}</Text>
+          <Switch value={isDark} onValueChange={() => {}} disabled={true} />
         </View>
         
-        <TouchableOpacity style={styles.menuItem}>
-          <Text style={styles.menuText}>Мова</Text>
-          <Text style={styles.statusText}>Українська ›</Text>
+        <TouchableOpacity style={styles.menuItem} onPress={changeLanguage}>
+          <Text style={[styles.menuText, { color: colors.text }]}>{t('language')}</Text>
+          <Text style={styles.statusText}>{i18n.language.toUpperCase()} ›</Text>
         </TouchableOpacity>
       </View>
 

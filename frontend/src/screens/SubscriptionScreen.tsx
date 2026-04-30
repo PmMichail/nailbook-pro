@@ -2,17 +2,35 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import api from '../api/client';
 import { useTranslation } from 'react-i18next';
-import * as WebBrowser from 'expo-web-browser';
+import Purchases from 'react-native-purchases';
+
+// Dummy keys - replace in production
+const API_KEY_IOS = "appl_dummy_key_here";
+const API_KEY_ANDROID = "goog_dummy_key_here";
 
 export const SubscriptionScreen = ({ navigation }: any) => {
   const { t } = useTranslation();
   const [sub, setSub] = useState<any>(null);
   const [clientCount, setClientCount] = useState<number>(0);
+  const [packages, setPackages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setupPurchases();
     loadSubscription();
   }, []);
+
+  const setupPurchases = async () => {
+     try {
+         // Purchases.configure({ apiKey: Platform.OS === 'ios' ? API_KEY_IOS : API_KEY_ANDROID });
+         // const offerings = await Purchases.getOfferings();
+         // if (offerings.current !== null && offerings.current.availablePackages.length !== 0) {
+         //    setPackages(offerings.current.availablePackages);
+         // }
+     } catch(e) {
+         console.warn("RevenueCat not fully configured yet.");
+     }
+  };
 
   const loadSubscription = async () => {
     try {
@@ -42,15 +60,25 @@ export const SubscriptionScreen = ({ navigation }: any) => {
   const handleUpgradeToPro = async () => {
     try {
       setLoading(true);
-      const res = await api.post('/api/master/subscription/checkout');
-      const { paymentUrl } = res.data;
       
-      const result = await WebBrowser.openBrowserAsync(paymentUrl);
+      // RevenueCat Purchase Flow
+      // if (packages.length > 0) {
+      //   const { customerInfo } = await Purchases.purchasePackage(packages[0]);
+      //   if (customerInfo.entitlements.active['pro']) {
+      //     // Trigger backend refresh
+      //     await api.post('/api/master/subscription/refresh-rc');
+      //   }
+      // } else {
+      //   Alert.alert('Увага', 'Пакети підписок наразі не налаштовані в Apple/Google.');
+      // }
       
-      // Reload sub when returning from browser
+      Alert.alert('Увага', 'Для реальної оплати потрібно замінити API ключі RevenueCat.');
+
       loadSubscription();
-    } catch (e) {
-      Alert.alert('Помилка', 'Не вдалося ініціювати оплату');
+    } catch (e: any) {
+      if (!e.userCancelled) {
+         Alert.alert('Помилка', 'Не вдалося ініціювати оплату Apple/Google');
+      }
       setLoading(false);
     }
   };
@@ -130,7 +158,7 @@ export const SubscriptionScreen = ({ navigation }: any) => {
                 </TouchableOpacity>
             )}
             <TouchableOpacity style={styles.proButton} onPress={handleUpgradeToPro}>
-              <Text style={styles.proButtonText}>Оплатити PRO (299 грн/міс)</Text>
+              <Text style={styles.proButtonText}>Оплатити PRO (через App Store)</Text>
             </TouchableOpacity>
          </View>
       ) : (

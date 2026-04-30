@@ -1,0 +1,16 @@
+{
+  "settings": "Einstellungen",
+  "language": "Sprache",
+  "darkTheme": "Dunkles Design",
+  "pushNotifications": "Push-Benachrichtigungen",
+  "telegramBot": "Telegram-Bot",
+  "logout": "Abmelden",
+  "deleteAccount": "Konto löschen",
+  "deleteAccountConfirm": "ACHTUNG: UNWIDERRUFLICHE AKTION. Möchten Sie Ihr Konto wirklich dauerhaft löschen?",
+  "cancel": "Abbrechen",
+  "delete": "KONTO LÖSCHEN",
+  "success": "Erfolg",
+  "error": "Fehler",
+  "saved": "Gespeichert",
+  "languageChanged": "Sprache geändert"
+}

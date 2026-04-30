@@ -3,6 +3,51 @@ import prisma from '../models/prismaClient';
 
 const router = Router();
 
+// POST /api/webhooks/revenuecat
+router.post('/revenuecat', async (req, res) => {
+  try {
+    const { event } = req.body;
+    if (!event || !event.app_user_id) {
+       return res.status(400).json({ error: 'Invalid event format' });
+    }
+
+    const masterId = event.app_user_id; // RevenueCat should be configured to use User.id as app_user_id
+    const type = event.type; // e.g. INITIAL_PURCHASE, RENEWAL, CANCELLATION, EXPIRATION
+
+    console.log(`[REVENUECAT WEBHOOK] Type: ${type}, User: ${masterId}`);
+
+    if (type === 'INITIAL_PURCHASE' || type === 'RENEWAL') {
+        const expirationDateMs = event.expiration_at_ms;
+        const currentPeriodEnd = new Date(expirationDateMs);
+
+        await prisma.subscription.upsert({
+            where: { masterId: String(masterId) },
+            create: {
+                masterId: String(masterId),
+                plan: 'PRO',
+                status: 'ACTIVE',
+                currentPeriodEnd
+            },
+            update: {
+                plan: 'PRO',
+                status: 'ACTIVE',
+                currentPeriodEnd
+            }
+        });
+    } else if (type === 'CANCELLATION' || type === 'EXPIRATION') {
+        await prisma.subscription.updateMany({
+            where: { masterId: String(masterId) },
+            data: { status: 'EXPIRED' }
+        });
+    }
+
+    res.status(200).send('OK');
+  } catch (error) {
+    console.error('[REVENUECAT ERROR]', error);
+    res.status(500).json({ error: 'Webhook processing failed' });
+  }
+});
+
 // POST /api/webhooks/liqpay
 router.post('/liqpay', async (req, res) => {
   try {

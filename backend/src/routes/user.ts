@@ -26,7 +26,7 @@ router.use(authenticate);
 router.put('/profile', uploadCloud.fields([{ name: 'avatar', maxCount: 1 }, { name: 'salonLogo', maxCount: 1 }]), async (req: any, res) => {
   try {
     const userId = req.user.id;
-    const { name, phone, password, salonName } = req.body;
+    const { name, phone, password, salonName, referralEnabled, instagram, tiktok, facebook } = req.body;
     
     let avatarUrl = undefined;
     let salonLogo = undefined;
@@ -47,6 +47,10 @@ router.put('/profile', uploadCloud.fields([{ name: 'avatar', maxCount: 1 }, { na
     
     if (salonName !== undefined) dataToUpdate.salonName = salonName;
     if (salonLogo) dataToUpdate.salonLogo = salonLogo;
+    if (referralEnabled !== undefined) dataToUpdate.referralEnabled = referralEnabled === 'true' || referralEnabled === true;
+    if (instagram !== undefined) dataToUpdate.instagram = instagram;
+    if (tiktok !== undefined) dataToUpdate.tiktok = tiktok;
+    if (facebook !== undefined) dataToUpdate.facebook = facebook;
     
     if (password && password.trim().length > 0) {
       const bcrypt = require('bcrypt');
@@ -65,7 +69,11 @@ router.put('/profile', uploadCloud.fields([{ name: 'avatar', maxCount: 1 }, { na
           city: true,
           linkSlug: true,
           salonName: true,
-          salonLogo: true
+          salonLogo: true,
+          referralEnabled: true,
+          instagram: true,
+          tiktok: true,
+          facebook: true
       }
     });
 
