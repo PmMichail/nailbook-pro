@@ -107,10 +107,17 @@ export const SubscriptionScreen = ({ navigation }: any) => {
       </View>
 
       <View style={styles.features}>
-         <Text style={styles.featureTitle}>✨ Переваги PRO:</Text>
-         <Text style={styles.featureItem}>✔️ Безлімітна кількість клієнтів у книзі</Text>
-         <Text style={styles.featureItem}>✔️ Масові розсилки Push та Telegram повідомлень</Text>
-         <Text style={styles.featureItem}>✔️ Детальна статистика доходів та аналітика</Text>
+         <Text style={styles.featureTitle}>Тариф LITE (Безкоштовно):</Text>
+         <Text style={styles.featureItem}>✔️ Базовий календар записів</Text>
+         <Text style={styles.featureItem}>❌ Обмеження: до 10 клієнтів</Text>
+         <Text style={styles.featureItem}>❌ Немає масових розсилок</Text>
+         <Text style={styles.featureItem}>❌ Немає детальної статистики</Text>
+         
+         <Text style={[styles.featureTitle, {marginTop: 20}]}>✨ Тариф PRO (299 грн/міс):</Text>
+         <Text style={styles.featureItem}>✔️ Безлімітна кількість клієнтів</Text>
+         <Text style={styles.featureItem}>✔️ Масові розсилки Push та Telegram</Text>
+         <Text style={styles.featureItem}>✔️ Детальна статистика та аналітика</Text>
+         <Text style={styles.featureItem}>✔️ Пріоритетна підтримка</Text>
       </View>
 
       {!isPro ? (

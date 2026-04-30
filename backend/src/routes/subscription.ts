@@ -16,6 +16,55 @@ const authenticate = (req: any, res: any, next: any) => {
   }
 };
 
+// GET /api/master/subscription/pay
+// Endpoint to serve the HTML form to the WebBrowser
+router.get('/pay', async (req: any, res) => {
+  const { order } = req.query;
+  const publicKey = process.env.LIQPAY_PUBLIC_KEY || 'i89524650072';
+  const privateKey = process.env.LIQPAY_PRIVATE_KEY || 'fc6PWMwymjvXs6RNIGTTyuMsuY7zv1XWWMEsxVHP';
+  const serverUrl = process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`;
+
+  let proPrice = 299;
+  const config = await prisma.systemConfig.findUnique({ where: { key: 'PRO_PRICE' } });
+  if (config && config.value) {
+      proPrice = parseInt(config.value, 10);
+  }
+
+  const payload = {
+     public_key: publicKey,
+     version: 3,
+     action: 'pay',
+     amount: proPrice,
+     currency: 'UAH',
+     description: 'Підписка PRO на NailsBook',
+     order_id: order,
+     server_url: `${serverUrl}/api/webhooks/liqpay`,
+     result_url: `${serverUrl}/api/webhooks/liqpay/success`,
+     sandbox: 1
+  };
+
+  const dataBuffer = Buffer.from(JSON.stringify(payload));
+  const dataString = dataBuffer.toString('base64');
+  
+  const crypto = await import('crypto');
+  const signatureString = crypto.createHash('sha1').update(privateKey + dataString + privateKey).digest('base64');
+
+  const formHtml = `
+    <html>
+      <head><title>NailsBook Payment</title></head>
+      <body onload="document.forms[0].submit();" style="display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif;">
+        <h2>Перенаправлення на оплату LiqPay...</h2>
+        <form method="POST" action="https://www.liqpay.ua/api/3/checkout" accept-charset="utf-8">
+          <input type="hidden" name="data" value="${dataString}" />
+          <input type="hidden" name="signature" value="${signatureString}" />
+        </form>
+      </body>
+    </html>
+  `;
+  
+  res.send(formHtml);
+});
+
 router.use(authenticate);
 
 // GET /api/master/subscription
@@ -162,57 +211,7 @@ router.post('/checkout', async (req: any, res) => {
   }
 });
 
-// GET /api/master/subscription/pay
-// Endpoint to serve the HTML form to the WebBrowser
-router.get('/pay', async (req: any, res) => {
-  const { order } = req.query;
-  const publicKey = process.env.LIQPAY_PUBLIC_KEY || 'i89524650072';
-  const privateKey = process.env.LIQPAY_PRIVATE_KEY || 'fc6PWMwymjvXs6RNIGTTyuMsuY7zv1XWWMEsxVHP';
-  const serverUrl = process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`;
 
-  let proPrice = 299;
-  const config = await prisma.systemConfig.findUnique({ where: { key: 'PRO_PRICE' } });
-  if (config && config.value) {
-      proPrice = parseInt(config.value, 10);
-  }
-
-  const payload = {
-     public_key: publicKey,
-     version: 3,
-     action: 'pay',
-     amount: proPrice,
-     currency: 'UAH',
-     description: 'Підписка PRO на NailsBook',
-     order_id: order,
-     server_url: `${serverUrl}/api/webhooks/liqpay`,
-     result_url: `${serverUrl}/api/webhooks/liqpay/success`,
-     sandbox: 1
-  };
-
-  const dataBuffer = Buffer.from(JSON.stringify(payload));
-  const dataString = dataBuffer.toString('base64');
-  
-  const crypto = await import('crypto');
-  const signatureString = crypto.createHash('sha1').update(privateKey + dataString + privateKey).digest('base64');
-
-  const formHtml = `
-    <html>
-      <head><title>NailsBook Payment</title></head>
-      <body onload="document.forms['liqpay'].submit();" style="display:flex; justify-content:center; align-items:center; height:100vh; font-family: sans-serif;">
-          <div style="text-align: center;">
-              <h2 style="color: #FF69B4;">NailsBook Pro</h2>
-              <p>Перенаправлення на сторінку безпечної оплати LiqPay...</p>
-          </div>
-          <form id="liqpay" name="liqpay" action="https://www.liqpay.ua/api/3/checkout" method="POST" style="display:none;">
-              <input type="hidden" name="data" value="${dataString}" />
-              <input type="hidden" name="signature" value="${signatureString}" />
-          </form>
-      </body>
-    </html>
-  `;
-
-  res.send(formHtml);
-});
 
 // DELETE /api/master/subscription
 router.delete('/', async (req: any, res) => {
