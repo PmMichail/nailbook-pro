@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import Purchases from 'react-native-purchases';
 
 // Keys provided by user
-const API_KEY_IOS = "test_ZmSbPrLAaDuIfvjPTGCwtDCXMFR";
+const API_KEY_IOS = "appl_DhQYpxSPNdHufxhMEhLdzmltNlV";
 const API_KEY_ANDROID = "goog_zwzVaWsrqGBNEpPxFoHxsUUBFdu";
 
 export const SubscriptionScreen = ({ navigation }: any) => {
