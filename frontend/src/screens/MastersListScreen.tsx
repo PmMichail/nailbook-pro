@@ -98,7 +98,7 @@ export const MastersListScreen = ({ navigation }: any) => {
        </View>
 
        {loading ? (
-           <ActivityIndicator size="large" color="#FF69B4" style={{marginTop: 20}} />
+           <ActivityIndicator size="large" color="#C88D7A" style={{marginTop: 20}} />
        ) : (
            <FlatList 
                data={masters}
@@ -127,12 +127,12 @@ const styles = StyleSheet.create({
   codeSection: { backgroundColor: '#fff', padding: 20, marginHorizontal: 20, borderRadius: 15, marginBottom: 20, elevation: 2 },
   row: { flexDirection: 'row', alignItems: 'center' },
   input: { backgroundColor: '#f9f9f9', padding: 12, borderRadius: 10, borderWidth: 1, borderColor: '#eee' },
-  btn: { backgroundColor: '#FF69B4', padding: 12, borderRadius: 10 },
+  btn: { backgroundColor: '#C88D7A', padding: 12, borderRadius: 10 },
   btnText: { color: '#fff', fontWeight: 'bold' },
   card: { backgroundColor: '#fff', padding: 15, borderRadius: 15, marginBottom: 10, flexDirection: 'row', alignItems: 'center', elevation: 2 },
   avatar: { width: 50, height: 50, borderRadius: 25, marginRight: 15 },
   name: { fontSize: 16, fontWeight: 'bold', color: '#333' },
-  salon: { fontSize: 14, color: '#FF69B4' },
+  salon: { fontSize: 14, color: '#C88D7A' },
   city: { fontSize: 12, color: '#888', marginTop: 3 },
   empty: { textAlign: 'center', color: '#888', marginTop: 20 }
 });

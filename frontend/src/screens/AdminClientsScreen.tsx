@@ -52,7 +52,7 @@ export const AdminClientsScreen = () => {
         ]);
     };
 
-    if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#FF69B4" /></View>;
+    if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#C88D7A" /></View>;
 
     return (
         <ScrollView style={styles.container}>
@@ -64,7 +64,7 @@ export const AdminClientsScreen = () => {
                             <Text style={styles.name}>{c.name}</Text>
                             <Text style={styles.subtext}>{c.phone || c.email}</Text>
                             <Text style={styles.subtext}>Зареєстровано: {new Date(c.createdAt).toLocaleDateString()}</Text>
-                            {c.masterId && <Text style={{color: '#FF69B4', fontSize: 12, marginTop: 5}}>Є майстер</Text>}
+                            {c.masterId && <Text style={{color: '#C88D7A', fontSize: 12, marginTop: 5}}>Є майстер</Text>}
                         </View>
                         <View style={[styles.badge, { backgroundColor: c.isBanned ? '#ffcccc' : '#d4edda' }]}>
                             <Text style={[styles.badgeText, { color: c.isBanned ? '#cc0000' : '#155724' }]}>

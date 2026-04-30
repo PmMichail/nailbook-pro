@@ -242,7 +242,7 @@ export const ClientsListScreen = () => {
                   <TouchableOpacity style={styles.cancelBtn} onPress={() => setSelectedClient(null)}>
                      <Text style={{color: colors.textSecondary}}>Закрити</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={[styles.saveBtn, {backgroundColor: '#FFB6C1', marginRight: 10}]} onPress={handleChat}>
+                  <TouchableOpacity style={[styles.saveBtn, {backgroundColor: '#e0c0b4', marginRight: 10}]} onPress={handleChat}>
                      <Text style={{color: '#000', fontWeight: 'bold'}}>💬 Написати</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={[styles.saveBtn, {backgroundColor: '#FF3B30', marginRight: 10}]} onPress={handleDeleteClient}>

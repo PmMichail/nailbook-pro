@@ -80,7 +80,7 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
         navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
     };
 
-    if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#FF69B4" /></View>;
+    if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#C88D7A" /></View>;
 
     return (
         <View style={styles.container}>
@@ -110,16 +110,6 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
                         <View style={styles.statCard}>
                             <Text style={styles.statVal}>{stats?.totalMasters || 0}</Text>
                             <Text style={styles.statL}>Всього майстрів</Text>
-                        </View>
-                        <View style={styles.statCard}>
-                            <Text style={styles.statVal}>{stats?.totalClients || 0}</Text>
-                            <Text style={styles.statL}>Всього клієнтів</Text>
-                        </View>
-                    </View>
-                    <View style={styles.statsContainer}>
-                        <View style={styles.statCard}>
-                            <Text style={styles.statVal}>{stats?.totalMasters ? (stats.totalClients / stats.totalMasters).toFixed(1) : 0}</Text>
-                            <Text style={styles.statL}>Клієнтів на майстра (сер.)</Text>
                         </View>
                     </View>
                     <Text style={styles.subHeader}>Підписки</Text>
@@ -199,7 +189,7 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
                                                     <Text style={{fontWeight: 'bold', color: '#666'}}>{r.masterCount}</Text>
                                                 </View>
                                                 <View style={{height: 10, backgroundColor: '#f0f0f0', borderRadius: 5, overflow: 'hidden'}}>
-                                                    <View style={{width: `${percent}%`, height: '100%', backgroundColor: '#FF69B4', borderRadius: 5}} />
+                                                    <View style={{width: `${percent}%`, height: '100%', backgroundColor: '#C88D7A', borderRadius: 5}} />
                                                 </View>
                                             </View>
                                         );
@@ -212,13 +202,11 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
                                 <View style={{flexDirection: 'row', borderBottomWidth: 2, borderBottomColor: '#eee', paddingBottom: 10, marginBottom: 10}}>
                                     <Text style={{flex: 2, fontWeight: 'bold', color: '#333'}}>Місто / Гео-зона</Text>
                                     <Text style={{flex: 1, fontWeight: 'bold', color: '#333', textAlign: 'center'}}>Майстри</Text>
-                                    <Text style={{flex: 1, fontWeight: 'bold', color: '#333', textAlign: 'center'}}>Клієнти</Text>
                                 </View>
                                 {regions.map((r, i) => (
                                     <View key={i} style={{flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: '#f5f5f5', paddingVertical: 12}}>
                                         <Text style={{flex: 2, color: '#444'}}>{r.region}</Text>
-                                        <Text style={{flex: 1, textAlign: 'center', fontWeight: 'bold', color: '#FF69B4'}}>{r.masterCount}</Text>
-                                        <Text style={{flex: 1, textAlign: 'center', color: '#666'}}>{r.clientCount}</Text>
+                                        <Text style={{flex: 1, textAlign: 'center', fontWeight: 'bold', color: '#C88D7A'}}>{r.masterCount}</Text>
                                     </View>
                                 ))}
                             </View>
@@ -262,11 +250,11 @@ const styles = StyleSheet.create({
     tab: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: 8 },
     activeTab: { backgroundColor: '#fff', shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 3, elevation: 2 },
     tabText: { color: '#64748b', fontWeight: '600' },
-    activeTabText: { color: '#FF69B4', fontWeight: 'bold' },
+    activeTabText: { color: '#C88D7A', fontWeight: 'bold' },
 
     statsContainer: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 15 },
     statCard: { backgroundColor: '#fff', flex: 1, marginHorizontal: 5, padding: 15, borderRadius: 12, alignItems: 'center', shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 5 },
-    statVal: { fontSize: 22, fontWeight: 'bold', color: '#FF69B4' },
+    statVal: { fontSize: 22, fontWeight: 'bold', color: '#C88D7A' },
     statL: { fontSize: 12, color: '#666', marginTop: 5 },
     subHeader: { fontSize: 20, fontWeight: 'bold', marginBottom: 15, color: '#333', marginLeft: 5 },
     payCard: { backgroundColor: '#fff', padding: 15, borderRadius: 10, marginBottom: 10, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 5 },
@@ -277,6 +265,6 @@ const styles = StyleSheet.create({
     settingsTitle: { fontSize: 18, fontWeight: 'bold', color: '#333', marginBottom: 5 },
     settingsDesc: { fontSize: 13, color: '#666', marginBottom: 20 },
     input: { backgroundColor: '#F0F4F8', padding: 15, borderRadius: 10, fontSize: 18, fontWeight: 'bold', color: '#333', marginBottom: 20 },
-    saveBtn: { backgroundColor: '#FF69B4', padding: 15, borderRadius: 10, alignItems: 'center' },
+    saveBtn: { backgroundColor: '#C88D7A', padding: 15, borderRadius: 10, alignItems: 'center' },
     saveBtnText: { color: '#fff', fontSize: 16, fontWeight: 'bold' }
 });

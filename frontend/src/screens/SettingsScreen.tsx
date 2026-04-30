@@ -58,7 +58,7 @@ export const SettingsScreen = () => {
         
         <TouchableOpacity style={styles.menuItem} onPress={handleCalendarConnect}>
           <Text style={styles.menuText}>Google Calendar</Text>
-          <Text style={[styles.statusText, {color: calendarConnected ? '#4CAF50' : '#FF69B4'}]}>
+          <Text style={[styles.statusText, {color: calendarConnected ? '#4CAF50' : '#C88D7A'}]}>
             {calendarConnected ? 'Підключено' : 'Підключити'}
           </Text>
         </TouchableOpacity>
@@ -116,5 +116,5 @@ const styles = StyleSheet.create({
   statusText: { fontSize: 14, color: '#999' },
   footer: { alignItems: 'center', marginBottom: 50, marginTop: 10 },
   footerText: { color: '#999', fontSize: 12, marginBottom: 10 },
-  footerLink: { color: '#FF69B4', fontSize: 12, marginBottom: 5, textDecorationLine: 'underline' }
+  footerLink: { color: '#C88D7A', fontSize: 12, marginBottom: 5, textDecorationLine: 'underline' }
 });

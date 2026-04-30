@@ -359,9 +359,9 @@ const styles = StyleSheet.create({
   saveBtn: { padding: 12, borderRadius: 10, alignItems: 'center' },
   saveBtnText: { color: '#fff', fontWeight: 'bold' },
   section: { padding: 20 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#FF69B4', marginBottom: 15 },
+  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#C88D7A', marginBottom: 15 },
   settingRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 15, borderRadius: 15, marginBottom: 10 },
   settingText: { fontSize: 16 },
-  logoutButton: { margin: 20, backgroundColor: '#FFB6C1', padding: 15, borderRadius: 20, alignItems: 'center' },
+  logoutButton: { margin: 20, backgroundColor: '#e0c0b4', padding: 15, borderRadius: 20, alignItems: 'center' },
   logoutButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' }
 });

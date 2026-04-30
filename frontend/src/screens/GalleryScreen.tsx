@@ -173,7 +173,7 @@ export const GalleryScreen = () => {
       </TouchableOpacity>
       <View style={styles.imageFooter}>
         <TouchableOpacity disabled={item.isLocked} onPress={() => handleLike(item.id)} style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Text style={[styles.likes, { color: item.isLocked ? '#888' : '#FF69B4' }]}>❤️ {item.likesNum || 0} {activeTab === 'FAV' && '(Видалити)'}</Text>
+          <Text style={[styles.likes, { color: item.isLocked ? '#888' : '#C88D7A' }]}>❤️ {item.likesNum || 0} {activeTab === 'FAV' && '(Видалити)'}</Text>
         </TouchableOpacity>
         <View style={styles.tagsContainer}>
           {item.tags?.map((t: string, idx: number) => (
@@ -284,25 +284,25 @@ const styles = StyleSheet.create({
   header: { fontSize: 24, fontWeight: 'bold', marginBottom: 15, paddingHorizontal: 5 },
   tabContainer: { flexDirection: 'row', marginBottom: 15, paddingHorizontal: 5 },
   tab: { flex: 1, paddingVertical: 10, alignItems: 'center', borderBottomWidth: 2, borderBottomColor: 'transparent' },
-  tabActive: { borderBottomColor: '#FF69B4' },
+  tabActive: { borderBottomColor: '#C88D7A' },
   tabText: { fontSize: 16, fontWeight: 'bold' },
   tabTextActive: { },
   imageCard: { width: (width / 2) - 15, marginHorizontal: 5, marginBottom: 15, borderRadius: 15, overflow: 'hidden', shadowColor: '#000', shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.1, shadowRadius: 3, elevation: 2, borderWidth: 1 },
   image: { width: '100%', height: 180, resizeMode: 'cover' },
   imageFooter: { padding: 10, alignItems: 'flex-start' },
-  likes: { color: '#FF69B4', fontWeight: 'bold', marginBottom: 5 },
+  likes: { color: '#C88D7A', fontWeight: 'bold', marginBottom: 5 },
   tagsContainer: { flexDirection: 'row', flexWrap: 'wrap' },
-  tagText: { color: '#fff', backgroundColor: '#FFB6C1', fontSize: 10, paddingHorizontal: 5, paddingVertical: 2, borderRadius: 5, marginRight: 3, marginBottom: 3, overflow: 'hidden' },
+  tagText: { color: '#fff', backgroundColor: '#e0c0b4', fontSize: 10, paddingHorizontal: 5, paddingVertical: 2, borderRadius: 5, marginRight: 3, marginBottom: 3, overflow: 'hidden' },
   deleteBtn: { position: 'absolute', top: 10, right: 10, backgroundColor: 'rgba(255, 255, 255, 0.8)', padding: 5, borderRadius: 15 },
   deleteIcon: { fontSize: 16 },
-  fabBtn: { position: 'absolute', bottom: 30, right: 30, width: 60, height: 60, borderRadius: 30, backgroundColor: '#FF69B4', justifyContent: 'center', alignItems: 'center', shadowColor: '#000', shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.3, shadowRadius: 3, elevation: 5 },
+  fabBtn: { position: 'absolute', bottom: 30, right: 30, width: 60, height: 60, borderRadius: 30, backgroundColor: '#C88D7A', justifyContent: 'center', alignItems: 'center', shadowColor: '#000', shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.3, shadowRadius: 3, elevation: 5 },
   fabIcon: { color: '#fff', fontSize: 32, fontWeight: 'bold' },
   modalBg: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
   modalContent: { width: '85%', borderRadius: 20, padding: 20, alignItems: 'center' },
   modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 15 },
   previewImage: { width: '100%', height: 200, borderRadius: 15, marginBottom: 15, resizeMode: 'cover' },
   input: { width: '100%', borderWidth: 1, borderRadius: 10, padding: 12, marginBottom: 20 },
-  btnPrimary: { backgroundColor: '#FF69B4', width: '100%', padding: 15, borderRadius: 15, alignItems: 'center', marginBottom: 10 },
+  btnPrimary: { backgroundColor: '#C88D7A', width: '100%', padding: 15, borderRadius: 15, alignItems: 'center', marginBottom: 10 },
   btnPrimaryText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
   btnCancel: { padding: 10 },
   btnCancelText: { color: '#999', fontSize: 16 },
@@ -310,6 +310,6 @@ const styles = StyleSheet.create({
   viewerCloseBtn: { position: 'absolute', top: 50, right: 20, zIndex: 10, padding: 10, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 20 },
   viewerCloseText: { color: '#fff', fontSize: 24, fontWeight: 'bold' },
   viewerImage: { width: '100%', height: '80%' },
-  checkbox: { width: 20, height: 20, borderWidth: 1, borderColor: '#FF69B4', borderRadius: 4 },
-  checkboxActive: { backgroundColor: '#FF69B4' }
+  checkbox: { width: 20, height: 20, borderWidth: 1, borderColor: '#C88D7A', borderRadius: 4 },
+  checkboxActive: { backgroundColor: '#C88D7A' }
 });

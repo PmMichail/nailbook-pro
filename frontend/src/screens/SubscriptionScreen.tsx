@@ -72,7 +72,7 @@ export const SubscriptionScreen = ({ navigation }: any) => {
   };
 
   if (loading) {
-    return <View style={[styles.container, {justifyContent: 'center'}]}><ActivityIndicator size="large" color="#FF69B4" /></View>;
+    return <View style={[styles.container, {justifyContent: 'center'}]}><ActivityIndicator size="large" color="#C88D7A" /></View>;
   }
 
   const isPro = sub?.plan === 'PRO' && (sub?.status === 'ACTIVE' || sub?.status === 'TRIAL');
@@ -154,11 +154,11 @@ const styles = StyleSheet.create({
   badgeText: { fontWeight: 'bold', color: '#333' },
   warningText: { color: 'red', marginTop: 10, fontSize: 13, fontStyle: 'italic' },
   features: { marginTop: 30, backgroundColor: '#fff', borderRadius: 15, padding: 20 },
-  featureTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 15, color: '#FF69B4' },
+  featureTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 15, color: '#C88D7A' },
   featureItem: { fontSize: 14, color: '#333', marginBottom: 10 },
-  trialButton: { backgroundColor: '#FFB6C1', padding: 15, borderRadius: 15, alignItems: 'center', marginBottom: 15 },
+  trialButton: { backgroundColor: '#e0c0b4', padding: 15, borderRadius: 15, alignItems: 'center', marginBottom: 15 },
   trialButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
-  proButton: { backgroundColor: '#FF69B4', padding: 15, borderRadius: 15, alignItems: 'center' },
+  proButton: { backgroundColor: '#C88D7A', padding: 15, borderRadius: 15, alignItems: 'center' },
   proButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
   cancelButton: { marginTop: 30, backgroundColor: '#fff', padding: 15, borderRadius: 15, alignItems: 'center', borderWidth: 1, borderColor: '#eee' },
   cancelButtonText: { color: 'red', fontWeight: 'bold' }

@@ -149,11 +149,11 @@ const styles = StyleSheet.create({
     codeSection: { padding: 15, borderRadius: 15, marginBottom: 20, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2 },
     row: { flexDirection: 'row', alignItems: 'center' },
     input: { padding: 12, borderRadius: 10, borderWidth: 1 },
-    btn: { backgroundColor: '#FF69B4', padding: 12, borderRadius: 10 },
+    btn: { backgroundColor: '#C88D7A', padding: 12, borderRadius: 10 },
     btnText: { color: '#fff', fontWeight: 'bold' },
     card: { borderRadius: 15, padding: 15, marginBottom: 15, borderWidth: 1, shadowColor: '#000', shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.1, shadowRadius: 5, elevation: 3 },
     header: { flexDirection: 'row', alignItems: 'center' },
-    avatarPlaceholder: { width: 50, height: 50, borderRadius: 25, backgroundColor: '#FF69B4', justifyContent: 'center', alignItems: 'center', marginRight: 15 },
+    avatarPlaceholder: { width: 50, height: 50, borderRadius: 25, backgroundColor: '#C88D7A', justifyContent: 'center', alignItems: 'center', marginRight: 15 },
     info: { flex: 1 },
     name: { fontSize: 18, fontWeight: 'bold' },
     city: { fontSize: 14, color: '#888', marginTop: 4 }

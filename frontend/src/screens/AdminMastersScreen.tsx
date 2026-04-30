@@ -101,7 +101,7 @@ export const AdminMastersScreen = () => {
         ]);
     };
 
-    if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#FF69B4" /></View>;
+    if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#C88D7A" /></View>;
 
     return (
         <ScrollView style={styles.container}>
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
     badgeText: { fontWeight: 'bold', color: '#333', fontSize: 12 },
     expText: { color: '#ff8c00', marginTop: 10, fontWeight: 'bold' },
     actions: { flexDirection: 'row', marginTop: 15, justifyContent: 'flex-start' },
-    upgradeBtn: { backgroundColor: '#FF69B4', paddingVertical: 8, paddingHorizontal: 15, borderRadius: 8 },
+    upgradeBtn: { backgroundColor: '#C88D7A', paddingVertical: 8, paddingHorizontal: 15, borderRadius: 8 },
     downgradeBtn: { backgroundColor: '#ffebe6', paddingVertical: 8, paddingHorizontal: 15, borderRadius: 8 },
     btnText: { color: '#fff', fontWeight: 'bold', fontSize: 13 },
     btnTextDowngrade: { color: 'red', fontWeight: 'bold', fontSize: 13 }

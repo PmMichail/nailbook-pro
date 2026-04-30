@@ -23,7 +23,7 @@ const Stack = createNativeStackNavigator();
 const ChatStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="ChatsList" component={ChatsListScreen} />
-    <Stack.Screen name="ChatScreen" component={ChatScreen} options={{ headerShown: true, title: 'Чат', headerBackVisible: false, headerTintColor: '#FF69B4' }} />
+    <Stack.Screen name="ChatScreen" component={ChatScreen} options={{ headerShown: true, title: 'Чат', headerBackVisible: false, headerTintColor: '#C88D7A' }} />
   </Stack.Navigator>
 );
 
@@ -42,7 +42,7 @@ const MasterProfileStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="MasterProfile" component={MasterProfileScreen} />
     <Stack.Screen name="PaymentSetupScreen" component={PaymentSetupScreen} />
-    <Stack.Screen name="SubscriptionScreen" component={SubscriptionScreen} options={{ headerShown: true, title: 'Підписка', headerTintColor: '#FF69B4' }} />
+    <Stack.Screen name="SubscriptionScreen" component={SubscriptionScreen} options={{ headerShown: true, title: 'Підписка', headerTintColor: '#C88D7A' }} />
     <Stack.Screen name="SettingsScreen" component={SettingsScreen} />
     <Stack.Screen name="NotificationSettings" component={NotificationSettingsScreen} />
   </Stack.Navigator>
@@ -51,10 +51,10 @@ const MasterProfileStack = () => (
 const ClientProfileStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="ClientProfile" component={ClientProfileScreen} />
-    <Stack.Screen name="Favorites" component={FavoritesScreen} options={{ headerShown: true, title: 'Обрані дизайни', headerTintColor: '#FF69B4' }} />
-    <Stack.Screen name="SearchMastersScreen" component={SearchMastersScreen} options={{ headerShown: true, title: 'Пошук майстрів', headerTintColor: '#FF69B4' }} />
-    <Stack.Screen name="PublicMasterGalleryScreen" component={PublicMasterGalleryScreen} options={{ headerShown: true, title: 'Галерея майстра', headerTintColor: '#FF69B4' }} />
-    <Stack.Screen name="MastersList" component={MastersListScreen} options={{ headerShown: true, title: 'Пошук майстрів', headerTintColor: '#FF69B4' }} />
+    <Stack.Screen name="Favorites" component={FavoritesScreen} options={{ headerShown: true, title: 'Обрані дизайни', headerTintColor: '#C88D7A' }} />
+    <Stack.Screen name="SearchMastersScreen" component={SearchMastersScreen} options={{ headerShown: true, title: 'Пошук майстрів', headerTintColor: '#C88D7A' }} />
+    <Stack.Screen name="PublicMasterGalleryScreen" component={PublicMasterGalleryScreen} options={{ headerShown: true, title: 'Галерея майстра', headerTintColor: '#C88D7A' }} />
+    <Stack.Screen name="MastersList" component={MastersListScreen} options={{ headerShown: true, title: 'Пошук майстрів', headerTintColor: '#C88D7A' }} />
   </Stack.Navigator>
 );
 

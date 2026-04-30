@@ -195,12 +195,12 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   primaryButton: {
-    backgroundColor: '#FF69B4', // Hot pink пастельний варіант
+    backgroundColor: '#C88D7A', // Hot pink пастельний варіант
     width: '100%',
     padding: 18,
     borderRadius: 20,
     alignItems: 'center',
-    shadowColor: '#FF69B4',
+    shadowColor: '#C88D7A',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   secondaryButtonText: {
-    color: '#FF69B4',
+    color: '#C88D7A',
     fontSize: 16,
     fontWeight: '600',
   }

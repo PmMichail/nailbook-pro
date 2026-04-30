@@ -29,7 +29,7 @@ export const MasterCalendarScreen = () => {
   };
 
   const markedDates: any = {
-    [selectedDay]: { selected: true, selectedColor: '#FF69B4' }
+    [selectedDay]: { selected: true, selectedColor: '#C88D7A' }
   };
 
   const updateStatus = async (id: string, newStatus: string) => {
@@ -56,10 +56,10 @@ export const MasterCalendarScreen = () => {
           onDayPress={(day: any) => setSelectedDay(day.dateString)}
           markedDates={markedDates}
           theme={{
-            selectedDayBackgroundColor: '#FF69B4',
-            todayTextColor: '#FF69B4',
-            arrowColor: '#FF69B4',
-            monthTextColor: '#FF69B4',
+            selectedDayBackgroundColor: '#C88D7A',
+            todayTextColor: '#C88D7A',
+            arrowColor: '#C88D7A',
+            monthTextColor: '#C88D7A',
             textMonthFontWeight: 'bold',
           }}
         />
@@ -80,7 +80,7 @@ export const MasterCalendarScreen = () => {
            ]);
         }}
       >
-        <Text style={{color: '#FF69B4', fontWeight: 'bold'}}>🧹 Очистити минулі записи</Text>
+        <Text style={{color: '#C88D7A', fontWeight: 'bold'}}>🧹 Очистити минулі записи</Text>
       </TouchableOpacity>
 
       <View style={styles.card}>
@@ -92,7 +92,7 @@ export const MasterCalendarScreen = () => {
         </View>
 
         {loading ? (
-          <ActivityIndicator color="#FF69B4" />
+          <ActivityIndicator color="#C88D7A" />
         ) : appointments.length === 0 ? (
           <Text style={styles.noData}>Немає записів на цей день</Text>
         ) : (
@@ -119,7 +119,7 @@ export const MasterCalendarScreen = () => {
                     </TouchableOpacity>
                   )}
                   {app.status !== 'CANCELLED' && (
-                    <TouchableOpacity style={[styles.actionBtn, {backgroundColor: '#FFB6C1'}]} onPress={() => updateStatus(app.id, 'CANCELLED')}>
+                    <TouchableOpacity style={[styles.actionBtn, {backgroundColor: '#e0c0b4'}]} onPress={() => updateStatus(app.id, 'CANCELLED')}>
                       <Text style={styles.actionBtnText}>✗</Text>
                     </TouchableOpacity>
                   )}
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
   calendarWrapper: { borderRadius: 20, overflow: 'hidden', shadowColor: '#000', shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.1, shadowRadius: 5, elevation: 3, marginBottom: 20 },
   card: { backgroundColor: '#fff', borderRadius: 20, padding: 20, marginBottom: 40, shadowColor: '#000', shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.1, shadowRadius: 5, elevation: 3 },
   cardHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 },
-  cardTitle: { fontSize: 18, fontWeight: '600', color: '#FF69B4' },
+  cardTitle: { fontSize: 18, fontWeight: '600', color: '#C88D7A' },
   editBtn: { backgroundColor: '#eee', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10 },
   editBtnText: { fontSize: 12, color: '#555' },
   noData: { color: '#999', fontStyle: 'italic', marginTop: 10 },

@@ -163,11 +163,11 @@ const styles = StyleSheet.create({
   image: { width: '100%', height: 180, resizeMode: 'cover' },
   imageFooter: { padding: 10, alignItems: 'flex-start' },
   tagsContainer: { flexDirection: 'row', flexWrap: 'wrap' },
-  tagText: { color: '#fff', backgroundColor: '#FFB6C1', fontSize: 10, paddingHorizontal: 5, paddingVertical: 2, borderRadius: 5, marginRight: 3, marginBottom: 3, overflow: 'hidden' },
+  tagText: { color: '#fff', backgroundColor: '#e0c0b4', fontSize: 10, paddingHorizontal: 5, paddingVertical: 2, borderRadius: 5, marginRight: 3, marginBottom: 3, overflow: 'hidden' },
   viewerBg: { flex: 1, backgroundColor: 'rgba(0,0,0,0.9)', justifyContent: 'center', alignItems: 'center' },
   viewerCloseBtn: { position: 'absolute', top: 50, right: 20, zIndex: 10, padding: 10, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 20 },
   viewerCloseText: { color: '#fff', fontSize: 24, fontWeight: 'bold' },
   viewerImage: { width: '100%', height: '80%' },
-  requestBtn: { position: 'absolute', bottom: 30, left: 20, right: 20, padding: 15, backgroundColor: '#FF69B4', borderRadius: 15, elevation: 5, shadowColor: '#000', shadowOffset: {width:0, height:2}, shadowOpacity: 0.3, shadowRadius: 5 },
+  requestBtn: { position: 'absolute', bottom: 30, left: 20, right: 20, padding: 15, backgroundColor: '#C88D7A', borderRadius: 15, elevation: 5, shadowColor: '#000', shadowOffset: {width:0, height:2}, shadowOpacity: 0.3, shadowRadius: 5 },
   requestBtnText: { color: '#fff', fontSize: 16, fontWeight: 'bold', textAlign: 'center' }
 });

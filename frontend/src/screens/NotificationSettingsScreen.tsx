@@ -22,15 +22,15 @@ export const NotificationSettingsScreen = () => {
         
         <View style={styles.settingRow}>
           <Text style={styles.settingLabel}>Всі сповіщення</Text>
-          <Switch value={allPush} onValueChange={setAllPush} trackColor={{ true: '#FF69B4', false: '#eee' }} />
+          <Switch value={allPush} onValueChange={setAllPush} trackColor={{ true: '#C88D7A', false: '#eee' }} />
         </View>
         <View style={styles.settingRow}>
           <Text style={styles.settingLabel}>Нові повідомлення (Чат)</Text>
-          <Switch value={chatPush} onValueChange={setChatPush} disabled={!allPush} trackColor={{ true: '#FF69B4', false: '#eee' }} />
+          <Switch value={chatPush} onValueChange={setChatPush} disabled={!allPush} trackColor={{ true: '#C88D7A', false: '#eee' }} />
         </View>
         <View style={styles.settingRow}>
           <Text style={styles.settingLabel}>Нагадування про записи (за 24г/2г)</Text>
-          <Switch value={reminders} onValueChange={setReminders} disabled={!allPush} trackColor={{ true: '#FF69B4', false: '#eee' }} />
+          <Switch value={reminders} onValueChange={setReminders} disabled={!allPush} trackColor={{ true: '#C88D7A', false: '#eee' }} />
         </View>
       </View>
 
@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
   container: { flex: 1,  padding: 20 },
   header: { fontSize: 24, fontWeight: 'bold', color: '#333', marginBottom: 20, marginTop: 40 },
   card: { backgroundColor: '#fff', borderRadius: 20, padding: 20, marginBottom: 20, shadowColor: '#000', shadowOffset: {width: 0, height: 1}, shadowOpacity: 0.1, shadowRadius: 3, elevation: 3 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#FF69B4', marginBottom: 20 },
+  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#C88D7A', marginBottom: 20 },
   settingRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15, borderBottomWidth: 1, borderBottomColor: '#f9f9f9', paddingBottom: 10 },
   settingLabel: { fontSize: 16, color: '#333' },
   btn: { padding: 15, borderRadius: 15, alignItems: 'center' },
