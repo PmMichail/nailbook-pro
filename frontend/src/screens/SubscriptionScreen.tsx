@@ -4,8 +4,8 @@ import api from '../api/client';
 import { useTranslation } from 'react-i18next';
 import Purchases from 'react-native-purchases';
 
-// Dummy keys - replace in production
-const API_KEY_IOS = "appl_dummy_key_here";
+// Keys provided by user
+const API_KEY_IOS = "test_ZmSbPrLAaDuIfvjPTGCwtDCXMFR";
 const API_KEY_ANDROID = "goog_dummy_key_here";
 
 export const SubscriptionScreen = ({ navigation }: any) => {
@@ -22,11 +22,11 @@ export const SubscriptionScreen = ({ navigation }: any) => {
 
   const setupPurchases = async () => {
      try {
-         // Purchases.configure({ apiKey: Platform.OS === 'ios' ? API_KEY_IOS : API_KEY_ANDROID });
-         // const offerings = await Purchases.getOfferings();
-         // if (offerings.current !== null && offerings.current.availablePackages.length !== 0) {
-         //    setPackages(offerings.current.availablePackages);
-         // }
+         Purchases.configure({ apiKey: Platform.OS === 'ios' ? API_KEY_IOS : API_KEY_ANDROID });
+         const offerings = await Purchases.getOfferings();
+         if (offerings.current !== null && offerings.current.availablePackages.length !== 0) {
+            setPackages(offerings.current.availablePackages);
+         }
      } catch(e) {
          console.warn("RevenueCat not fully configured yet.");
      }
@@ -62,17 +62,15 @@ export const SubscriptionScreen = ({ navigation }: any) => {
       setLoading(true);
       
       // RevenueCat Purchase Flow
-      // if (packages.length > 0) {
-      //   const { customerInfo } = await Purchases.purchasePackage(packages[0]);
-      //   if (customerInfo.entitlements.active['pro']) {
-      //     // Trigger backend refresh
-      //     await api.post('/api/master/subscription/refresh-rc');
-      //   }
-      // } else {
-      //   Alert.alert('Увага', 'Пакети підписок наразі не налаштовані в Apple/Google.');
-      // }
-      
-      Alert.alert('Увага', 'Для реальної оплати потрібно замінити API ключі RevenueCat.');
+      if (packages.length > 0) {
+        const { customerInfo } = await Purchases.purchasePackage(packages[0]);
+        if (customerInfo.entitlements.active['pro']) {
+          // Trigger backend refresh
+          Alert.alert('Успіх', 'Підписка PRO активована!');
+        }
+      } else {
+        Alert.alert('Увага', 'Пакети підписок наразі не налаштовані в Apple/Google.');
+      }
 
       loadSubscription();
     } catch (e: any) {
