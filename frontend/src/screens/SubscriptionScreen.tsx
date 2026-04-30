@@ -132,9 +132,9 @@ export const SubscriptionScreen = ({ navigation }: any) => {
             </TouchableOpacity>
          </View>
       ) : (
-         <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
-            <Text style={styles.cancelButtonText}>Відмінити підписку</Text>
-         </TouchableOpacity>
+         <View style={{marginTop: 30, padding: 15, backgroundColor: '#f9f9f9', borderRadius: 10, borderWidth: 1, borderColor: '#eee'}}>
+            <Text style={{textAlign: 'center', color: '#555'}}>Ваша підписка активна і не потребує ручного скасування. Вона автоматично перейде на тариф LITE після закінчення терміну дії.</Text>
+         </View>
       )}
 
     </View>

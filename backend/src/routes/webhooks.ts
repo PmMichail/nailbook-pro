@@ -73,6 +73,31 @@ router.post('/liqpay', async (req, res) => {
   }
 });
 
+// GET /api/webhooks/liqpay/success
+// Returns HTML success message when LiqPay redirects back
+const renderSuccessHtml = (req: any, res: any) => {
+   res.send(`
+       <html>
+         <body style="display:flex; justify-content:center; align-items:center; height:100vh; background:#FFF0F5; font-family:sans-serif;">
+            <div style="text-align:center; padding: 40px; background: white; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+               <h1 style="color:#FF69B4">Оплата успішна! 🎉</h1>
+               <p>Вашу підписку PRO активовано.</p>
+               <p>Ви можете закрити це вікно і повернутись у додаток.</p>
+               <script>
+                   // Якщо можливо, спробуємо закрити вікно автоматично
+                   setTimeout(() => {
+                       window.close();
+                   }, 3000);
+               </script>
+            </div>
+         </body>
+       </html>
+   `);
+};
+
+router.get('/liqpay/success', renderSuccessHtml);
+router.post('/liqpay/success', renderSuccessHtml);
+
 // GET /api/webhooks/mock-payment?orderId=X&masterId=Y
 // Simulates a successful checkout from the browser
 router.get('/mock-payment', async (req, res) => {

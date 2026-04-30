@@ -21,7 +21,8 @@ router.get('/', async (req: AuthRequest, res) => {
       where: {
         OR: [
           { roomId: { contains: req.user!.id } },
-          { roomId: { in: appointmentIds } }
+          { roomId: { in: appointmentIds } },
+          { messages: { some: { senderId: req.user!.id } } }
         ]
       },
       include: {
