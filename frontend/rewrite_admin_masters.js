@@ -1,4 +1,7 @@
-import React, { useState, useEffect } from 'react';
+const fs = require('fs');
+const path = 'src/screens/AdminMastersScreen.tsx';
+
+const content = `import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, Modal, Dimensions } from 'react-native';
 import { BarChart } from 'react-native-chart-kit';
 import api from '../api/client';
@@ -36,7 +39,7 @@ export const AdminMastersScreen = () => {
             { text: 'Ні', style: 'cancel' },
             { text: 'Так', onPress: async () => {
                 try {
-                    await api.put(`/api/admin/masters/${masterId}/subscription`, {
+                    await api.put(\`/api/admin/masters/\${masterId}/subscription\`, {
                         plan: 'PRO', status: 'ACTIVE', durationDays: 30
                     });
                     Alert.alert('Успіх', 'Статус оновлено');
@@ -53,7 +56,7 @@ export const AdminMastersScreen = () => {
             { text: 'Ні', style: 'cancel' },
             { text: 'Так', onPress: async () => {
                 try {
-                    await api.put(`/api/admin/masters/${masterId}/subscription`, {
+                    await api.put(\`/api/admin/masters/\${masterId}/subscription\`, {
                         plan: 'FREE', status: 'ACTIVE', durationDays: null
                     });
                     Alert.alert('Успіх', 'Статус оновлено на FREE');
@@ -70,8 +73,8 @@ export const AdminMastersScreen = () => {
             { text: 'Скасувати', style: 'cancel' },
             { text: 'Так', style: 'destructive', onPress: async () => {
                 try {
-                    const res = await api.put(`/api/admin/masters/${masterId}/reset-password`);
-                    Alert.alert('Успіх', `Новий пароль для майстра:\n\n${res.data.newPassword}\n\nОбов'язково передайте його власнику.`);
+                    const res = await api.put(\`/api/admin/masters/\${masterId}/reset-password\`);
+                    Alert.alert('Успіх', \`Новий пароль для майстра:\\n\\n\${res.data.newPassword}\\n\\nОбов'язково передайте його власнику.\`);
                 } catch(e) {
                     Alert.alert('Помилка', 'Не вдалося скинути пароль');
                 }
@@ -84,7 +87,7 @@ export const AdminMastersScreen = () => {
             { text: 'Скасувати', style: 'cancel' },
             { text: 'Так', onPress: async () => {
                 try {
-                    await api.put(`/api/admin/users/${masterId}/ban`, { isBanned: !currentStatus });
+                    await api.put(\`/api/admin/users/\${masterId}/ban\`, { isBanned: !currentStatus });
                     Alert.alert('Успіх', 'Статус оновлено');
                     loadMasters();
                 } catch(e) {
@@ -95,11 +98,11 @@ export const AdminMastersScreen = () => {
     };
 
     const deleteUser = async (userId: string, userName: string) => {
-        Alert.alert('УВАГА: НЕЗВОРОТНЯ ДІЯ', `Ви точно хочете повністю видалити акаунт ${userName}? Всі їх прайси та записи будуть знищені!`, [
+        Alert.alert('УВАГА: НЕЗВОРОТНЯ ДІЯ', \`Ви точно хочете повністю видалити акаунт \${userName}? Всі їх прайси та записи будуть знищені!\`, [
             { text: 'Скасувати', style: 'cancel' },
             { text: 'ВИДАЛИТИ', style: 'destructive', onPress: async () => {
                 try {
-                    await api.delete(`/api/admin/users/${userId}`);
+                    await api.delete(\`/api/admin/users/\${userId}\`);
                     Alert.alert('Успіх', 'Акаунт видалено');
                     loadMasters();
                 } catch(e) {
@@ -114,7 +117,7 @@ export const AdminMastersScreen = () => {
         setAnalyticsVisible(true);
         setLoadingAnalytics(true);
         try {
-            const res = await api.get(`/api/admin/masters/${master.id}/analytics`);
+            const res = await api.get(\`/api/admin/masters/\${master.id}/analytics\`);
             setAnalyticsData(res.data);
         } catch(e) {
             Alert.alert('Помилка', 'Не вдалося завантажити аналітику');
@@ -128,8 +131,8 @@ export const AdminMastersScreen = () => {
       backgroundColor: '#ffffff',
       backgroundGradientFrom: '#ffffff',
       backgroundGradientTo: '#ffffff',
-      color: (opacity = 1) => `rgba(200, 141, 122, ${opacity})`,
-      labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+      color: (opacity = 1) => \`rgba(200, 141, 122, \${opacity})\`,
+      labelColor: (opacity = 1) => \`rgba(0, 0, 0, \${opacity})\`,
       barPercentage: 0.5,
     };
 
@@ -271,3 +274,7 @@ const styles = StyleSheet.create({
     statBoxVal: { fontSize: 24, fontWeight: 'bold', color: '#C88D7A' },
     statBoxLabel: { fontSize: 12, color: '#666', marginTop: 5 }
 });
+`;
+
+fs.writeFileSync(path, content, 'utf8');
+console.log("Rewrote AdminMastersScreen.tsx");

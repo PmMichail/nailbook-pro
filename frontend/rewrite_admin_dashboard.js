@@ -1,4 +1,7 @@
-import React, { useState, useEffect } from 'react';
+const fs = require('fs');
+const path = 'src/screens/AdminDashboardScreen.tsx';
+
+const content = `import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, TextInput, Alert, FlatList, Dimensions } from 'react-native';
 import { LineChart, PieChart } from 'react-native-chart-kit';
 import api from '../api/client';
@@ -94,8 +97,8 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
       backgroundColor: '#fff',
       backgroundGradientFrom: '#fff',
       backgroundGradientTo: '#fff',
-      color: (opacity = 1) => `rgba(200, 141, 122, ${opacity})`,
-      labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+      color: (opacity = 1) => \`rgba(200, 141, 122, \${opacity})\`,
+      labelColor: (opacity = 1) => \`rgba(0, 0, 0, \${opacity})\`,
       propsForDots: { r: '4', strokeWidth: '2', stroke: '#C88D7A' }
     };
 
@@ -178,7 +181,7 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
                                 data={{ labels: getLast7DaysLabels(), datasets: [{ data: stats.last7DaysRevenue.some(n=>n>0) ? stats.last7DaysRevenue : [0,0,0,0,0,0,0] }] }}
                                 width={screenWidth - 30}
                                 height={220}
-                                chartConfig={{...chartConfig, color: (opacity=1)=>`rgba(76, 175, 80, ${opacity})`}}
+                                chartConfig={{...chartConfig, color: (opacity=1)=>\`rgba(76, 175, 80, \${opacity})\`}}
                                 bezier
                                 style={{borderRadius: 12, marginVertical: 8}}
                             />
@@ -320,3 +323,7 @@ const styles = StyleSheet.create({
     saveBtn: { backgroundColor: '#C88D7A', padding: 15, borderRadius: 10, alignItems: 'center' },
     saveBtnText: { color: '#fff', fontSize: 16, fontWeight: 'bold' }
 });
+`;
+
+fs.writeFileSync(path, content, 'utf8');
+console.log("Rewrote AdminDashboardScreen.tsx");

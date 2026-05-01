@@ -107,7 +107,41 @@ router.get('/clients', async (req, res) => {
 router.get('/statistics', async (req, res) => {
    try {
        const totalMasters = await prisma.user.count({ where: { role: 'MASTER' } });
-       const totalClients = await prisma.user.count({ where: { role: 'CLIENT' } });
+       
+       // Calculate Last 7 Days Revenue
+       const sevenDaysAgo = new Date();
+       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+       
+       const recentPayments = await prisma.payment.findMany({
+           where: { status: 'success', createdAt: { gte: sevenDaysAgo } },
+           select: { amount: true, createdAt: true }
+       });
+       
+       const recentUsers = await prisma.user.findMany({
+           where: { role: 'MASTER', createdAt: { gte: sevenDaysAgo } },
+           select: { createdAt: true }
+       });
+       
+       const last7DaysRevenue: number[] = [0,0,0,0,0,0,0];
+       const last7DaysRegs: number[] = [0,0,0,0,0,0,0];
+       
+       for (let i = 0; i < 7; i++) {
+           const d = new Date();
+           d.setDate(d.getDate() - (6 - i));
+           const dateStr = d.toISOString().split('T')[0];
+           
+           recentPayments.forEach(p => {
+               if (p.createdAt.toISOString().split('T')[0] === dateStr) {
+                   last7DaysRevenue[i]! += p.amount || 0;
+               }
+           });
+           recentUsers.forEach(u => {
+               if (u.createdAt.toISOString().split('T')[0] === dateStr) {
+                   last7DaysRegs[i]! += 1;
+               }
+           });
+       }
+
        const activePro = await prisma.subscription.count({
            where: { plan: 'PRO', status: 'ACTIVE' }
        });
@@ -127,7 +161,7 @@ router.get('/statistics', async (req, res) => {
 
        res.json({
            totalMasters,
-           totalClients,
+           last7DaysRevenue, last7DaysRegs,
            activePro,
            activeTrials,
            canceledOrExpired,
@@ -213,7 +247,7 @@ router.get('/activity', async (req, res) => {
         const events: any[] = [];
         users.forEach(u => events.push({ id: `usr_${u.id}`, type: 'USER_REG', title: `Новий ${u.role === 'MASTER' ? 'Майстер' : 'Клієнт'}`, details: `${u.name} (${u.phone})`, timestamp: u.createdAt }));
         appts.forEach(a => events.push({ id: `apt_${a.id}`, type: 'NEW_APPT', title: `Новий Запис`, details: `Клієнт ${a.client?.name || 'Невідомо'} до майстра ${a.master?.name || 'Невідомо'} (${a.service || 'Без послуги'})`, timestamp: a.createdAt }));
-        payments.forEach(p => events.push({ id: `pay_${p.id}`, type: 'PAYMENT', title: `Оплата Підписки`, details: `Майстер ${p.master?.name || 'Невідомо'} сплатив ${p.amount} грн [${p.status}]`, timestamp: p.createdAt }));
+        payments.forEach(p => events.push({ id: `pay_${p.id}`, type: 'PAYMENT', title: `Оплата Підписки`, details: `Майстер ${p.master?.name || 'Невідомо'} сплатив ${p.amount || 0} грн [${p.status}]`, timestamp: p.createdAt }));
 
         events.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
@@ -236,44 +270,33 @@ router.get('/regions', async (req, res) => {
             select: { masterId: true }
         });
 
-        // Grouping logic
+        // Country Classification Logic
         const regionMap = new Map();
+        
+        const getCountry = (lat: number, lng: number) => {
+             if (lat > 44 && lat < 52.5 && lng > 22 && lng < 40.5) return 'Україна';
+             if (lat > 49 && lat < 55 && lng > 14 && lng < 24) return 'Польща';
+             if (lat > 47 && lat < 55 && lng > 5 && lng < 15) return 'Німеччина';
+             return 'Інші (Європа)';
+        };
 
         masters.forEach(m => {
-            let regionKey = 'Невідомо';
-            if (m.city && m.city.trim() !== '') {
-                // Capitalize first letter to normalize
-                const cleanedCity = m.city.trim().charAt(0).toUpperCase() + m.city.trim().slice(1).toLowerCase();
-                regionKey = cleanedCity;
-            } else if (m.lat && m.lng) {
-                // Cluster by ~20km approx (rounding to 1 decimal place)
-                const rndLat = m.lat.toFixed(1);
-                const rndLng = m.lng.toFixed(1);
-                regionKey = `Гео-зона (${rndLat}, ${rndLng})`;
+            let regionKey = 'Не вказано';
+            if (m.lat && m.lng) {
+                regionKey = getCountry(m.lat, m.lng);
+            } else if (m.city && m.city.trim() !== '') {
+                // Fallback to city parsing (basic)
+                const c = m.city.toLowerCase();
+                if (c.includes('kyiv') || c.includes('київ') || c.includes('lviv') || c.includes('львів')) regionKey = 'Україна';
+                else if (c.includes('warsaw') || c.includes('варшава') || c.includes('krakow') || c.includes('краків')) regionKey = 'Польща';
+                else if (c.includes('berlin') || c.includes('берлін') || c.includes('munich') || c.includes('мюнхен')) regionKey = 'Німеччина';
+                else regionKey = 'Інші';
             }
 
             if (!regionMap.has(regionKey)) {
-                regionMap.set(regionKey, { region: regionKey, masterCount: 0, clientCount: 0 });
+                regionMap.set(regionKey, { region: regionKey, masterCount: 0 });
             }
             regionMap.get(regionKey).masterCount += 1;
-        });
-
-        clients.forEach(c => {
-            if (c.masterId) {
-                // Find master's region
-                const master = masters.find(m => m.id === c.masterId);
-                if (master) {
-                    let regionKey = 'Невідомо';
-                    if (master.city && master.city.trim() !== '') {
-                        regionKey = master.city.trim().charAt(0).toUpperCase() + master.city.trim().slice(1).toLowerCase();
-                    } else if (master.lat && master.lng) {
-                        regionKey = `Гео-зона (${master.lat.toFixed(1)}, ${master.lng.toFixed(1)})`;
-                    }
-                    if (regionMap.has(regionKey)) {
-                        regionMap.get(regionKey).clientCount += 1;
-                    }
-                }
-            }
         });
 
         const sortedRegions = Array.from(regionMap.values()).sort((a, b) => b.masterCount - a.masterCount);
@@ -304,15 +327,43 @@ router.delete('/users/:id', async (req, res) => {
         await prisma.masterWeeklySettings.deleteMany({ where: { masterId: userId } });
         await prisma.priceList.deleteMany({ where: { masterId: userId } });
         await prisma.appointment.deleteMany({ where: { OR: [{ masterId: userId }, { clientId: userId }] } });
-        await prisma.chatMessage.deleteMany({ where: { senderId: userId } });
+        await prisma.message.deleteMany({ where: { senderId: userId } });
         const userChats = await prisma.chat.findMany({ where: { roomId: { contains: userId } }});
-        await prisma.chatMessage.deleteMany({ where: { chatId: { in: userChats.map(c => c.id) } }});
+        await prisma.message.deleteMany({ where: { chatId: { in: userChats.map(c => c.id) } }});
         await prisma.chat.deleteMany({ where: { roomId: { contains: userId } } });
         
         await prisma.user.delete({ where: { id: userId } });
         res.json({ success: true });
     } catch(e) {
         res.status(500).json({ error: 'Failed to delete user' });
+    }
+});
+
+
+// GET /api/admin/masters/:id/analytics
+router.get('/masters/:id/analytics', async (req, res) => {
+    try {
+        const masterId = req.params.id;
+        const totalClients = await prisma.user.count({ where: { role: 'CLIENT', masterId } });
+        const totalAppointments = await prisma.appointment.count({ where: { masterId } });
+        
+        const completedAppointments = await prisma.appointment.count({ where: { masterId, status: 'COMPLETED' } });
+        const cancelledAppointments = await prisma.appointment.count({ where: { masterId, status: 'CANCELLED' } });
+        const pendingAppointments = await prisma.appointment.count({ where: { masterId, status: 'PENDING' } });
+        const confirmedAppointments = await prisma.appointment.count({ where: { masterId, status: 'CONFIRMED' } });
+        
+        res.json({
+            totalClients,
+            totalAppointments,
+            chartData: [
+                { name: 'Completed', count: completedAppointments },
+                { name: 'Cancelled', count: cancelledAppointments },
+                { name: 'Confirmed', count: confirmedAppointments },
+                { name: 'Pending', count: pendingAppointments }
+            ]
+        });
+    } catch(e) {
+        res.status(500).json({ error: 'Server error' });
     }
 });
 

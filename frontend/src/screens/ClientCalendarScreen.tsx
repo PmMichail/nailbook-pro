@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, ImageBackground, RefreshControl, Linking } from 'react-native';
+import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Animated, ImageBackground, RefreshControl, Linking } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
@@ -19,6 +19,7 @@ export const ClientCalendarScreen = ({ navigation }: any) => {
   const [masterId, setMasterId] = useState<string | null>(null);
   const [masterName, setMasterName] = useState<string>('ПРОСТІР КРАСИ');
   const [masterType, setMasterType] = useState<string>('');
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [socialLinks, setSocialLinks] = useState<any>({ instagram: '', tiktok: '', facebook: '' });
   const [prices, setPrices] = useState<any[]>([]);
   const [selectedPriceId, setSelectedPriceId] = useState<string | null>(null);
@@ -46,6 +47,7 @@ export const ClientCalendarScreen = ({ navigation }: any) => {
                 } else if (masterRes.data.name) {
                     setMasterName(masterRes.data.name.toUpperCase()); setMasterType('master');
                 }
+                if (masterRes.data.avatarUrl) setAvatarUrl(masterRes.data.avatarUrl);
                 setSocialLinks({
                     instagram: masterRes.data.instagram || '',
                     tiktok: masterRes.data.tiktok || '',
@@ -150,8 +152,12 @@ export const ClientCalendarScreen = ({ navigation }: any) => {
       {/* Header */}
       <View style={[styles.header, { backgroundColor: colors.background }]}>
         <Text style={[styles.brandTitle, { color: colors.text }]}>NAILSBOOK PRO</Text>
-        <View style={[styles.avatarHolder, { borderColor: colors.border, backgroundColor: colors.card }]}>
-            <Text style={{fontSize: 16}}>💅</Text>
+        <View style={[styles.avatarHolder, { borderColor: colors.border, backgroundColor: colors.card, overflow: 'hidden' }]}>
+            {avatarUrl ? (
+                <Image source={{ uri: avatarUrl }} style={{ width: '100%', height: '100%' }} />
+            ) : (
+                <Text style={{fontSize: 16}}>💅</Text>
+            )}
         </View>
       </View>
 
