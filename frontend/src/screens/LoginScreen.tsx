@@ -58,7 +58,7 @@ export const LoginScreen = ({ navigation }: any) => {
   const executeLogin = async (phoneToUse: string, passToUse: string) => {
     try {
       setIsAuthenticating(true);
-      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
+      const API_URL = api.defaults.baseURL;
       const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

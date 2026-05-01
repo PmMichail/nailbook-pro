@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Switch } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import * as Location from 'expo-location';
-import api from '../api/client';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 export const SettingsScreen = () => {
@@ -22,89 +20,34 @@ export const SettingsScreen = () => {
       ]);
   };
 
-  const handleFixLocation = async () => {
-    try {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Помилка', 'Доступ до геоданих відхилено');
-        return;
-      }
-      const location = await Location.getCurrentPositionAsync({});
-      await api.put('/api/master/salon-info', {
-        lat: location.coords.latitude,
-        lng: location.coords.longitude
-      });
-      Alert.alert('Готово', 'Ваша геолокація успішно збережена!');
-    } catch(e) {
-      Alert.alert('Помилка', 'Не вдалося визначити геолокацію');
-    }
-  };
-
-  const handleCalendarConnect = () => {
-    // В реальності відкриваємо WebView на /api/calendar/auth
-    if(calendarConnected) {
-      Alert.alert("Відключення", "Ви впевнені, що хочете відключити Google Calendar?", [
-        { text: 'Ні', style: 'cancel' },
-        { text: 'Так, відключити', onPress: () => setCalendarConnected(false), style: 'destructive' }
-      ]);
-    } else {
-      setCalendarConnected(true);
-      Alert.alert("Успіх", "Уявімо, що ви успішно пройшли OAuth авторизацію Google.");
-    }
-  };
-
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
       <Text style={[styles.header, { color: colors.text }]}>{t('settings')}</Text>
 
       <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
-        <Text style={styles.sectionTitle}>Акаунт & Інтеграції</Text>
-        <TouchableOpacity style={styles.menuItem} onPress={handleFixLocation}>
-          <Text style={styles.menuText}>📍 Зафіксувати мою геолокацію</Text>
-        </TouchableOpacity>
-
-        
-        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('NotificationSettings')}>
-          <Text style={styles.menuText}>Сповіщення & Telegram</Text>
-          <Text style={styles.menuArrow}>›</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.menuItem} onPress={handleCalendarConnect}>
-          <Text style={styles.menuText}>Google Calendar</Text>
-          <Text style={[styles.statusText, {color: calendarConnected ? '#4CAF50' : '#C88D7A'}]}>
-            {calendarConnected ? 'Підключено' : 'Підключити'}
-          </Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.menuItem}>
-          <Text style={styles.menuText}>Редагувати профіль (Аватар, ПІБ)</Text>
-          <Text style={styles.menuArrow}>›</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
-        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Додаток</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Налаштування</Text>
         
         <View style={styles.menuItem}>
           <Text style={[styles.menuText, { color: colors.text }]}>{t('darkTheme')}</Text>
-          <Switch value={isDark} onValueChange={() => {}} disabled={true} />
+          <Switch value={isDark} onValueChange={toggleTheme} />
         </View>
         
         <TouchableOpacity style={styles.menuItem} onPress={changeLanguage}>
           <Text style={[styles.menuText, { color: colors.text }]}>{t('language')}</Text>
           <Text style={styles.statusText}>{i18n.language.toUpperCase()} ›</Text>
         </TouchableOpacity>
+        
+        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('SubscriptionScreen')}>
+          <Text style={[styles.menuText, { color: colors.text }]}>Керування підпискою</Text>
+          <Text style={styles.menuArrow}>›</Text>
+        </TouchableOpacity>
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Дані та Безпека</Text>
-        
-        <TouchableOpacity style={styles.menuItem}>
-          <Text style={styles.menuText}>Експорт всіх моїх даних (JSON)</Text>
-        </TouchableOpacity>
+      <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
+        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Дані та Безпека</Text>
         
         <TouchableOpacity style={[styles.menuItem, { borderBottomWidth: 0 }]}>
-          <Text style={[styles.menuText, { color: 'red' }]}>Видалити акаунт</Text>
+          <Text style={[styles.menuText, { color: 'red' }]}>{t('deleteAccount')}</Text>
         </TouchableOpacity>
       </View>
 
