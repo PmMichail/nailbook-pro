@@ -7,7 +7,7 @@ export const SettingsScreen = () => {
   const navigation = useNavigation<any>();
   const [isDarkMode, setIsDarkMode] = useState(false);
   const { t, i18n } = useTranslation();
-  const { colors, isDark } = useTheme();
+  const { colors, isDark, toggleTheme } = useTheme();
   const [calendarConnected, setCalendarConnected] = useState(false);
 
   const changeLanguage = () => {
