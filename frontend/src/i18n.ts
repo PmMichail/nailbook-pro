@@ -17,9 +17,9 @@ const languageDetectorPlugin: any = {
     try {
       await AsyncStorage.getItem(STORE_LANGUAGE_KEY).then((language) => {
         if (language) {
-          return callback('en');
+          return callback(language);
         } else {
-          return callback('en'); // Default to Ukrainian
+          return callback(language); // Default to Ukrainian
         }
       });
     } catch (error) {
