@@ -6,11 +6,9 @@ import * as Location from 'expo-location';
 import api from '../api/client';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
-import { useTranslation } from 'react-i18next';
 
 export const MasterProfileScreen = ({ navigation }: any) => {
   const { colors, isDark, toggleTheme } = useTheme();
-  const { t } = useTranslation();
   const { t } = useTranslation();
   
   const [name, setName] = useState('');
