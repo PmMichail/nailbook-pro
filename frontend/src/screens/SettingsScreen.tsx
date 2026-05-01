@@ -37,7 +37,7 @@ export const SettingsScreen = () => {
       <Text style={[styles.header, { color: colors.text }]}>{t('settings')}</Text>
 
       <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
-        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Налаштування</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('settings')}</Text>
         
         <View style={styles.menuItem}>
           <Text style={[styles.menuText, { color: colors.text }]}>{t('darkTheme')}</Text>
@@ -58,7 +58,7 @@ export const SettingsScreen = () => {
       </View>
 
       <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
-        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Дані та Безпека</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('profile.dataSecurity', {defaultValue: 'Дані та Безпека'})}</Text>
         
         <TouchableOpacity style={[styles.menuItem, { borderBottomWidth: 0 }]}>
           <Text style={[styles.menuText, { color: 'red' }]}>{t('deleteAccount')}</Text>

@@ -198,12 +198,12 @@ export const GalleryScreen = () => {
 
       <View style={styles.tabContainer}>
         <TouchableOpacity style={[styles.tab, activeTab === 'ALL' && styles.tabActive]} onPress={() => setActiveTab('ALL')}>
-          <Text style={[styles.tabText, activeTab === 'ALL' && styles.tabTextActive, { color: activeTab === 'ALL' ? colors.primary : colors.textSecondary }]}>Всі Роботи</Text>
+          <Text style={[styles.tabText, activeTab === 'ALL' && styles.tabTextActive, { color: activeTab === 'ALL' ? colors.primary : colors.textSecondary }]}>{t('gallery.allWorks', {defaultValue: 'Всі Роботи'})}</Text>
         </TouchableOpacity>
 
         {role === 'MASTER' && (
           <TouchableOpacity style={[styles.tab, activeTab === 'MY' && styles.tabActive]} onPress={() => setActiveTab('MY')}>
-            <Text style={[styles.tabText, activeTab === 'MY' && styles.tabTextActive, { color: activeTab === 'MY' ? colors.primary : colors.textSecondary }]}>Мої Портфоліо</Text>
+            <Text style={[styles.tabText, activeTab === 'MY' && styles.tabTextActive, { color: activeTab === 'MY' ? colors.primary : colors.textSecondary }]}>{t('gallery.myPortfolio', {defaultValue: 'Мої Портфоліо'})}</Text>
           </TouchableOpacity>
         )}
 

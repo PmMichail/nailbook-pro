@@ -3,11 +3,13 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, Share, TextI
 import api from '../api/client';
 import Checkbox from 'expo-checkbox';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 
 export const ClientsListScreen = () => {
   const { colors, isDark } = useTheme();
+  const { t } = useTranslation();
   const [clients, setClients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -160,17 +162,17 @@ export const ClientsListScreen = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Text style={[styles.header, { color: colors.text }]}>Мої клієнти {clients.length > 0 && `(${clients.length})`}</Text>
+      <Text style={[styles.header, { color: colors.text }]}>{t('clients.myClients', {defaultValue: 'Мої клієнти'})} {clients.length > 0 && `(${clients.length})`}</Text>
       
       <View style={styles.inviteContainer}>
          <TouchableOpacity style={[styles.shareBtn, { backgroundColor: colors.primary }]} onPress={handleShareLink}>
-           <Text style={[styles.shareBtnText, { color: isDark ? '#000' : '#fff' }]}>Запросити ще 🔗</Text>
+           <Text style={[styles.shareBtnText, { color: isDark ? '#000' : '#fff' }]}>{t('clients.inviteMore', {defaultValue: 'Запросити ще'})} 🔗</Text>
          </TouchableOpacity>
       </View>
 
       <TextInput 
         style={[styles.searchInput, { backgroundColor: colors.card, borderColor: colors.border, color: colors.text }]}
-        placeholder="Пошук клієнтів..."
+        placeholder={t('clients.searchClients', {defaultValue: 'Пошук клієнтів...'})}
         placeholderTextColor={colors.textSecondary}
         value={search}
         onChangeText={setSearch}
@@ -183,7 +185,7 @@ export const ClientsListScreen = () => {
              onValueChange={toggleSelectAll} 
              color={colors.primary} 
            />
-           <Text style={{marginLeft: 8, color: colors.textSecondary}}>Вибрати всіх</Text>
+           <Text style={{marginLeft: 8, color: colors.textSecondary}}>{t('clients.selectAll', {defaultValue: 'Вибрати всіх'})}</Text>
          </TouchableOpacity>
          
          <TouchableOpacity 
@@ -191,7 +193,7 @@ export const ClientsListScreen = () => {
             disabled={selectedIds.size === 0}
             onPress={() => setShowBulkModal(true)}
          >
-           <Text style={[styles.bulkBtnText, { color: isDark ? '#000' : '#fff' }]}>Розсилка ({selectedIds.size})</Text>
+           <Text style={[styles.bulkBtnText, { color: isDark ? '#000' : '#fff' }]}>{t('clients.broadcast', {defaultValue: 'Розсилка'})} ({selectedIds.size})</Text>
          </TouchableOpacity>
       </View>
 
