@@ -81,28 +81,28 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
         <View style={styles.container}>
             <View style={styles.headerRow}>
                 <View style={styles.headerTitleContainer}>
-                    <Text style={styles.header}>COMMAND CENTER</Text>
+                    <Text style={styles.header}>КОМАНДНИЙ ЦЕНТР</Text>
                     <View style={styles.liveStatus}>
                         <PulsingIndicator />
-                        <Text style={styles.liveText}>SYSTEM ONLINE</Text>
+                        <Text style={styles.liveText}>СИСТЕМА ОНЛАЙН</Text>
                     </View>
                 </View>
                 <TouchableOpacity onPress={handleLogout} style={styles.logoutBtn}>
-                    <Text style={styles.logoutTxt}>DISCONNECT</Text>
+                    <Text style={styles.logoutTxt}>ВІДКЛЮЧИТИ</Text>
                 </TouchableOpacity>
             </View>
 
             <ScrollView contentContainerStyle={{paddingBottom: 50}} showsVerticalScrollIndicator={false}>
                 
                 {/* Metrics Grid */}
-                <Text style={styles.sectionTitle}>GLOBAL METRICS</Text>
+                <Text style={styles.sectionTitle}>ГЛОБАЛЬНІ МЕТРИКИ</Text>
                 <View style={styles.statsGrid}>
                     <View style={styles.statCard}>
-                        <Text style={styles.statL}>TOTAL MASTERS</Text>
+                        <Text style={styles.statL}>ВСЬОГО МАЙСТРІВ</Text>
                         <Text style={styles.statVal}>{stats?.totalMasters || 0}</Text>
                     </View>
                     <View style={styles.statCard}>
-                        <Text style={styles.statL}>ACTIVE TODAY</Text>
+                        <Text style={styles.statL}>АКТИВНІ СЬОГОДНІ</Text>
                         <Text style={[styles.statVal, {color: '#38BDF8'}]}>{stats?.activeToday || Math.floor((stats?.totalMasters || 0) * 0.3)}</Text>
                     </View>
                 </View>
@@ -110,7 +110,7 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
                 {/* Growth Chart */}
                 {stats?.last7DaysRegs && (
                     <View style={styles.card}>
-                        <Text style={styles.cardTitle}>REGISTRATION MATRIX (7D)</Text>
+                        <Text style={styles.cardTitle}>МАТРИЦЯ РЕЄСТРАЦІЙ (7 ДНІВ)</Text>
                         <LineChart
                             data={{ labels: getLast7DaysLabels(), datasets: [{ data: stats.last7DaysRegs.some((n: number)=>n>0) ? stats.last7DaysRegs : [0,0,0,0,0,0,0] }] }}
                             width={screenWidth - 40}
@@ -126,7 +126,7 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
 
                 {/* Global Footprint */}
                 <View style={styles.card}>
-                    <Text style={styles.cardTitle}>GEOSPATIAL DISTRIBUTION</Text>
+                    <Text style={styles.cardTitle}>ГЕОПРОСТОРОВИЙ РОЗПОДІЛ</Text>
                     {regions.length > 0 ? regions.map((r, i) => {
                         const maxVal = Math.max(...regions.map(x => x.masterCount));
                         const progress = (r.masterCount / maxVal) * 100;
@@ -134,7 +134,7 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
                             <View key={i} style={styles.regionRow}>
                                 <View style={styles.regionHeader}>
                                     <Text style={styles.regionName}>{r.region}</Text>
-                                    <Text style={styles.regionCount}>{r.masterCount} Nodes</Text>
+                                    <Text style={styles.regionCount}>{r.masterCount} Вузлів</Text>
                                 </View>
                                 <View style={styles.progressBarBg}>
                                     <View style={[styles.progressBarFill, {width: `${progress}%`}]} />
@@ -142,13 +142,13 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
                             </View>
                         );
                     }) : (
-                        <Text style={styles.emptyText}>AWAITING LOCATION DATA...</Text>
+                        <Text style={styles.emptyText}>ОЧІКУВАННЯ ДАНИХ ЛОКАЦІЇ...</Text>
                     )}
                 </View>
 
                 {/* Live Activity Feed */}
                 <View style={styles.card}>
-                    <Text style={styles.cardTitle}>LIVE ACTIVITY STREAM</Text>
+                    <Text style={styles.cardTitle}>ЖИВА СТРІЧКА АКТИВНОСТІ</Text>
                     <View style={styles.terminalContainer}>
                         {events.length > 0 ? events.slice(0, 10).map((item, idx) => {
                             let typeColor = '#94A3B8';
@@ -164,7 +164,7 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
                                 </View>
                             );
                         }) : (
-                            <Text style={styles.terminalText}>Waiting for incoming network packets...</Text>
+                            <Text style={styles.terminalText}>Очікування вхідних мережевих пакетів...</Text>
                         )}
                     </View>
                 </View>

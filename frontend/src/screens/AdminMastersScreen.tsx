@@ -101,7 +101,7 @@ export const AdminMastersScreen = () => {
 
     return (
         <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-            <Text style={styles.header}>ACTIVE NODES</Text>
+            <Text style={styles.header}>АКТИВНІ ВУЗЛИ</Text>
             {masters.map(m => {
                 return (
                     <View key={m.id} style={styles.card}>
@@ -109,16 +109,16 @@ export const AdminMastersScreen = () => {
                             <View>
                                 <Text style={styles.name}>{m.name}</Text>
                                 <Text style={styles.subtext}>{m.phone || m.email}</Text>
-                                <Text style={styles.subtext}>Uplink: {new Date(m.createdAt).toLocaleDateString()}</Text>
+                                <Text style={styles.subtext}>Аплінк: {new Date(m.createdAt).toLocaleDateString()}</Text>
                             </View>
                             <View style={{flexDirection: 'row', gap: 5}}>
                                 {m.isBanned ? (
                                     <View style={[styles.badge, { backgroundColor: 'rgba(239, 68, 68, 0.2)' }]}>
-                                        <Text style={[styles.badgeText, {color: '#EF4444'}]}>SUSPENDED</Text>
+                                        <Text style={[styles.badgeText, {color: '#EF4444'}]}>ЗАБЛОКОВАНО</Text>
                                     </View>
                                 ) : (
                                     <View style={[styles.badge, { backgroundColor: 'rgba(0, 255, 170, 0.2)' }]}>
-                                        <Text style={[styles.badgeText, {color: '#00FFAA'}]}>ONLINE</Text>
+                                        <Text style={[styles.badgeText, {color: '#00FFAA'}]}>ОНЛАЙН</Text>
                                     </View>
                                 )}
                             </View>
@@ -126,16 +126,16 @@ export const AdminMastersScreen = () => {
                         
                         <View style={styles.actions}>
                             <TouchableOpacity style={[styles.btn, {borderColor: '#38BDF8'}]} onPress={() => openAnalytics(m)}>
-                                <Text style={[styles.btnText, {color: '#38BDF8'}]}>TELEMETRY</Text>
+                                <Text style={[styles.btnText, {color: '#38BDF8'}]}>ТЕЛЕМЕТРІЯ</Text>
                             </TouchableOpacity>
                             <TouchableOpacity style={[styles.btn, {borderColor: '#94A3B8', marginLeft: 10}]} onPress={() => resetPassword(m.id)}>
-                                <Text style={[styles.btnText, {color: '#94A3B8'}]}>RESET KEY</Text>
+                                <Text style={[styles.btnText, {color: '#94A3B8'}]}>СКИДАННЯ</Text>
                             </TouchableOpacity>
                             <TouchableOpacity style={[styles.btn, {borderColor: m.isBanned ? '#00FFAA' : '#F5A623', marginLeft: 10}]} onPress={() => toggleBan(m.id, m.isBanned)}>
-                                <Text style={[styles.btnText, {color: m.isBanned ? '#00FFAA' : '#F5A623'}]}>{m.isBanned ? 'RESTORE' : 'SUSPEND'}</Text>
+                                <Text style={[styles.btnText, {color: m.isBanned ? '#00FFAA' : '#F5A623'}]}>{m.isBanned ? 'РОЗБАН' : 'БАН'}</Text>
                             </TouchableOpacity>
                             <TouchableOpacity style={[styles.btn, {borderColor: '#EF4444', marginLeft: 'auto'}]} onPress={() => deleteUser(m.id, m.name)}>
-                                <Text style={[styles.btnText, {color: '#EF4444'}]}>PURGE</Text>
+                                <Text style={[styles.btnText, {color: '#EF4444'}]}>ВИДАЛИТИ</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -148,10 +148,10 @@ export const AdminMastersScreen = () => {
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContent}>
                         <TouchableOpacity style={styles.closeBtn} onPress={() => setAnalyticsVisible(false)}>
-                            <Text style={styles.closeBtnTxt}>CLOSE_</Text>
+                            <Text style={styles.closeBtnTxt}>ЗАКРИТИ_</Text>
                         </TouchableOpacity>
                         
-                        <Text style={styles.modalHeader}>NODE TELEMETRY: {selectedMaster?.name}</Text>
+                        <Text style={styles.modalHeader}>ТЕЛЕМЕТРІЯ ВУЗЛА: {selectedMaster?.name}</Text>
                         
                         {loadingAnalytics ? (
                             <View style={{padding: 50}}><ActivityIndicator size="large" color="#00FFAA" /></View>
@@ -160,15 +160,15 @@ export const AdminMastersScreen = () => {
                                 <View style={{flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20}}>
                                     <View style={styles.statBox}>
                                         <Text style={styles.statBoxVal}>{analyticsData.totalClients}</Text>
-                                        <Text style={styles.statBoxLabel}>KNOWN CLIENTS</Text>
+                                        <Text style={styles.statBoxLabel}>ВІДОМІ КЛІЄНТИ</Text>
                                     </View>
                                     <View style={styles.statBox}>
                                         <Text style={styles.statBoxVal}>{analyticsData.totalAppointments}</Text>
-                                        <Text style={styles.statBoxLabel}>TX RECORDS</Text>
+                                        <Text style={styles.statBoxLabel}>ЗАПИСИ (TX)</Text>
                                     </View>
                                 </View>
 
-                                <Text style={styles.modalSubHeader}>TX STATUS BREAKDOWN</Text>
+                                <Text style={styles.modalSubHeader}>АНАЛІЗ СТАТУСІВ TX</Text>
                                 <BarChart
                                     data={{
                                         labels: analyticsData.chartData.map((d: any) => d.name),
