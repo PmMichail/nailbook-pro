@@ -225,12 +225,22 @@ export const ClientCalendarScreen = ({ navigation }: any) => {
             })}
         </View>
 
-        {/* Temporal Selection */}
         <Text style={[styles.sectionHeader, { color: colors.text }]}>Вибір Дати</Text>
         <View style={[styles.calendarContainer, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <Calendar
                 current={new Date().toISOString().split('T')[0]}
                 minDate={new Date().toISOString().split('T')[0]}
+                theme={{
+                  calendarBackground: colors.card,
+                  textSectionTitleColor: colors.textSecondary,
+                  selectedDayBackgroundColor: colors.primary,
+                  selectedDayTextColor: '#ffffff',
+                  todayTextColor: colors.primary,
+                  dayTextColor: colors.text,
+                  textDisabledColor: colors.border,
+                  monthTextColor: colors.text,
+                  arrowColor: colors.primary,
+                }}
                 onDayPress={(day: any) => {
                     setSelectedDay(day.dateString);
                     setSelectedSlot(null);

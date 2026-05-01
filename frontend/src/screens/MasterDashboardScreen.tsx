@@ -391,11 +391,21 @@ export const MasterDashboardScreen = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Slots Grid */}
       <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <Calendar
           current={selectedCalendarDay}
           onDayPress={(day: any) => setSelectedCalendarDay(day.dateString)}
+          theme={{
+            calendarBackground: colors.card,
+            textSectionTitleColor: colors.textSecondary,
+            selectedDayBackgroundColor: colors.primary,
+            selectedDayTextColor: '#ffffff',
+            todayTextColor: colors.primary,
+            dayTextColor: colors.text,
+            textDisabledColor: colors.border,
+            monthTextColor: colors.text,
+            arrowColor: colors.primary,
+          }}
           markedDates={{
              ...appointments.reduce((acc: any, app: any) => {
                  if (app.status !== 'CANCELLED') {
