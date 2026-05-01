@@ -473,7 +473,7 @@ export const MasterDashboardScreen = () => {
 
       {/* Appointments */}
       <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-        <Text style={[styles.cardTitle, { color: colors.text }]}>⚠️ Запити на підтвердження</Text>
+        <Text style={[styles.cardTitle, { color: colors.text }]}>{t('dashboard.pendingRequestsTitle', {defaultValue: '⚠️ Запити на підтвердження'})}</Text>
         {appointments.filter((a: any) => a.status === 'PENDING').length === 0 && <Text style={[styles.subtext, {color: colors.textSecondary}]}>Немає нових запитів</Text>}
         {appointments.filter((a: any) => a.status === 'PENDING').map((app: any) => (
             <View key={'pend-'+app.id} style={[styles.appointmentItem, {borderBottomColor: colors.border, backgroundColor: isDark ? 'rgba(224, 192, 180, 0.1)' : 'rgba(224, 192, 180, 0.2)', padding: 15, borderRadius: 12}]}>
@@ -513,7 +513,7 @@ export const MasterDashboardScreen = () => {
         
         {isAppointmentsExpanded && (
             <View style={{marginTop: 15}}>
-                {currentDayAppoints.filter((a: any) => a.status !== 'PENDING').length === 0 && <Text style={[styles.subtext, {color: colors.textSecondary}]}>Немає записів</Text>}
+                {currentDayAppoints.filter((a: any) => a.status !== 'PENDING').length === 0 && <Text style={[styles.subtext, {color: colors.textSecondary}]}>{t('dashboard.noRecords', {defaultValue: 'Немає записів'})}</Text>}
                 {currentDayAppoints.filter((a: any) => a.status !== 'PENDING').map((app: any) => (
                     <View key={app.id} style={[styles.appointmentItem, {borderBottomColor: colors.border}]}>
                         <View style={styles.appInfo}>
@@ -573,7 +573,7 @@ export const MasterDashboardScreen = () => {
 
       {/* Прайс-лист */}
       <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-        <Text style={[styles.cardTitle, { color: colors.primary }]}>Мої ціни (Прайс-лист)</Text>
+        <Text style={[styles.cardTitle, { color: colors.primary }]}>{t('dashboard.myPrices', {defaultValue: 'Мої ціни (Прайс-лист)'})}</Text>
         {prices.map(item => (
           <View key={item.id} style={[styles.row, {marginBottom: 10, alignItems: 'center', borderBottomWidth: 1, borderBottomColor: colors.border, paddingBottom: 10, opacity: item.isLocked ? 0.5 : 1}]}>
             {item.imageUrl && (
@@ -595,7 +595,7 @@ export const MasterDashboardScreen = () => {
         ))}
         {(!prices.length || !prices[prices.length - 1]?.isLocked) && (
             <TouchableOpacity style={[styles.btnPrimary, {marginTop: 10, backgroundColor: colors.primary}]} onPress={() => { setEditPriceId(null); setPriceForm({service: '', price: '', imageUrl: null}); setPriceModalVisible(true); }}>
-               <Text style={[styles.btnPrimaryText, { color: isDark ? '#000' : '#fff' }]}>+ Додати послугу</Text>
+               <Text style={[styles.btnPrimaryText, { color: isDark ? '#000' : '#fff' }]}>{t('dashboard.addService', {defaultValue: '+ Додати послугу'})}</Text>
             </TouchableOpacity>
         )}
       </View>
@@ -715,7 +715,7 @@ export const MasterDashboardScreen = () => {
                  const totalClients = dayApps.length;
                  const totalIncome = dayApps.reduce((acc, a) => acc + (a.finalPrice || a.price || 0), 0);
                  
-                 if (totalClients === 0) return <Text style={{color: colors.textSecondary, textAlign: 'center', marginVertical: 20}}>Немає записів на цей день</Text>;
+                 if (totalClients === 0) return <Text style={{color: colors.textSecondary, textAlign: 'center', marginVertical: 20}}>{t('dashboard.noRecordsToday', {defaultValue: 'Немає записів на цей день'})}</Text>;
                  
                  return (
                     <>

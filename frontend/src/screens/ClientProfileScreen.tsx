@@ -202,9 +202,9 @@ export const ClientProfileScreen = ({ navigation }: any) => {
                    cleaned = formatted;
                 }
                 setPhone(cleaned);
-            }} placeholder="Телефон" placeholderTextColor={colors.textSecondary} keyboardType="phone-pad" />
+            }} placeholder={t('profile.phonePlaceholder', {defaultValue: 'Телефон'})} placeholderTextColor={colors.textSecondary} keyboardType="phone-pad" />
             <TouchableOpacity style={[styles.saveBtn, { backgroundColor: colors.primary }]} onPress={handleSaveProfile}>
-                <Text style={[styles.saveBtnText, { color: isDark ? '#000' : '#fff' }]}>Зберегти зміни</Text>
+                <Text style={[styles.saveBtnText, { color: isDark ? '#000' : '#fff' }]}>{t('profile.saveChangesBtn', {defaultValue: 'Зберегти зміни'})}</Text>
             </TouchableOpacity>
         </View>
       </View>

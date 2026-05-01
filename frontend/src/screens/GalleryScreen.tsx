@@ -78,7 +78,7 @@ export const GalleryScreen = () => {
       } else {
           // Default post to like
           res: await api.post(`/api/gallery/${id}/like`, {});
-          Alert.alert('Успіх', 'Додано в обране ❤️');
+          Alert.alert('Успіх', t('gallery.addedToFav', {defaultValue: 'Додано в обране ❤️'}));
       }
       fetchGallery();
     } catch(e: any) {
@@ -208,7 +208,7 @@ export const GalleryScreen = () => {
         )}
 
         <TouchableOpacity style={[styles.tab, activeTab === 'FAV' && styles.tabActive]} onPress={() => setActiveTab('FAV')}>
-          <Text style={[styles.tabText, activeTab === 'FAV' && styles.tabTextActive, { color: activeTab === 'FAV' ? colors.primary : colors.textSecondary }]}>Обране ❤️</Text>
+          <Text style={[styles.tabText, activeTab === 'FAV' && styles.tabTextActive, { color: activeTab === 'FAV' ? colors.primary : colors.textSecondary }]}>{t('gallery.favorites', {defaultValue: 'Обране ❤️'})}</Text>
         </TouchableOpacity>
       </View>
 

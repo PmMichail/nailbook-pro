@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import api from '../api/client';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 
 LocaleConfig.defaultLocale = 'ua';
 
 export const MasterCalendarScreen = () => {
   const { colors, isDark } = useTheme();
+  const { t } = useTranslation();
   const [selectedDay, setSelectedDay] = useState(new Date().toISOString().split('T')[0]);
   const [appointments, setAppointments] = useState<any[]>([]);
   const [totalSum, setTotalSum] = useState(0);
@@ -103,7 +105,7 @@ export const MasterCalendarScreen = () => {
         {loading ? (
           <ActivityIndicator color={colors.primary} />
         ) : appointments.length === 0 ? (
-          <Text style={[styles.noData, { color: colors.textSecondary }]}>Немає записів на цей день</Text>
+          <Text style={[styles.noData, { color: colors.textSecondary }]}>{t('dashboard.noRecordsToday', {defaultValue: 'Немає записів на цей день'})}</Text>
         ) : (
           <>
             <Text style={{fontWeight: 'bold', color: colors.text, marginBottom: 10, fontSize: 16}}>

@@ -53,7 +53,12 @@
     "cancel": "Скасувати",
     "confirm": "Підтвердити",
     "sendAsCoupon": "Надіслати як Купон",
-    "detailsFor": "Деталі за"
+    "detailsFor": "Деталі за",
+    "pendingRequestsTitle": "⚠️ Запити на підтвердження",
+    "noRecords": "Немає записів",
+    "noRecordsToday": "Немає записів на цей день",
+    "myPrices": "Мої ціни (Прайс-лист)",
+    "addService": "+ Додати послугу"
   },
   "profile": {
     "referralProgram": "Реферальна програма",
@@ -102,7 +107,8 @@
     "currentAddress": "Поточна адреса:",
     "generateCodeDesc": "Згенеруйте тимчасовий код для клієнта.",
     "yourCode": "Ваш код:",
-    "codeValid24h": "Передайте його клієнту. Дійсний 24 години."
+    "codeValid24h": "Передайте його клієнту. Дійсний 24 години.",
+    "saveChangesBtn": "Зберегти зміни"
   },
   "clients": {
     "inviteMore": "Запросити ще",
@@ -134,8 +140,9 @@
     "galleryTitle": "Галерея",
     "allWorks": "Всі Роботи",
     "myPortfolio": "Мої Портфоліо",
-    "favorites": "Обране",
-    "uploadPhoto": "Завантажити фото"
+    "favorites": "Обране ❤️",
+    "uploadPhoto": "Завантажити фото",
+    "addedToFav": "Додано в обране ❤️"
   },
   "client": {
     "appointments": "Мої записи",

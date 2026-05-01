@@ -72,7 +72,7 @@ export const MasterClientsScreen = () => {
                         </Text>
                     ))
                 ) : (
-                    <Text style={{color: colors.textSecondary, fontSize: 12}}>Немає записів</Text>
+                    <Text style={{color: colors.textSecondary, fontSize: 12}}>{t('dashboard.noRecords', {defaultValue: 'Немає записів'})}</Text>
                 )}
             </View>
         </View>
