@@ -41,88 +41,19 @@ router.get('/masters', async (req, res) => {
    }
 });
 
-// PUT /api/admin/masters/:id/subscription
-router.put('/masters/:id/subscription', async (req, res) => {
-   try {
-       const masterId = req.params.id;
-       const { plan, status, durationDays } = req.body; // e.g. plan: 'PRO', status: 'ACTIVE', durationDays: 30
-
-       let sub = await prisma.subscription.findUnique({ where: { masterId } });
-       
-       const currentPeriodEnd = new Date();
-       if (durationDays) {
-          currentPeriodEnd.setDate(currentPeriodEnd.getDate() + durationDays);
-       }
-
-       if (!sub) {
-           sub = await prisma.subscription.create({
-               data: {
-                   masterId, plan, status, currentPeriodEnd: durationDays ? currentPeriodEnd : null
-               }
-           });
-       } else {
-           sub = await prisma.subscription.update({
-               where: { masterId },
-               data: {
-                   plan, status, currentPeriodEnd: durationDays ? currentPeriodEnd : null
-               }
-           });
-       }
-       res.json({ success: true, subscription: sub });
-   } catch(e) {
-       res.status(500).json({ error: 'Server error' });
-   }
-});
-
-// GET /api/admin/payments
-router.get('/payments', async (req, res) => {
-   try {
-      const payments = await prisma.payment.findMany({
-          orderBy: { createdAt: 'desc' },
-          include: {
-              master: { select: { name: true, phone: true, email: true } }
-          }
-      });
-      res.json(payments);
-   } catch(e) {
-       res.status(500).json({ error: 'Server error' });
-   }
-});
-
-// GET /api/admin/clients
-router.get('/clients', async (req, res) => {
-   try {
-       const clients = await prisma.user.findMany({
-           where: { role: 'CLIENT' },
-           select: { id: true, name: true, phone: true, email: true, createdAt: true, isBanned: true, masterId: true },
-           orderBy: { createdAt: 'desc' }
-       });
-       res.json(clients);
-   } catch(e) {
-       res.status(500).json({ error: 'Server error' });
-   }
-});
-
 // GET /api/admin/statistics
 router.get('/statistics', async (req, res) => {
    try {
        const totalMasters = await prisma.user.count({ where: { role: 'MASTER' } });
        
-       // Calculate Last 7 Days Revenue
        const sevenDaysAgo = new Date();
        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-       
-       const recentPayments = await prisma.payment.findMany({
-           where: { status: 'success', createdAt: { gte: sevenDaysAgo } },
-           select: { amount: true, createdAt: true }
-       });
        
        const recentUsers = await prisma.user.findMany({
            where: { role: 'MASTER', createdAt: { gte: sevenDaysAgo } },
            select: { createdAt: true }
        });
        
-       const last7DaysRevenue: number[] = [0,0,0,0,0,0,0];
        const last7DaysRegs: number[] = [0,0,0,0,0,0,0];
        
        for (let i = 0; i < 7; i++) {
@@ -130,11 +61,6 @@ router.get('/statistics', async (req, res) => {
            d.setDate(d.getDate() - (6 - i));
            const dateStr = d.toISOString().split('T')[0];
            
-           recentPayments.forEach(p => {
-               if (p.createdAt.toISOString().split('T')[0] === dateStr) {
-                   last7DaysRevenue[i]! += p.amount || 0;
-               }
-           });
            recentUsers.forEach(u => {
                if (u.createdAt.toISOString().split('T')[0] === dateStr) {
                    last7DaysRegs[i]! += 1;
@@ -142,43 +68,26 @@ router.get('/statistics', async (req, res) => {
            });
        }
 
-       const activePro = await prisma.subscription.count({
-           where: { plan: 'PRO', status: 'ACTIVE' }
-       });
-       const activeTrials = await prisma.subscription.count({
-           where: { plan: 'PRO', status: 'TRIAL' }
-       });
-       const canceledOrExpired = await prisma.subscription.count({
-           where: { status: { in: ['EXPIRED', 'CANCELLED'] } }
-       });
-       
-       const successfulPayments = await prisma.payment.aggregate({
-           where: { status: 'success' },
-           _sum: { amount: true }
-       });
-
-       const conversionRate = totalMasters > 0 ? ((activePro / totalMasters) * 100).toFixed(1) + '%' : '0%';
+       const activeToday = await prisma.appointment.groupBy({
+           by: ['masterId'],
+           where: { createdAt: { gte: new Date(new Date().setHours(0,0,0,0)) } },
+       }).then(res => res.length);
 
        res.json({
            totalMasters,
-           last7DaysRevenue, last7DaysRegs,
-           activePro,
-           activeTrials,
-           canceledOrExpired,
-           conversionRate,
-           revenue: successfulPayments._sum.amount || 0
+           last7DaysRegs,
+           activeToday
        });
    } catch(e) {
        res.status(500).json({ error: 'Server error' });
    }
 });
 
-// PUT /api/admin/masters/:id/reset-password
 import bcrypt from 'bcrypt';
 router.put('/masters/:id/reset-password', async (req, res) => {
    try {
        const masterId = req.params.id;
-       const newPassword = Math.floor(100000 + Math.random() * 900000).toString(); // 6 digits code
+       const newPassword = Math.floor(100000 + Math.random() * 900000).toString();
        const hashedPassword = await bcrypt.hash(newPassword, 10);
        
        await prisma.user.update({
@@ -190,37 +99,6 @@ router.put('/masters/:id/reset-password', async (req, res) => {
    } catch(e) {
        res.status(500).json({ error: 'Server error' });
    }
-});
-
-// GET /api/admin/config
-router.get('/config', async (req, res) => {
-    try {
-        const configs = await prisma.systemConfig.findMany();
-        const configMap: Record<string, string> = {};
-        configs.forEach(c => configMap[c.key] = c.value);
-        
-        // Return default PRO_PRICE if not explicitly saved yet
-        if (!configMap['PRO_PRICE']) configMap['PRO_PRICE'] = '299';
-        
-        res.json(configMap);
-    } catch(e) {
-        res.status(500).json({ error: 'Server error' });
-    }
-});
-
-// POST /api/admin/config
-router.post('/config', async (req, res) => {
-    try {
-        const { key, value } = req.body;
-        const config = await prisma.systemConfig.upsert({
-            where: { key },
-            update: { value: String(value) },
-            create: { key, value: String(value) }
-        });
-        res.json({ success: true, config });
-    } catch(e) {
-        res.status(500).json({ error: 'Server error' });
-    }
 });
 
 // GET /api/admin/activity

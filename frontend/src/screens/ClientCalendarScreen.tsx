@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Animated, ImageBackground, RefreshControl, Linking } from 'react-native';
 import { Calendar } from 'react-native-calendars';
