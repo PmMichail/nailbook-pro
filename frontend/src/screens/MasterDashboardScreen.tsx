@@ -3,6 +3,10 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert,
 import api from '../api/client';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
+const getDaysArray = (t: any) => [
+  { id: '1', name: t('days.monday', {defaultValue: 'ПН'}) }, { id: '2', name: t('days.tuesday', {defaultValue: 'ВТ'}) }, { id: '3', name: t('days.wednesday', {defaultValue: 'СР'}) },
+  { id: '4', name: t('days.thursday', {defaultValue: 'ЧТ'}) }, { id: '5', name: t('days.friday', {defaultValue: 'ПТ'}) }, { id: '6', name: t('days.saturday', {defaultValue: 'СБ'}) }, { id: '0', name: t('days.sunday', {defaultValue: 'НД'}) }
+];
 import QRCode from 'react-native-qrcode-svg';
 import * as Clipboard from 'expo-clipboard';
 import * as ImagePicker from 'expo-image-picker';
@@ -327,7 +331,7 @@ export const MasterDashboardScreen = () => {
         <Text style={[styles.cardTitle, { color: colors.primary }]}>{t('dashboard.scheduleSettings', {defaultValue: 'Налаштування Графіка'})}</Text>
 
         <View style={styles.daysRow}>
-          {DAYS.map((day, ix) => (
+          {getDaysArray(t).map((day, ix) => (
             <TouchableOpacity 
               key={ix} 
               style={[styles.dayCircle, { width: 45, height: 45, borderRadius: 22.5, borderColor: colors.primary }, activeEditDay === ix + 1 && { backgroundColor: colors.primary }]}
@@ -340,7 +344,7 @@ export const MasterDashboardScreen = () => {
                 setSummaryModalVisible(true);
               }}
             >
-              <Text style={{ color: activeEditDay === ix + 1 ? (isDark ? '#000' : '#fff') : colors.text, fontSize: 12, fontWeight: 'bold' }}>{day}</Text>
+              <Text style={{ color: activeEditDay === ix + 1 ? (isDark ? '#000' : '#fff') : colors.text, fontSize: 12, fontWeight: 'bold' }}>{day.name}</Text>
               <Text style={{ color: activeEditDay === ix + 1 ? (isDark ? '#000' : '#fff') : colors.textSecondary, fontSize: 10 }}>{currentWeek[ix]}</Text>
             </TouchableOpacity>
           ))}
@@ -502,7 +506,7 @@ export const MasterDashboardScreen = () => {
 
         <TouchableOpacity onPress={() => setIsAppointmentsExpanded(!isAppointmentsExpanded)}>
             <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 20}}>
-                <Text style={[styles.cardTitle, {color: colors.text, marginBottom: 0}]}>Записи на {selectedCalendarDay}</Text>
+                <Text style={[styles.cardTitle, {color: colors.text, marginBottom: 0}]}>{t('dashboard.appointmentsOn', {defaultValue: 'Записи на'})} {selectedCalendarDay}</Text>
                 <Text style={{fontSize: 20, color: colors.textSecondary}}>{isAppointmentsExpanded ? '▲' : '▼'}</Text>
             </View>
         </TouchableOpacity>
@@ -606,7 +610,7 @@ export const MasterDashboardScreen = () => {
             <Text style={{color: colors.text, marginBottom: 5}}>Послуга: {selectedClient?.service || 'Не вказано'}</Text>
             <Text style={{color: colors.text, marginBottom: 15}}>Ціна: {selectedClient?.price ? selectedClient.price + ' грн' : 'Не вказано'}</Text>
             <TouchableOpacity style={[styles.btnPrimary, { backgroundColor: colors.primary }]} onPress={() => setSelectedClient(null)}>
-              <Text style={[styles.btnPrimaryText, { color: isDark ? '#000' : '#fff' }]}>Закрити</Text>
+              <Text style={[styles.btnPrimaryText, { color: isDark ? '#000' : '#fff' }]}>{t('dashboard.close', {defaultValue: 'Закрити'})}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -623,7 +627,7 @@ export const MasterDashboardScreen = () => {
                      <Image source={{uri: priceForm.imageUrl.startsWith('http') ? priceForm.imageUrl : (priceForm.imageUrl.includes('/') ? `${api.defaults.baseURL}/${priceForm.imageUrl}` : priceForm.imageUrl)}} style={{width: 100, height: 100, borderRadius: 15}} />
                  ) : (
                      <View style={[styles.imagePlaceholder, {borderColor: colors.border}]}>
-                         <Text style={{color: '#888', textAlign: 'center', fontWeight: 'bold'}}>📷 Фото (Опц.)</Text>
+                         <Text style={{color: '#888', textAlign: 'center', fontWeight: 'bold'}}>{t('dashboard.photoOpt', {defaultValue: '📷 Фото (Опц.)'})}</Text>
                      </View>
                  )}
              </TouchableOpacity>
@@ -637,10 +641,10 @@ export const MasterDashboardScreen = () => {
                 <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border, width: '100%'}]} placeholder="450" placeholderTextColor="#666" keyboardType="numeric" value={priceForm.price} onChangeText={t => setPriceForm({...priceForm, price: t})} />
             </View>
             <TouchableOpacity style={[styles.btnPrimary, {marginBottom: 10, width: '100%', backgroundColor: colors.primary }]} onPress={savePriceItem}>
-              <Text style={[styles.btnPrimaryText, { color: isDark ? '#000' : '#fff' }]}>Зберегти</Text>
+              <Text style={[styles.btnPrimaryText, { color: isDark ? '#000' : '#fff' }]}>{t('dashboard.save', {defaultValue: 'Зберегти'})}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.btnSecondary, {width: '100%', borderColor: colors.primary}]} onPress={() => setPriceModalVisible(false)}>
-              <Text style={{color: colors.primary, fontWeight: 'bold'}}>Скасувати</Text>
+              <Text style={{color: colors.primary, fontWeight: 'bold'}}>{t('dashboard.cancel', {defaultValue: 'Скасувати'})}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -671,10 +675,10 @@ export const MasterDashboardScreen = () => {
             </View>
 
             <TouchableOpacity style={[styles.btnPrimary, {marginBottom: 10, width: '100%', backgroundColor: colors.primary }]} onPress={submitConfirm}>
-              <Text style={[styles.btnPrimaryText, { color: isDark ? '#000' : '#fff' }]}>Підтвердити</Text>
+              <Text style={[styles.btnPrimaryText, { color: isDark ? '#000' : '#fff' }]}>{t('dashboard.confirm', {defaultValue: 'Підтвердити'})}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.btnSecondary, {width: '100%', borderColor: colors.primary}]} onPress={() => setConfirmModalVisible(false)}>
-              <Text style={{color: colors.primary, fontWeight: 'bold'}}>Закрити</Text>
+              <Text style={{color: colors.primary, fontWeight: 'bold'}}>{t('dashboard.close', {defaultValue: 'Закрити'})}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -690,11 +694,11 @@ export const MasterDashboardScreen = () => {
             <Text style={[styles.linkText, {color: colors.primary}]} onPress={copyLink}>{inviteLink}</Text>
             
             <TouchableOpacity style={[styles.btnSecondary, {borderColor: colors.primary, width: '100%'}]} onPress={() => Alert.alert('Купон', 'Ваш клієнт може використати код: ' + masterProfile?.linkSlug + ' при реєстрації, щоб отримати сертифікат!')}>
-              <Text style={{color: colors.primary, fontWeight: 'bold', textAlign: 'center'}}>Надіслати як Купон</Text>
+              <Text style={{color: colors.primary, fontWeight: 'bold', textAlign: 'center'}}>{t('dashboard.sendAsCoupon', {defaultValue: 'Надіслати як Купон'})}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={[styles.btnPrimary, {marginTop: 15, width: '100%', backgroundColor: colors.primary }]} onPress={() => setQrModalVisible(false)}>
-              <Text style={[styles.btnPrimaryText, { color: isDark ? '#000' : '#fff' }]}>Закрити</Text>
+              <Text style={[styles.btnPrimaryText, { color: isDark ? '#000' : '#fff' }]}>{t('dashboard.close', {defaultValue: 'Закрити'})}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -704,7 +708,7 @@ export const MasterDashboardScreen = () => {
       <Modal visible={summaryModalVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, {backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1, maxHeight: '80%'}]}>
-            <Text style={[styles.modalTitle, {color: colors.text, marginBottom: 10}]}>Деталі за {selectedSummaryDate}</Text>
+            <Text style={[styles.modalTitle, {color: colors.text, marginBottom: 10}]}>{t('dashboard.detailsFor', {defaultValue: 'Деталі за'})} {selectedSummaryDate}</Text>
             <ScrollView style={{width: '100%'}}>
               {(() => {
                  const dayApps = appointments.filter((a: any) => String(a.date).includes(selectedSummaryDate) && a.status !== 'CANCELLED');
@@ -731,7 +735,7 @@ export const MasterDashboardScreen = () => {
               })()}
             </ScrollView>
             <TouchableOpacity style={[styles.btnPrimary, {marginTop: 15, width: '100%', backgroundColor: colors.primary }]} onPress={() => setSummaryModalVisible(false)}>
-              <Text style={[styles.btnPrimaryText, { color: isDark ? '#000' : '#fff' }]}>Закрити</Text>
+              <Text style={[styles.btnPrimaryText, { color: isDark ? '#000' : '#fff' }]}>{t('dashboard.close', {defaultValue: 'Закрити'})}</Text>
             </TouchableOpacity>
           </View>
         </View>

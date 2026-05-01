@@ -1,64 +1,14 @@
-import { LocaleConfig } from 'react-native-calendars';
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+const fs = require('fs');
+const path = 'src/i18n.ts';
+let content = fs.readFileSync(path, 'utf8');
 
-import uk from './locales/uk.json';
-import en from './locales/en.json';
-import pl from './locales/pl.json';
-import de from './locales/de.json';
-
-const STORE_LANGUAGE_KEY = 'settings.lang';
-
-const languageDetectorPlugin: any = {
-  type: 'languageDetector',
-  async: true,
-  init: () => {},
-  detect: async function (callback: (lang: string) => void) {
-    try {
-      await AsyncStorage.getItem(STORE_LANGUAGE_KEY).then((language) => {
-        if (language) {
-          return callback(language);
-        } else {
-          return callback(language); // Default to Ukrainian
-        }
-      });
-    } catch (error) {
-      console.log('Error reading language', error);
-      callback('en');
-    }
-  },
-  cacheUserLanguage: async function (language: string) {
-    try {
-      await AsyncStorage.setItem(STORE_LANGUAGE_KEY, language);
-    } catch (error) {}
-  }
-};
-
-const resources = {
-  uk: { translation: uk },
-  en: { translation: en },
-  pl: { translation: pl },
-  de: { translation: de },
-};
-
-i18n
-  .use(initReactI18next)
-  .use(languageDetectorPlugin)
-  .init({
-    resources,
-    fallbackLng: 'en',
-    interpolation: {
-      escapeValue: false, // react is already safe from xss
-    },
-  });
-
-export default i18n;
-
+if (!content.includes('LocaleConfig')) {
+    const localeConfigImport = "import { LocaleConfig } from 'react-native-calendars';\n";
+    const configBlock = `
 LocaleConfig.locales['uk'] = {
   monthNames: ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'],
   monthNamesShort: ['Січ','Лют','Бер','Кві','Тра','Чер','Лип','Сер','Вер','Жов','Лис','Гру'],
-  dayNames: ['Неділя','Понеділок','Вівторок','Середа','Четвер','П\'ятниця','Субота'],
+  dayNames: ['Неділя','Понеділок','Вівторок','Середа','Четвер','П\\'ятниця','Субота'],
   dayNamesShort: ['Нд','Пн','Вт','Ср','Чт','Пт','Сб'],
   today: 'Сьогодні'
 };
@@ -87,3 +37,7 @@ LocaleConfig.locales['en'] = {
 i18n.on('languageChanged', (lng) => {
    LocaleConfig.defaultLocale = lng;
 });
+`;
+    content = localeConfigImport + content + configBlock;
+    fs.writeFileSync(path, content, 'utf8');
+}
