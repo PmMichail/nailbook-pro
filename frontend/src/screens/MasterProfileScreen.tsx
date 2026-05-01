@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Switch, ScrollView, TextInput, Alert, Image, Linking } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Switch, ScrollView, TextInput, Alert, Image, Linking, SafeAreaView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
@@ -214,6 +214,7 @@ export const MasterProfileScreen = ({ navigation }: any) => {
   };
 
   return (
+    <SafeAreaView style={{flex: 1, backgroundColor: colors.background}}>
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
         <TouchableOpacity 
@@ -279,10 +280,10 @@ export const MasterProfileScreen = ({ navigation }: any) => {
             )}
 
             <TouchableOpacity 
-               style={[styles.saveBtn, {backgroundColor: colors.primary, width: '100%', marginTop: 10}]}
+               style={[styles.saveBtn, {backgroundColor: colors.text, width: '100%', marginTop: 10, shadowColor: colors.text, elevation: 5, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.3}]}
                onPress={() => navigation.navigate('SubscriptionScreen')}
             >
-               <Text style={styles.saveBtnText}>
+               <Text style={[styles.saveBtnText, {color: colors.background}]}>
                    {(subData?.plan === 'FREE' || subData?.status === 'TRIAL' || subData?.status === 'EXPIRED') ? '⭐️ Оновити до Pro' : '💳 Керувати підпискою'}
                </Text>
             </TouchableOpacity>
@@ -296,10 +297,10 @@ export const MasterProfileScreen = ({ navigation }: any) => {
           <Text style={{color: colors.textSecondary, marginBottom: 10, marginTop: 5, fontSize: 13}}>Дозвольте новим клієнтам поблизу знаходити вас на карті.</Text>
           {address ? <Text style={{color: colors.primary, marginBottom: 10, fontWeight: 'bold'}}>Поточна адреса: {address}</Text> : null}
           <TouchableOpacity 
-             style={[styles.saveBtn, {backgroundColor: '#ff9900', width: '100%'}]}
+             style={[styles.saveBtn, {backgroundColor: colors.text, width: '100%', shadowColor: colors.text, elevation: 5, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.3}]}
              onPress={handleFixLocation}
           >
-             <Text style={styles.saveBtnText}>📍 Зафіксувати геолокацію салону</Text>
+             <Text style={[styles.saveBtnText, {color: colors.background}]}>📍 Зафіксувати геолокацію салону</Text>
           </TouchableOpacity>
         </View>
 
@@ -320,17 +321,17 @@ export const MasterProfileScreen = ({ navigation }: any) => {
           <Text style={[styles.settingText, { color: colors.text, fontWeight: 'bold' }]}>Сповіщення Telegram</Text>
           <Text style={{color: colors.textSecondary, marginBottom: 10, marginTop: 5, fontSize: 13}}>Отримуйте сповіщення про нові записи прямо в Telegram.</Text>
           <TouchableOpacity 
-             style={[styles.saveBtn, {backgroundColor: '#0088cc', width: '100%'}]}
+             style={[styles.saveBtn, {backgroundColor: colors.text, width: '100%', shadowColor: colors.text, elevation: 5, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.3}]}
              onPress={() => Linking.openURL(`https://t.me/NailBookProBot?start=${userId}`)}
           >
-             <Text style={styles.saveBtnText}>💬 Підключити Telegram</Text>
+             <Text style={[styles.saveBtnText, {color: colors.background}]}>💬 Підключити Telegram</Text>
           </TouchableOpacity>
         </View>
         <View style={[styles.settingRow, { backgroundColor: colors.card, flexDirection: 'column', alignItems: 'flex-start' }]}>
           <Text style={[styles.settingText, { color: colors.text, fontWeight: 'bold' }]}>Запросити клієнта</Text>
           <Text style={{color: colors.textSecondary, marginBottom: 10, marginTop: 5, fontSize: 13}}>Згенеруйте тимчасовий код для клієнта.</Text>
           <TouchableOpacity 
-             style={[styles.saveBtn, {backgroundColor: '#32CD32', width: '100%'}]}
+             style={[styles.saveBtn, {backgroundColor: colors.text, width: '100%', shadowColor: colors.text, elevation: 5, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.3}]}
              onPress={async () => {
                  try {
                      const res = await api.post('/api/master/connection-code');
@@ -341,7 +342,7 @@ export const MasterProfileScreen = ({ navigation }: any) => {
                  }
              }}
           >
-             <Text style={styles.saveBtnText}>🔑 Згенерувати код</Text>
+             <Text style={[styles.saveBtnText, {color: colors.background}]}>🔑 Згенерувати код</Text>
           </TouchableOpacity>
           {generatedCode && (
               <View style={{marginTop: 15, padding: 15, backgroundColor: '#e6ffe6', borderRadius: 10, width: '100%', alignItems: 'center'}}>
@@ -362,6 +363,7 @@ export const MasterProfileScreen = ({ navigation }: any) => {
       
       <View style={{height: 50}} />
     </ScrollView>
+    </SafeAreaView>
   );
 };
 

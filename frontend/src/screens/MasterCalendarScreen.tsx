@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import api from '../api/client';
+import { useTheme } from '../context/ThemeContext';
 
 LocaleConfig.defaultLocale = 'ua';
 
 export const MasterCalendarScreen = () => {
+  const { colors, isDark } = useTheme();
   const [selectedDay, setSelectedDay] = useState(new Date().toISOString().split('T')[0]);
   const [appointments, setAppointments] = useState<any[]>([]);
   const [totalSum, setTotalSum] = useState(0);
@@ -47,26 +49,33 @@ export const MasterCalendarScreen = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.header}>Мій Розклад</Text>
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
+      <Text style={[styles.header, { color: colors.text }]}>Мій Розклад</Text>
 
-      <View style={styles.calendarWrapper}>
+      <View style={[styles.calendarWrapper, { backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1 }]}>
         <Calendar
           current={selectedDay}
           onDayPress={(day: any) => setSelectedDay(day.dateString)}
           markedDates={markedDates}
           theme={{
-            selectedDayBackgroundColor: '#C88D7A',
-            todayTextColor: '#C88D7A',
-            arrowColor: '#C88D7A',
-            monthTextColor: '#C88D7A',
+            calendarBackground: colors.card,
+            textSectionTitleColor: colors.textSecondary,
+            selectedDayBackgroundColor: colors.text,
+            selectedDayTextColor: colors.background,
+            todayTextColor: colors.primary,
+            dayTextColor: colors.text,
+            textDisabledColor: isDark ? '#444444' : '#d9e1e8',
+            dotColor: colors.primary,
+            selectedDotColor: colors.background,
+            arrowColor: colors.text,
+            monthTextColor: colors.text,
             textMonthFontWeight: 'bold',
           }}
         />
       </View>
 
       <TouchableOpacity 
-        style={{backgroundColor: '#FFE4E1', padding: 15, borderRadius: 10, alignItems: 'center', marginBottom: 20}}
+        style={{backgroundColor: colors.text, padding: 15, borderRadius: 12, alignItems: 'center', marginBottom: 20, elevation: 5, shadowColor: colors.text, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.3}}
         onPress={() => {
            Alert.alert('Підтвердження', 'Ви впевнені, що хочете приховати всі записи до сьогоднішнього дня? (вони залишаться в статистиці)', [
               {text: 'Скасувати', style: 'cancel'},
@@ -80,35 +89,35 @@ export const MasterCalendarScreen = () => {
            ]);
         }}
       >
-        <Text style={{color: '#C88D7A', fontWeight: 'bold'}}>🧹 Очистити минулі записи</Text>
+        <Text style={{color: colors.background, fontWeight: 'bold'}}>🧹 Очистити минулі записи</Text>
       </TouchableOpacity>
 
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1 }]}>
         <View style={styles.cardHeaderRow}>
-            <Text style={styles.cardTitle}>Записи на {selectedDay}</Text>
-            <TouchableOpacity style={styles.editBtn}>
-                <Text style={styles.editBtnText}>✎ Ред. день</Text>
+            <Text style={[styles.cardTitle, { color: colors.text }]}>Записи на {selectedDay}</Text>
+            <TouchableOpacity style={[styles.editBtn, { backgroundColor: colors.background }]}>
+                <Text style={[styles.editBtnText, { color: colors.textSecondary }]}>✎ Ред. день</Text>
             </TouchableOpacity>
         </View>
 
         {loading ? (
-          <ActivityIndicator color="#C88D7A" />
+          <ActivityIndicator color={colors.primary} />
         ) : appointments.length === 0 ? (
-          <Text style={styles.noData}>Немає записів на цей день</Text>
+          <Text style={[styles.noData, { color: colors.textSecondary }]}>Немає записів на цей день</Text>
         ) : (
           <>
-            <Text style={{fontWeight: 'bold', color: '#333', marginBottom: 10, fontSize: 16}}>
+            <Text style={{fontWeight: 'bold', color: colors.text, marginBottom: 10, fontSize: 16}}>
               Загальна сума за день: {totalSum} грн
             </Text>
             {appointments.map((app) => (
-              <View key={app.id} style={styles.appointmentCard}>
+              <View key={app.id} style={[styles.appointmentCard, { borderBottomColor: colors.border }]}>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.appName}>{app.client?.name || 'Клієнт'}</Text>
-                  <Text style={styles.appTime}>{app.time}</Text>
-                  <Text style={{color: '#888', fontSize: 12}}>
+                  <Text style={[styles.appName, { color: colors.text }]}>{app.client?.name || 'Клієнт'}</Text>
+                  <Text style={[styles.appTime, { color: colors.textSecondary }]}>{app.time}</Text>
+                  <Text style={{color: colors.textSecondary, fontSize: 12}}>
                     {app.service ? app.service : 'Послуга не вказана'} | {(app.finalPrice || app.originalPrice || app.price) ? (app.finalPrice || app.originalPrice || app.price) + ' грн' : 'Ціна не вказана'}
                   </Text>
-                  <Text style={[styles.appStatus, app.status === 'CONFIRMED' ? {color:'green'} : {color: '#555'}]}>
+                  <Text style={[styles.appStatus, app.status === 'CONFIRMED' ? {color:'green'} : {color: colors.textSecondary}]}>
                     {app.status === 'PENDING' ? 'ОЧІКУЄ' : app.status === 'CONFIRMED' ? 'ПІДТВЕРДЖЕНО' : app.status}
                   </Text>
                 </View>
@@ -119,8 +128,8 @@ export const MasterCalendarScreen = () => {
                     </TouchableOpacity>
                   )}
                   {app.status !== 'CANCELLED' && (
-                    <TouchableOpacity style={[styles.actionBtn, {backgroundColor: '#e0c0b4'}]} onPress={() => updateStatus(app.id, 'CANCELLED')}>
-                      <Text style={styles.actionBtnText}>✗</Text>
+                    <TouchableOpacity style={[styles.actionBtn, {backgroundColor: colors.border}]} onPress={() => updateStatus(app.id, 'CANCELLED')}>
+                      <Text style={[styles.actionBtnText, { color: colors.text }]}>✗</Text>
                     </TouchableOpacity>
                   )}
                 </View>
