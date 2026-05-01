@@ -18,6 +18,7 @@ export const ClientCalendarScreen = ({ navigation }: any) => {
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [masterId, setMasterId] = useState<string | null>(null);
   const [masterName, setMasterName] = useState<string>('ПРОСТІР КРАСИ');
+  const [masterType, setMasterType] = useState<string>('');
   const [socialLinks, setSocialLinks] = useState<any>({ instagram: '', tiktok: '', facebook: '' });
   const [prices, setPrices] = useState<any[]>([]);
   const [selectedPriceId, setSelectedPriceId] = useState<string | null>(null);
@@ -41,9 +42,9 @@ export const ClientCalendarScreen = ({ navigation }: any) => {
             const masterRes = await api.get(`/api/client/master/${u.masterId}`);
             if (masterRes.data) {
                 if (masterRes.data.salonName) {
-                    setMasterName(t('clientCalendar.salonPrefix', {defaultValue: 'САЛОН '}) + masterRes.data.salonName.toUpperCase());
+                    setMasterName(masterRes.data.salonName.toUpperCase()); setMasterType('salon');
                 } else if (masterRes.data.name) {
-                    setMasterName(t('clientCalendar.masterPrefix', {defaultValue: 'МАЙСТЕР '}) + masterRes.data.name.toUpperCase());
+                    setMasterName(masterRes.data.name.toUpperCase()); setMasterType('master');
                 }
                 setSocialLinks({
                     instagram: masterRes.data.instagram || '',
@@ -162,7 +163,7 @@ export const ClientCalendarScreen = ({ navigation }: any) => {
         
         {/* Hero Section */}
         <View style={styles.heroSection}>
-            <Text style={[styles.overTitle, { color: colors.primary }]}>{masterName}</Text>
+            <Text style={[styles.overTitle, { color: colors.primary }]}>{masterType === 'salon' ? t('clientCalendar.salonPrefix', {defaultValue: 'САЛОН '}) : (masterType === 'master' ? t('clientCalendar.masterPrefix', {defaultValue: 'МАЙСТЕР '}) : '')}{masterName}</Text>
             
             {(socialLinks.instagram || socialLinks.tiktok || socialLinks.facebook) ? (
               <View style={{flexDirection: 'row', gap: 15, marginBottom: 15}}>
