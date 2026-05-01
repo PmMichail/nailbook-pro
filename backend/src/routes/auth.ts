@@ -154,7 +154,7 @@ router.post('/register', async (req, res) => {
 
     const token = jwt.sign({ id: user.id, role: user.role, masterId: user.masterId }, JWT_SECRET, { expiresIn: '7d' });
     
-    res.status(201).json({ user: { id: user.id, name: user.name, role: user.role, linkSlug: user.linkSlug, masterId: user.masterId, avatarUrl: user.avatarUrl }, token });
+    res.status(201).json({ user: { id: user.id, name: user.name, role: user.role, linkSlug: user.linkSlug, masterId: user.masterId, avatarUrl: user.avatarUrl, salonLogo: user.salonLogo, salonName: user.salonName }, token });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Помилка сервера' });
@@ -198,7 +198,7 @@ router.post('/login', async (req, res) => {
 
     const token = jwt.sign({ id: user.id, role: user.role, masterId: user.masterId }, JWT_SECRET, { expiresIn: '7d' });
     
-    res.json({ user: { id: user.id, name: user.name, role: user.role, linkSlug: user.linkSlug, masterId: user.masterId, avatarUrl: user.avatarUrl }, token });
+    res.json({ user: { id: user.id, name: user.name, role: user.role, linkSlug: user.linkSlug, masterId: user.masterId, avatarUrl: user.avatarUrl, salonLogo: user.salonLogo, salonName: user.salonName }, token });
   } catch (error) {
     res.status(500).json({ error: 'Помилка сервера' });
   }
