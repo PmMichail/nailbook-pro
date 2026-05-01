@@ -5,6 +5,7 @@ import { registerForPushNotificationsAsync } from '../utils/notifications';
 import * as LocalAuthentication from 'expo-local-authentication';
 import * as SecureStore from 'expo-secure-store';
 import { useTheme } from '../context/ThemeContext';
+import api from '../api/client';
 
 export const LoginScreen = ({ navigation }: any) => {
   const { t } = useTranslation();

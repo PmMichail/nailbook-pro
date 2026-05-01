@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingVi
 import { useTranslation } from 'react-i18next';
 import { registerForPushNotificationsAsync } from '../utils/notifications';
 import { useTheme } from '../context/ThemeContext';
+import api from '../api/client';
 
 export const RegisterScreen = ({ navigation }: any) => {
   const { t } = useTranslation();
