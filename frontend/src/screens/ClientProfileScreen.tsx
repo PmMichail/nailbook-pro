@@ -207,38 +207,45 @@ export const ClientProfileScreen = ({ navigation }: any) => {
         </View>
       </View>
 
-      {myMaster?.referralEnabled !== false && (
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Реферальна програма 🎁</Text>
         <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <Text style={[styles.cardTitle, { color: colors.text }]}>Запроси подругу - отримай знижку 10%!</Text>
-          <Text style={{ color: colors.textSecondary, marginBottom: 20, fontSize: 13 }}>Ваша подруга отримає знижку 10% на перший запис, а ви 10% — на ваш наступний запис за кожну подругу!</Text>
-          
-          <View style={{backgroundColor: colors.background, padding: 15, borderRadius: 12, borderWidth: 1, borderColor: colors.border, marginBottom: 15}}>
-             <Text style={{color: colors.text, fontWeight: 'bold', fontSize: 18, letterSpacing: 2, textAlign: 'center', marginBottom: 15}}>{referralCode || 'Завантаження...'}</Text>
-             <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
-                 <TouchableOpacity style={[styles.actionBtn, { borderColor: colors.primary }]} onPress={shareReferralCode}>
-                     <Text style={{color: colors.primary, fontWeight: 'bold', fontSize: 12}}>Поділитися 💬</Text>
-                 </TouchableOpacity>
-                 <TouchableOpacity style={[styles.actionBtn, { borderColor: colors.primary, marginLeft: 10 }]} onPress={copyReferralCode}>
-                     <Text style={{color: colors.primary, fontWeight: 'bold', fontSize: 12}}>Копіювати</Text>
-                 </TouchableOpacity>
+          {myMaster?.referralEnabled === false ? (
+             <View style={{padding: 20, alignItems: 'center'}}>
+                 <Text style={{fontSize: 30, marginBottom: 10}}>😔</Text>
+                 <Text style={{color: colors.textSecondary, textAlign: 'center'}}>Ваш майстер тимчасово вимкнув реферальну програму.</Text>
              </View>
-          </View>
-          
-          <View style={{flexDirection: 'row', justifyContent: 'space-between', borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 15}}>
-             <View style={{alignItems: 'center', flex: 1}}>
-                 <Text style={{fontSize: 24, fontFamily: 'serif', fontWeight: 'bold', color: colors.text}}>{referralUses}</Text>
-                 <Text style={{fontSize: 12, color: colors.textSecondary}}>Запрошено</Text>
-             </View>
-             <View style={{alignItems: 'center', flex: 1, borderLeftWidth: 1, borderLeftColor: colors.border}}>
-                 <Text style={{fontSize: 24, fontFamily: 'serif', fontWeight: 'bold', color: colors.primary}}>{referralPendingBonuses}</Text>
-                 <Text style={{fontSize: 12, color: colors.textSecondary}}>Доступно знижок</Text>
-             </View>
-          </View>
+          ) : (
+            <>
+              <Text style={[styles.cardTitle, { color: colors.text }]}>Запроси подругу - отримай знижку 10%!</Text>
+              <Text style={{ color: colors.textSecondary, marginBottom: 20, fontSize: 13 }}>Ваша подруга отримає знижку 10% на перший запис, а ви 10% — на ваш наступний запис за кожну подругу!</Text>
+              
+              <View style={{backgroundColor: colors.background, padding: 15, borderRadius: 12, borderWidth: 1, borderColor: colors.border, marginBottom: 15}}>
+                 <Text style={{color: colors.text, fontWeight: 'bold', fontSize: 18, letterSpacing: 2, textAlign: 'center', marginBottom: 15}}>{referralCode || 'Завантаження...'}</Text>
+                 <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
+                     <TouchableOpacity style={[styles.actionBtn, { borderColor: colors.primary }]} onPress={shareReferralCode}>
+                         <Text style={{color: colors.primary, fontWeight: 'bold', fontSize: 12}}>Поділитися 💬</Text>
+                     </TouchableOpacity>
+                     <TouchableOpacity style={[styles.actionBtn, { borderColor: colors.primary, marginLeft: 10 }]} onPress={copyReferralCode}>
+                         <Text style={{color: colors.primary, fontWeight: 'bold', fontSize: 12}}>Копіювати</Text>
+                     </TouchableOpacity>
+                 </View>
+              </View>
+              
+              <View style={{flexDirection: 'row', justifyContent: 'space-between', borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 15}}>
+                 <View style={{alignItems: 'center', flex: 1}}>
+                     <Text style={{fontSize: 24, fontFamily: 'serif', fontWeight: 'bold', color: colors.text}}>{referralUses}</Text>
+                     <Text style={{fontSize: 12, color: colors.textSecondary}}>Запрошено</Text>
+                 </View>
+                 <View style={{alignItems: 'center', flex: 1, borderLeftWidth: 1, borderLeftColor: colors.border}}>
+                     <Text style={{fontSize: 24, fontFamily: 'serif', fontWeight: 'bold', color: colors.primary}}>{referralPendingBonuses}</Text>
+                     <Text style={{fontSize: 12, color: colors.textSecondary}}>Доступно знижок</Text>
+                 </View>
+              </View>
+            </>
+          )}
         </View>
       </View>
-      )}
 
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Мій Майстер</Text>
