@@ -5,9 +5,11 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Clipboard from 'expo-clipboard';
 import api from '../api/client';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 export const ClientProfileScreen = ({ navigation }: any) => {
   const { colors, isDark, toggleTheme } = useTheme();
+  const { t } = useTranslation();
   const [pushEnabled, setPushEnabled] = useState(true);
   const [telegramEnabled, setTelegramEnabled] = useState(false);
   
@@ -208,7 +210,7 @@ export const ClientProfileScreen = ({ navigation }: any) => {
       </View>
 
       <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Реферальна програма 🎁</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('profile.referralProgram', {defaultValue: 'Реферальна програма 🎁'})}</Text>
         <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
           {myMaster?.referralEnabled === false ? (
              <View style={{padding: 20, alignItems: 'center'}}>
@@ -217,17 +219,17 @@ export const ClientProfileScreen = ({ navigation }: any) => {
              </View>
           ) : (
             <>
-              <Text style={[styles.cardTitle, { color: colors.text }]}>Запроси подругу - отримай знижку 10%!</Text>
-              <Text style={{ color: colors.textSecondary, marginBottom: 20, fontSize: 13 }}>Ваша подруга отримає знижку 10% на перший запис, а ви 10% — на ваш наступний запис за кожну подругу!</Text>
+              <Text style={[styles.cardTitle, { color: colors.text }]}>{t('profile.referralTitle', {defaultValue: 'Запроси подругу - отримай знижку 10%!'})}</Text>
+              <Text style={{ color: colors.textSecondary, marginBottom: 20, fontSize: 13 }}>{t('profile.referralDesc', {defaultValue: 'Ваша подруга отримає знижку 10% на перший запис, а ви 10% — на ваш наступний запис за кожну подругу!'})}</Text>
               
               <View style={{backgroundColor: colors.background, padding: 15, borderRadius: 12, borderWidth: 1, borderColor: colors.border, marginBottom: 15}}>
                  <Text style={{color: colors.text, fontWeight: 'bold', fontSize: 18, letterSpacing: 2, textAlign: 'center', marginBottom: 15}}>{referralCode || 'Завантаження...'}</Text>
                  <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
                      <TouchableOpacity style={[styles.actionBtn, { borderColor: colors.primary }]} onPress={shareReferralCode}>
-                         <Text style={{color: colors.primary, fontWeight: 'bold', fontSize: 12}}>Поділитися 💬</Text>
+                         <Text style={{color: colors.primary, fontWeight: 'bold', fontSize: 12}}>{t('profile.share', {defaultValue: 'Поділитися 💬'})}</Text>
                      </TouchableOpacity>
                      <TouchableOpacity style={[styles.actionBtn, { borderColor: colors.primary, marginLeft: 10 }]} onPress={copyReferralCode}>
-                         <Text style={{color: colors.primary, fontWeight: 'bold', fontSize: 12}}>Копіювати</Text>
+                         <Text style={{color: colors.primary, fontWeight: 'bold', fontSize: 12}}>{t('profile.copy', {defaultValue: 'Копіювати 📄'})}</Text>
                      </TouchableOpacity>
                  </View>
               </View>
@@ -235,11 +237,11 @@ export const ClientProfileScreen = ({ navigation }: any) => {
               <View style={{flexDirection: 'row', justifyContent: 'space-between', borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 15}}>
                  <View style={{alignItems: 'center', flex: 1}}>
                      <Text style={{fontSize: 24, fontFamily: 'serif', fontWeight: 'bold', color: colors.text}}>{referralUses}</Text>
-                     <Text style={{fontSize: 12, color: colors.textSecondary}}>Запрошено</Text>
+                     <Text style={{fontSize: 12, color: colors.textSecondary}}>{t('profile.invited', {defaultValue: 'Запрошено'})}</Text>
                  </View>
                  <View style={{alignItems: 'center', flex: 1, borderLeftWidth: 1, borderLeftColor: colors.border}}>
                      <Text style={{fontSize: 24, fontFamily: 'serif', fontWeight: 'bold', color: colors.primary}}>{referralPendingBonuses}</Text>
-                     <Text style={{fontSize: 12, color: colors.textSecondary}}>Доступно знижок</Text>
+                     <Text style={{fontSize: 12, color: colors.textSecondary}}>{t('profile.yourDiscount', {defaultValue: 'Ваша знижка'})}</Text>
                  </View>
               </View>
             </>
@@ -248,7 +250,7 @@ export const ClientProfileScreen = ({ navigation }: any) => {
       </View>
 
       <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Мій Майстер</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('profile.myMaster', {defaultValue: 'Мій Майстер'})}</Text>
         
         {myMaster && (
            <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border, marginBottom: 15, paddingVertical: 15 }]}>
@@ -257,7 +259,7 @@ export const ClientProfileScreen = ({ navigation }: any) => {
                      {(myMaster.salonLogo || myMaster.avatarUrl) && <Image source={{uri: (myMaster.salonLogo || myMaster.avatarUrl).startsWith('http') ? (myMaster.salonLogo || myMaster.avatarUrl) : `${api.defaults.baseURL}/${(myMaster.salonLogo || myMaster.avatarUrl)}`}} style={{width: '100%', height: '100%', resizeMode: 'cover'}} />}
                  </View>
                  <View style={{flex: 1}}>
-                     <Text style={{ color: colors.textSecondary, fontSize: 12, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Поточний майстер</Text>
+                     <Text style={{ color: colors.textSecondary, fontSize: 12, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>{t('profile.currentMaster', {defaultValue: 'Поточний майстер'})}</Text>
                      <Text style={{ color: colors.text, fontFamily: 'serif', fontStyle: 'italic', fontSize: 28, fontWeight: 'bold' }}>{myMaster.name}</Text>
                      {myMaster.salonName && <Text style={{ color: colors.primary, fontSize: 18, marginTop: 4, fontWeight: 'bold' }}>💅 {myMaster.salonName}</Text>}
                      <Text style={{ color: colors.textSecondary, fontSize: 15, marginTop: 4 }}>{myMaster.phone}</Text>
@@ -265,7 +267,7 @@ export const ClientProfileScreen = ({ navigation }: any) => {
              </View>
              <View style={{flexDirection: 'row', justifyContent: 'space-between', marginTop: 15, alignItems: 'center', width: '100%'}}>
                  <TouchableOpacity onPress={handleContactMaster}>
-                     <Text style={{color: colors.primary, fontSize: 14, fontWeight: 'bold'}}>💬 Написати</Text>
+                     <Text style={{color: colors.primary, fontSize: 14, fontWeight: 'bold'}}>{t('profile.message', {defaultValue: '💬 Написати'})}</Text>
                  </TouchableOpacity>
                  <TouchableOpacity onPress={() => {
                      Alert.alert('Підтвердження', 'Відкріпитись від цього майстра?', [
@@ -279,45 +281,45 @@ export const ClientProfileScreen = ({ navigation }: any) => {
                          }}
                      ]);
                  }}>
-                     <Text style={{color: '#8b0000', fontSize: 13, fontWeight: 'bold'}}>Відкріпитись</Text>
+                     <Text style={{color: '#8b0000', fontSize: 13, fontWeight: 'bold'}}>{t('profile.unlink', {defaultValue: 'Відкріпитись'})}</Text>
                  </TouchableOpacity>
              </View>
            </View>
         )}
         <TouchableOpacity style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border, marginBottom: 20 }]} onPress={() => navigation.navigate('SearchMastersScreen' as never)}>
-          <Text style={[styles.cardTitle, { color: colors.text }]}>Знайти або підключити майстра 🔍</Text>
-          <Text style={{ color: colors.textSecondary }}>Пошук за геолокацією або ввід коду</Text>
+          <Text style={[styles.cardTitle, { color: colors.text }]}>{t('profile.findMaster', {defaultValue: 'Знайти або підключити майстра 🔍'})}</Text>
+          <Text style={{ color: colors.textSecondary }}>{t('profile.searchDesc', {defaultValue: 'Пошук за геолокацією або ввід коду'})}</Text>
         </TouchableOpacity>
 
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Вподобання</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('profile.preferences', {defaultValue: 'Вподобання'})}</Text>
         <TouchableOpacity style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]} onPress={() => navigation.navigate('Gallery' as never)}>
-          <Text style={[styles.cardTitle, { color: colors.text }]}>Збережені дизайни (Обране)</Text>
-          <Text style={{ color: colors.textSecondary }}>Переглянути збережені фото 💅</Text>
+          <Text style={[styles.cardTitle, { color: colors.text }]}>{t('profile.savedDesigns', {defaultValue: 'Збережені дизайни (Обране)'})}</Text>
+          <Text style={{ color: colors.textSecondary }}>{t('profile.viewSaved', {defaultValue: 'Переглянути збережені фото 💅'})}</Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Налаштування</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('settings', {defaultValue: 'Налаштування'})}</Text>
         <View style={[styles.settingRow, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <Text style={[styles.settingText, { color: colors.text }]}>Темна тема</Text>
+          <Text style={[styles.settingText, { color: colors.text }]}>{t('darkTheme', {defaultValue: 'Темна тема'})}</Text>
           <Switch value={isDark} onValueChange={toggleTheme} trackColor={{true: colors.primary}} />
         </View>
         <View style={[styles.settingRow, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <Text style={[styles.settingText, { color: colors.text }]}>Push-сповіщення</Text>
+          <Text style={[styles.settingText, { color: colors.text }]}>{t('pushNotifications', {defaultValue: 'Push-сповіщення'})}</Text>
           <Switch value={pushEnabled} onValueChange={setPushEnabled} trackColor={{true: colors.primary}} />
         </View>
         <View style={[styles.settingRow, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <Text style={[styles.settingText, { color: colors.text }]}>Telegram-бот</Text>
+          <Text style={[styles.settingText, { color: colors.text }]}>{t('telegramBot', {defaultValue: 'Telegram-бот'})}</Text>
           <Switch value={telegramEnabled} onValueChange={setTelegramEnabled} trackColor={{true: colors.primary}} />
         </View>
       </View>
 
       <TouchableOpacity style={[styles.logoutButton, { borderColor: '#8b0000', backgroundColor: 'transparent', borderWidth: 1, marginBottom: 15 }]} onPress={handleLogout}>
-        <Text style={[styles.logoutButtonText, { color: '#8b0000' }]}>Вийти з акаунту</Text>
+        <Text style={[styles.logoutButtonText, { color: '#8b0000' }]}>{t('logout', {defaultValue: 'Вийти з акаунту'})}</Text>
       </TouchableOpacity>
       
       <TouchableOpacity onPress={handleDeleteAccount} style={{ alignSelf: 'center', marginBottom: 20 }}>
-          <Text style={{color: '#ff0000', textDecorationLine: 'underline'}}>Видалити мій акаунт назавжди</Text>
+          <Text style={{color: '#ff0000', textDecorationLine: 'underline'}}>{t('deleteAccount', {defaultValue: 'Видалити мій акаунт назавжди'})}</Text>
       </TouchableOpacity>
       
       <View style={{height: 80}} />

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, ActivityIndicator, Modal, RefreshControl, Image, Linking } from 'react-native';
 import api from '../api/client';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from 'react-i18next';
 import QRCode from 'react-native-qrcode-svg';
 import * as Clipboard from 'expo-clipboard';
 import * as ImagePicker from 'expo-image-picker';
@@ -22,6 +23,7 @@ const DAYS = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'НД'];
 
 export const MasterDashboardScreen = () => {
   const { colors, isDark } = useTheme();
+  const { t } = useTranslation();
   const navigation = useNavigation<any>();
     const currentWeek = React.useMemo(() => {
     const base = new Date();
@@ -306,23 +308,23 @@ export const MasterDashboardScreen = () => {
       {/* Top Actions */}
       <View style={{flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20}}>
         <TouchableOpacity style={[styles.btnSecondary, {flex: 1, marginRight: 5, borderColor: colors.primary, borderWidth: 1}]} onPress={() => setQrModalVisible(true)}>
-          <Text style={{color: colors.primary, fontWeight: 'bold'}}>QR Код</Text>
+          <Text style={{color: colors.primary, fontWeight: 'bold'}}>{t('dashboard.qrCode', {defaultValue: 'QR Код'})}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.btnSecondary, {flex: 0.5, borderColor: colors.primary}]} onPress={() => navigation.navigate('StatisticsScreen' as never)}>
-          <Text style={{color: colors.primary, fontWeight: 'bold'}}>Статист.</Text>
+          <Text style={{color: colors.primary, fontWeight: 'bold'}}>{t('dashboard.stats', {defaultValue: 'Статист.'})}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.btnSecondary, {flex: 0.5, marginLeft: 5, borderColor: colors.primary}]} onPress={() => navigation.navigate('PaymentSetupScreen' as never)}>
-          <Text style={{color: colors.primary, fontWeight: 'bold'}}>Оплата</Text>
+          <Text style={{color: colors.primary, fontWeight: 'bold'}}>{t('dashboard.payment', {defaultValue: 'Оплата'})}</Text>
         </TouchableOpacity>
       </View>
       <TouchableOpacity style={[styles.btnSecondary, {marginBottom: 20, width: '100%', borderColor: colors.primary}]} onPress={() => navigation.navigate('MasterClientsScreen' as never)}>
-          <Text style={{color: colors.primary, fontWeight: 'bold', fontSize: 16}}>👥 Мої Клієнти</Text>
+          <Text style={{color: colors.primary, fontWeight: 'bold', fontSize: 16}}>👥 {t('dashboard.myClients', {defaultValue: 'Мої Клієнти'})}</Text>
       </TouchableOpacity>
 
 
       {/* Settings Form for Weekly */}
       <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-        <Text style={[styles.cardTitle, { color: colors.primary }]}>Налаштування Графіка</Text>
+        <Text style={[styles.cardTitle, { color: colors.primary }]}>{t('dashboard.scheduleSettings', {defaultValue: 'Налаштування Графіка'})}</Text>
 
         <View style={styles.daysRow}>
           {DAYS.map((day, ix) => (
@@ -349,7 +351,7 @@ export const MasterDashboardScreen = () => {
           onPress={() => handleUpdateCurrentDaySetting('isWorking', !activeDaySetting.isWorking)}
         >
           <Text style={{color: colors.text, fontWeight: 'bold'}}>
-            {activeDaySetting.isWorking ? '✅ Робочий день' : '❌ Вихідний'} <Text style={{color: colors.textSecondary, fontSize: 12}}>(Натисніть щоб змінити)</Text>
+            {activeDaySetting.isWorking ? `✅ ${t('dashboard.workDay', {defaultValue: 'Робочий день'})}` : '❌ Вихідний'}
           </Text>
         </TouchableOpacity>
 
@@ -357,37 +359,37 @@ export const MasterDashboardScreen = () => {
           <>
             <View style={styles.row}>
                 <View style={{flex: 1, paddingRight: 10}}>
-                    <Text style={[styles.label, {color: colors.textSecondary}]}>Початок:</Text>
+                    <Text style={[styles.label, {color: colors.textSecondary}]}>{t('dashboard.start', {defaultValue: 'Початок:'})}</Text>
                     <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={activeDaySetting.workStart} onChangeText={(v) => handleUpdateCurrentDaySetting('workStart', v)} />
                 </View>
                 <View style={{flex: 1}}>
-                    <Text style={[styles.label, {color: colors.textSecondary}]}>Кінець:</Text>
+                    <Text style={[styles.label, {color: colors.textSecondary}]}>{t('dashboard.end', {defaultValue: 'Кінець:'})}</Text>
                     <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={activeDaySetting.workEnd} onChangeText={(v) => handleUpdateCurrentDaySetting('workEnd', v)} />
                 </View>
             </View>
 
             <View style={styles.row}>
                 <View style={{flex: 1, paddingRight: 10}}>
-                    <Text style={[styles.label, {color: colors.textSecondary}]}>Поч. Перерви:</Text>
+                    <Text style={[styles.label, {color: colors.textSecondary}]}>{t('dashboard.breakStart', {defaultValue: 'Поч. Перерви:'})}</Text>
                     <TextInput placeholder="12:00" placeholderTextColor={colors.textSecondary} style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={activeDaySetting.breakStart} onChangeText={(v) => handleUpdateCurrentDaySetting('breakStart', v)} />
                 </View>
                 <View style={{flex: 1}}>
-                    <Text style={[styles.label, {color: colors.textSecondary}]}>Кін. Перерви:</Text>
+                    <Text style={[styles.label, {color: colors.textSecondary}]}>{t('dashboard.breakEnd', {defaultValue: 'Кін. Перерви:'})}</Text>
                     <TextInput placeholder="13:00" placeholderTextColor={colors.textSecondary} style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={activeDaySetting.breakEnd} onChangeText={(v) => handleUpdateCurrentDaySetting('breakEnd', v)} />
                 </View>
             </View>
 
-            <Text style={[styles.label, {color: colors.textSecondary}]}>Час на клієнта (хв):</Text>
+            <Text style={[styles.label, {color: colors.textSecondary}]}>{t('dashboard.timePerClient', {defaultValue: 'Час на клієнта (хв):'})}</Text>
             <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={activeDaySetting.timePerClient?.toString()} onChangeText={(v) => handleUpdateCurrentDaySetting('timePerClient', v)} keyboardType="numeric" />
             
             <TouchableOpacity style={{alignItems: 'flex-end', marginBottom: 15}} onPress={handleCopyToAllDays}>
-              <Text style={{color: colors.primary, textDecorationLine: 'underline'}}>Скопіювати на всі дні</Text>
+              <Text style={{color: colors.primary, textDecorationLine: 'underline'}}>{t('dashboard.copyToAllDays', {defaultValue: 'Скопіювати на всі дні'})}</Text>
             </TouchableOpacity>
           </>
         )}
 
         <TouchableOpacity style={[styles.btnPrimary, { backgroundColor: colors.primary }]} onPress={saveSettings}>
-          <Text style={[styles.btnPrimaryText, { color: isDark ? '#000' : '#fff' }]}>Зберегти Розклад</Text>
+          <Text style={[styles.btnPrimaryText, { color: isDark ? '#000' : '#fff' }]}>{t('dashboard.saveSchedule', {defaultValue: 'Зберегти Розклад'})}</Text>
         </TouchableOpacity>
       </View>
 

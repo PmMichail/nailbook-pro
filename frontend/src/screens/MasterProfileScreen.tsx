@@ -6,9 +6,11 @@ import * as Location from 'expo-location';
 import api from '../api/client';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 export const MasterProfileScreen = ({ navigation }: any) => {
   const { colors, isDark, toggleTheme } = useTheme();
+  const { t } = useTranslation();
   const { t } = useTranslation();
   
   const [name, setName] = useState('');
@@ -295,42 +297,41 @@ export const MasterProfileScreen = ({ navigation }: any) => {
 
 
         <View style={[styles.settingRow, { backgroundColor: colors.card, flexDirection: 'column', alignItems: 'flex-start' }]}>
-          <Text style={[styles.settingText, { color: colors.text, fontWeight: 'bold' }]}>Геолокація салону</Text>
+          <Text style={[styles.settingText, { color: colors.text, fontWeight: 'bold' }]}>{t('profile.fixLocation', {defaultValue: 'Геолокація салону'})}</Text>
           <Text style={{color: colors.textSecondary, marginBottom: 10, marginTop: 5, fontSize: 13}}>Дозвольте новим клієнтам поблизу знаходити вас на карті.</Text>
           {address ? <Text style={{color: colors.primary, marginBottom: 10, fontWeight: 'bold'}}>Поточна адреса: {address}</Text> : null}
           <TouchableOpacity 
              style={[styles.saveBtn, {backgroundColor: 'transparent', width: '100%', borderColor: colors.primary, borderWidth: 1}]}
              onPress={handleFixLocation}
           >
-             <Text style={[styles.saveBtnText, {color: '#ffcc00'}]}>📍 Зафіксувати геолокацію салону</Text>
+             <Text style={[styles.saveBtnText, {color: '#ffcc00'}]}>{t('profile.fixLocation', {defaultValue: '📍 Зафіксувати геолокацію салону'})}</Text>
           </TouchableOpacity>
         </View>
 
         <View style={[styles.settingRow, { backgroundColor: colors.card }]}>
-
-          <Text style={[styles.settingText, { color: colors.text }]}>Темна тема</Text>
+          <Text style={[styles.settingText, { color: colors.text }]}>{t('darkTheme', {defaultValue: 'Темна тема'})}</Text>
           <Switch value={isDark} onValueChange={toggleTheme} trackColor={{true: colors.primary}} />
         </View>
         <View style={[styles.settingRow, { backgroundColor: colors.card }]}>
-          <Text style={[styles.settingText, { color: colors.text }]}>Push-сповіщення</Text>
+          <Text style={[styles.settingText, { color: colors.text }]}>{t('pushNotifications', {defaultValue: 'Push-сповіщення'})}</Text>
           <Switch value={pushEnabled} onValueChange={setPushEnabled} trackColor={{true: colors.primary}} />
         </View>
         <View style={[styles.settingRow, { backgroundColor: colors.card }]}>
-          <Text style={[styles.settingText, { color: colors.text }]}>Реферальна програма</Text>
+          <Text style={[styles.settingText, { color: colors.text }]}>{t('profile.referralProgram', {defaultValue: 'Реферальна програма'})}</Text>
           <Switch value={referralEnabled} onValueChange={(val) => { setReferralEnabled(val); handleSaveProfile(); }} trackColor={{true: colors.primary}} />
         </View>
         <View style={[styles.settingRow, { backgroundColor: colors.card, flexDirection: 'column', alignItems: 'flex-start' }]}>
-          <Text style={[styles.settingText, { color: colors.text, fontWeight: 'bold' }]}>Сповіщення Telegram</Text>
-          <Text style={{color: colors.textSecondary, marginBottom: 10, marginTop: 5, fontSize: 13}}>Отримуйте сповіщення про нові записи прямо в Telegram.</Text>
+          <Text style={[styles.settingText, { color: colors.text, fontWeight: 'bold' }]}>{t('profile.telegramNotifications', {defaultValue: 'Сповіщення Telegram'})}</Text>
+          <Text style={{color: colors.textSecondary, marginBottom: 10, marginTop: 5, fontSize: 13}}>{t('telegramHint', {defaultValue: 'Отримуйте сповіщення про нові записи прямо в Telegram.'})}</Text>
           <TouchableOpacity 
              style={[styles.saveBtn, {backgroundColor: 'transparent', width: '100%', borderColor: colors.primary, borderWidth: 1}]}
              onPress={() => Linking.openURL(`https://t.me/NailBookProBot?start=${userId}`)}
           >
-             <Text style={[styles.saveBtnText, {color: '#2AABEE'}]}>💬 Підключити Telegram</Text>
+             <Text style={[styles.saveBtnText, {color: '#2AABEE'}]}>{t('profile.connectTelegram', {defaultValue: '💬 Підключити Telegram'})}</Text>
           </TouchableOpacity>
         </View>
         <View style={[styles.settingRow, { backgroundColor: colors.card, flexDirection: 'column', alignItems: 'flex-start' }]}>
-          <Text style={[styles.settingText, { color: colors.text, fontWeight: 'bold' }]}>Запросити клієнта</Text>
+          <Text style={[styles.settingText, { color: colors.text, fontWeight: 'bold' }]}>{t('profile.inviteClient', {defaultValue: 'Запросити клієнта'})}</Text>
           <Text style={{color: colors.textSecondary, marginBottom: 10, marginTop: 5, fontSize: 13}}>Згенеруйте тимчасовий код для клієнта.</Text>
           <TouchableOpacity 
              style={[styles.saveBtn, {backgroundColor: 'transparent', width: '100%', borderColor: colors.primary, borderWidth: 1}]}
@@ -344,7 +345,7 @@ export const MasterProfileScreen = ({ navigation }: any) => {
                  }
              }}
           >
-             <Text style={[styles.saveBtnText, {color: '#32CD32'}]}>🔑 Згенерувати код</Text>
+             <Text style={[styles.saveBtnText, {color: '#32CD32'}]}>{t('profile.generateCode', {defaultValue: '🔑 Згенерувати код'})}</Text>
           </TouchableOpacity>
           {generatedCode && (
               <View style={{marginTop: 15, padding: 15, backgroundColor: '#e6ffe6', borderRadius: 10, width: '100%', alignItems: 'center'}}>
@@ -360,7 +361,7 @@ export const MasterProfileScreen = ({ navigation }: any) => {
       </TouchableOpacity>
       
       <TouchableOpacity onPress={handleDeleteAccount} style={{ alignSelf: 'center', marginBottom: 20 }}>
-          <Text style={{color: '#ff0000', textDecorationLine: 'underline'}}>Видалити мій акаунт назавжди</Text>
+          <Text style={{color: '#ff0000', textDecorationLine: 'underline'}}>{t('deleteAccount', {defaultValue: 'Видалити мій акаунт назавжди'})}</Text>
       </TouchableOpacity>
       
       <View style={{height: 50}} />

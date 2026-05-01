@@ -64,9 +64,11 @@ import { ClientsListScreen } from '../screens/ClientsListScreen';
 import { MastersListScreen } from '../screens/MastersListScreen';
 import { SearchMastersScreen } from '../screens/SearchMastersScreen';
 import { PublicMasterGalleryScreen } from '../screens/PublicMasterGalleryScreen';
+import { useTranslation } from 'react-i18next';
 
 export const MasterTabs = () => {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   return (
     <>
     <GlobalHeader />
@@ -80,11 +82,11 @@ export const MasterTabs = () => {
         tabBarLabelStyle: { textTransform: 'none', fontSize: 10, fontFamily: 'sans-serif' },
         swipeEnabled: true
     }}>
-      <Tab.Screen name="Dashboard" component={MasterDashboardStack} options={{ tabBarLabel: 'Кабінет', title: '📋' }} />
-      <Tab.Screen name="ClientsList" component={ClientsListScreen} options={{ tabBarLabel: 'Клієнти', title: '👥' }} />
-      <Tab.Screen name="ChatsListNav" component={ChatStack} options={{ tabBarLabel: 'Чати', title: '💬' }} />
-      <Tab.Screen name="Gallery" component={GalleryScreen} options={{ tabBarLabel: 'Галерея', title: '🖼' }} />
-      <Tab.Screen name="Profile" component={MasterProfileStack} options={{ tabBarLabel: 'Профіль', title: '👤' }} />
+      <Tab.Screen name="Dashboard" component={MasterDashboardStack} options={{ tabBarLabel: t('tabs.dashboard', {defaultValue: 'Кабінет'}), title: '📋' }} />
+      <Tab.Screen name="ClientsList" component={ClientsListScreen} options={{ tabBarLabel: t('tabs.clients', {defaultValue: 'Клієнти'}), title: '👥' }} />
+      <Tab.Screen name="ChatsListNav" component={ChatStack} options={{ tabBarLabel: t('tabs.chats', {defaultValue: 'Чати'}), title: '💬' }} />
+      <Tab.Screen name="Gallery" component={GalleryScreen} options={{ tabBarLabel: t('tabs.gallery', {defaultValue: 'Галерея'}), title: '🖼' }} />
+      <Tab.Screen name="Profile" component={MasterProfileStack} options={{ tabBarLabel: t('tabs.profile', {defaultValue: 'Профіль'}), title: '👤' }} />
     </Tab.Navigator>
     </>
   );
@@ -92,6 +94,7 @@ export const MasterTabs = () => {
 
 export const ClientTabs = () => {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   return (
     <>
     <GlobalHeader />
@@ -105,11 +108,11 @@ export const ClientTabs = () => {
         tabBarLabelStyle: { textTransform: 'none', fontSize: 10, fontFamily: 'sans-serif' },
         swipeEnabled: true
     }}>
-      <Tab.Screen name="Calendar" component={ClientCalendarScreen} options={{ tabBarLabel: 'Календар', title: '📅' }} />
-      <Tab.Screen name="Appointments" component={ClientAppointmentsScreen} options={{ tabBarLabel: 'Мої записи', title: '📝' }} />
-      <Tab.Screen name="ChatsListNav" component={ChatStack} options={{ tabBarLabel: 'Чати', title: '💬' }} />
-      <Tab.Screen name="Gallery" component={GalleryScreen} options={{ tabBarLabel: 'Галерея', title: '🖼' }} />
-      <Tab.Screen name="Profile" component={ClientProfileStack} options={{ tabBarLabel: 'Профіль', title: '👤' }} />
+      <Tab.Screen name="Calendar" component={ClientCalendarScreen} options={{ tabBarLabel: t('tabs.dashboard', {defaultValue: 'Календар'}), title: '📅' }} />
+      <Tab.Screen name="Appointments" component={ClientAppointmentsScreen} options={{ tabBarLabel: t('tabs.clients', {defaultValue: 'Мої записи'}), title: '📝' }} />
+      <Tab.Screen name="ChatsListNav" component={ChatStack} options={{ tabBarLabel: t('tabs.chats', {defaultValue: 'Чати'}), title: '💬' }} />
+      <Tab.Screen name="Gallery" component={GalleryScreen} options={{ tabBarLabel: t('tabs.gallery', {defaultValue: 'Галерея'}), title: '🖼' }} />
+      <Tab.Screen name="Profile" component={ClientProfileStack} options={{ tabBarLabel: t('tabs.profile', {defaultValue: 'Профіль'}), title: '👤' }} />
     </Tab.Navigator>
     </>
   );
@@ -123,6 +126,7 @@ import { useTheme } from '../context/ThemeContext';
 
 export const AdminTabs = () => {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   return (
     <Tab.Navigator 
       tabBarPosition="bottom"
@@ -134,8 +138,8 @@ export const AdminTabs = () => {
         tabBarLabelStyle: { textTransform: 'none', fontSize: 10, fontFamily: 'sans-serif' },
         swipeEnabled: true
     }}>
-      <Tab.Screen name="Dashboard" component={AdminDashboardScreen} options={{ tabBarLabel: 'Головна', title: '📊' }} />
-      <Tab.Screen name="Masters" component={AdminMastersScreen} options={{ tabBarLabel: 'Майстри', title: '👥' }} />
+      <Tab.Screen name="Dashboard" component={AdminDashboardScreen} options={{ tabBarLabel: t('tabs.dashboard', {defaultValue: 'Головна'}), title: '📊' }} />
+      <Tab.Screen name="Masters" component={AdminMastersScreen} options={{ tabBarLabel: t('tabs.clients', {defaultValue: 'Майстри'}), title: '👥' }} />
     </Tab.Navigator>
   );
 };
