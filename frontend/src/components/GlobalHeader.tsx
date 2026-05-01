@@ -15,6 +15,8 @@ export const GlobalHeader = () => {
 
   useEffect(() => {
     loadInfo();
+    const interval = setInterval(loadInfo, 2000);
+    return () => clearInterval(interval);
   }, []);
 
   const loadInfo = async () => {

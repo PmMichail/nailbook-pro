@@ -5,9 +5,11 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import api from '../api/client';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 export const MasterProfileScreen = ({ navigation }: any) => {
   const { colors, isDark, toggleTheme } = useTheme();
+  const { t } = useTranslation();
   
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -254,8 +256,8 @@ export const MasterProfileScreen = ({ navigation }: any) => {
             <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={facebook} onChangeText={setFacebook} placeholder="Обліковий запис Facebook" placeholderTextColor={colors.textSecondary} />
             
             <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={password} onChangeText={setPassword} placeholder="Новий пароль (залиште порожнім, щоб не змінювати)" placeholderTextColor={colors.textSecondary} secureTextEntry />
-            <TouchableOpacity style={[styles.saveBtn, {backgroundColor: colors.text, marginTop: 10, shadowColor: colors.text, elevation: 5, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.3}]} onPress={handleSaveProfile}>
-                <Text style={[styles.saveBtnText, {color: colors.background}]}>Зберегти зміни</Text>
+            <TouchableOpacity style={[styles.saveBtn, {backgroundColor: 'transparent', borderColor: colors.primary, borderWidth: 1, marginTop: 10, shadowColor: colors.text, elevation: 5, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.3}]} onPress={handleSaveProfile}>
+                <Text style={[styles.saveBtnText, {color: colors.primary}]}>{t('saveChanges', {defaultValue: 'Зберегти зміни'})}</Text>
             </TouchableOpacity>
         </View>
       </View>
@@ -280,10 +282,10 @@ export const MasterProfileScreen = ({ navigation }: any) => {
             )}
 
             <TouchableOpacity 
-               style={[styles.saveBtn, {backgroundColor: colors.text, width: '100%', marginTop: 10, shadowColor: colors.text, elevation: 5, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.3}]}
+               style={[styles.saveBtn, {backgroundColor: 'transparent', borderColor: colors.primary, borderWidth: 1, width: '100%', marginTop: 10, shadowColor: colors.text, elevation: 5, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.3}]}
                onPress={() => navigation.navigate('SubscriptionScreen')}
             >
-               <Text style={[styles.saveBtnText, {color: colors.background}]}>
+               <Text style={[styles.saveBtnText, {color: colors.primary}]}>
                    {(subData?.plan === 'FREE' || subData?.status === 'TRIAL' || subData?.status === 'EXPIRED') ? '⭐️ Оновити до Pro' : '💳 Керувати підпискою'}
                </Text>
             </TouchableOpacity>
@@ -353,8 +355,8 @@ export const MasterProfileScreen = ({ navigation }: any) => {
         </View>
       </View>
 
-      <TouchableOpacity style={[styles.logoutButton, { marginBottom: 15 }]} onPress={handleLogout}>
-        <Text style={styles.logoutButtonText}>Вийти з акаунту</Text>
+      <TouchableOpacity style={[styles.logoutButton, { backgroundColor: 'transparent', borderColor: 'red', borderWidth: 1, marginBottom: 15 }]} onPress={handleLogout}>
+        <Text style={[styles.logoutButtonText, { color: 'red' }]}>{t('logout', {defaultValue: 'Вийти з акаунту'})}</Text>
       </TouchableOpacity>
       
       <TouchableOpacity onPress={handleDeleteAccount} style={{ alignSelf: 'center', marginBottom: 20 }}>
