@@ -41,9 +41,9 @@ export const ClientCalendarScreen = ({ navigation }: any) => {
             const masterRes = await api.get(`/api/client/master/${u.masterId}`);
             if (masterRes.data) {
                 if (masterRes.data.salonName) {
-                    setMasterName('САЛОН ' + masterRes.data.salonName.toUpperCase());
+                    setMasterName(t('clientCalendar.salonPrefix', {defaultValue: 'САЛОН '}) + masterRes.data.salonName.toUpperCase());
                 } else if (masterRes.data.name) {
-                    setMasterName('МАЙСТЕР ' + masterRes.data.name.toUpperCase());
+                    setMasterName(t('clientCalendar.masterPrefix', {defaultValue: 'МАЙСТЕР '}) + masterRes.data.name.toUpperCase());
                 }
                 setSocialLinks({
                     instagram: masterRes.data.instagram || '',
@@ -184,9 +184,9 @@ export const ClientCalendarScreen = ({ navigation }: any) => {
               </View>
             ) : null}
 
-            <Text style={[styles.heroTitle, { color: colors.text }]}>Створіть свій</Text>
-            <Text style={[styles.heroTitle, { color: colors.primary }]}>Стиль</Text>
-            <Text style={[styles.heroDesc, { color: colors.textSecondary, borderLeftColor: colors.primary }]}>Оберіть послугу та зручний час для вашого ідеального візиту.</Text>
+            <Text style={[styles.heroTitle, { color: colors.text }]}>{t('clientCalendar.createYour', {defaultValue: 'Створіть свій'})}</Text>
+            <Text style={[styles.heroTitle, { color: colors.primary }]}>{t('clientCalendar.style', {defaultValue: 'Стиль'})}</Text>
+            <Text style={[styles.heroDesc, { color: colors.textSecondary, borderLeftColor: colors.primary }]}>{t('clientCalendar.heroDesc', {defaultValue: 'Оберіть послугу та зручний час для вашого ідеального візиту.'})}</Text>
         </View>
 
         {/* Services / Rituals */}
@@ -211,7 +211,7 @@ export const ClientCalendarScreen = ({ navigation }: any) => {
                         >
                         <View style={[styles.serviceContent, { backgroundColor: p.imageUrl ? 'rgba(0,0,0,0.1)' : 'transparent', flex: 1, padding: 20, borderRadius: 12 }]}>
                             <View>
-                                <Text style={[styles.serviceType, { color: '#fff', textShadowColor: 'rgba(0,0,0,0.5)', textShadowOffset: {width: 1, height: 1}, textShadowRadius: 2 }]}>ПОСЛУГА</Text>
+                                <Text style={[styles.serviceType, { color: '#fff', textShadowColor: 'rgba(0,0,0,0.5)', textShadowOffset: {width: 1, height: 1}, textShadowRadius: 2 }]}>{t('clientCalendar.serviceType', {defaultValue: 'ПОСЛУГА'})}</Text>
                                 <Text style={[styles.serviceTitle, { color: '#fff', textShadowColor: 'rgba(0,0,0,0.5)', textShadowOffset: {width: 1, height: 1}, textShadowRadius: 2 }]}>{p.service}</Text>
                             </View>
                             <View style={{alignItems: 'flex-end'}}>
@@ -227,7 +227,7 @@ export const ClientCalendarScreen = ({ navigation }: any) => {
             })}
         </View>
 
-        <Text style={[styles.sectionHeader, { color: colors.text }]}>Вибір Дати</Text>
+        <Text style={[styles.sectionHeader, { color: colors.text }]}>{t('clientCalendar.selectDate', {defaultValue: 'Вибір Дати'})}</Text>
         <View style={[styles.calendarContainer, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <Calendar
                 key={isDark ? 'dark' : 'light'}
@@ -269,9 +269,9 @@ export const ClientCalendarScreen = ({ navigation }: any) => {
         {/* Available Hours */}
         {selectedDay !== '' && (
             <View style={{marginBottom: 40}}>
-                <Text style={[styles.sectionHeader, { color: colors.text }]}>Доступні години</Text>
+                <Text style={[styles.sectionHeader, { color: colors.text }]}>{t('clientCalendar.availableHours', {defaultValue: 'Доступні години'})}</Text>
                 {availableSlots.length === 0 ? (
-                    <Text style={{color: colors.textSecondary}}>Немає вільних віконець на цю дату.</Text>
+                    <Text style={{color: colors.textSecondary}}>{t('clientCalendar.noSlots', {defaultValue: 'Немає вільних віконець на цю дату.'})}</Text>
                 ) : (
                     <View style={styles.slotsGrid}>
                         {availableSlots.map((s, i) => {
@@ -297,8 +297,8 @@ export const ClientCalendarScreen = ({ navigation }: any) => {
 
         {/* Note */}
         <View style={[styles.noteBox, { backgroundColor: colors.card, borderLeftColor: colors.primary }]}>
-            <Text style={[styles.noteTitle, { color: colors.text }]}>Правила візиту:</Text>
-            <Text style={[styles.noteDesc, { color: colors.textSecondary }]}>Будь ласка, приходьте вчасно. У разі запізнення або неможливості прийти — завчасно попередьте майстра у чаті.</Text>
+            <Text style={[styles.noteTitle, { color: colors.text }]}>{t('clientCalendar.visitRules', {defaultValue: 'Правила візиту:'})}</Text>
+            <Text style={[styles.noteDesc, { color: colors.textSecondary }]}>{t('clientCalendar.visitRulesDesc', {defaultValue: 'Будь ласка, приходьте вчасно. У разі запізнення або неможливості прийти — завчасно попередьте майстра у чаті.'})}</Text>
         </View>
 
         <View style={{height: 180}} />
@@ -308,7 +308,7 @@ export const ClientCalendarScreen = ({ navigation }: any) => {
       <View style={styles.fabContainer}>
           <BlurView intensity={70} tint={isDark ? "dark" : "light"} style={[styles.fabBlur, { borderColor: colors.border }]}>
               <TouchableOpacity style={styles.fabBtn} onPress={handleBook}>
-                  <Text style={[styles.fabText, { color: colors.text }]}>ЗАБРОНЮВАТИ ВІЗИТ</Text>
+                  <Text style={[styles.fabText, { color: colors.text }]}>{t('clientCalendar.bookVisit', {defaultValue: 'ЗАБРОНЮВАТИ ВІЗИТ'})}</Text>
                   <View style={{flexDirection: 'row', alignItems: 'center'}}>
                       <Text style={[styles.fabPrice, { color: colors.primary }]}>{displayPrice} ₴</Text>
                       <Text style={[styles.fabArrow, { color: colors.primary }]}>→</Text>

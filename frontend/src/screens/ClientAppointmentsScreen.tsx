@@ -20,11 +20,11 @@ export const ClientAppointmentsScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
 
   const statusMap: any = {
-    'PENDING': 'ОЧІКУЄ ПІДТВЕРДЖЕННЯ',
-    'AWAITING_PREPAYMENT': 'ОЧІКУЄ ПЕРЕДОПЛАТУ',
-    'CONFIRMED': 'ПІДТВЕРДЖЕНО',
-    'CANCELLED': 'СКАСОВАНО',
-    'COMPLETED': 'ВИКОНАНО'
+    'PENDING': t('status.pending', {defaultValue: 'ОЧІКУЄ ПІДТВЕРДЖЕННЯ'}),
+    'AWAITING_PREPAYMENT': t('status.awaitingPrepayment', {defaultValue: 'ОЧІКУЄ ПЕРЕДОПЛАТУ'}),
+    'CONFIRMED': t('status.confirmed', {defaultValue: 'ПІДТВЕРДЖЕНО'}),
+    'CANCELLED': t('status.cancelled', {defaultValue: 'СКАСОВАНО'}),
+    'COMPLETED': t('status.completed', {defaultValue: 'ВИКОНАНО'})
   };
 
   useEffect(() => {
@@ -98,11 +98,11 @@ export const ClientAppointmentsScreen = () => {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
     >
       <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20}}>
-        <Text style={[styles.header, { color: colors.text }]}>Мої Записи</Text>
+        <Text style={[styles.header, { color: colors.text }]}>{t('clientAppointments.title', {defaultValue: 'Мої Записи'})}</Text>
       </View>
       
       {appointments.length === 0 ? (
-        <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Ви ще не маєте записів</Text>
+        <Text style={[styles.emptyText, { color: colors.textSecondary }]}>{t('clientAppointments.noAppointments', {defaultValue: 'Ви ще не маєте записів'})}</Text>
       ) : (
         appointments.map(app => (
           <View key={app.id} style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -117,28 +117,28 @@ export const ClientAppointmentsScreen = () => {
                 {statusMap[app.status] || app.status}
               </Text>
             </View>
-            <Text style={[styles.masterText, { color: colors.textSecondary }]}>Майстер: {app.master?.name || 'Ваш Майстер'}</Text>
+            <Text style={[styles.masterText, { color: colors.textSecondary }]}>{t('clientAppointments.master', {defaultValue: 'Майстер:'})} {app.master?.name || t('clientAppointments.yourMaster', {defaultValue: 'Ваш Майстер'})}</Text>
             {(app.finalPrice || app.originalPrice || app.price) && (
               <Text style={[styles.priceText, { color: colors.primary }]}>
-                До сплати: {app.finalPrice || app.originalPrice || app.price} грн
+                {t('clientAppointments.toPay', {defaultValue: 'До сплати:'})} {app.finalPrice || app.originalPrice || app.price} {t('currency.uah', {defaultValue: 'грн'})}
               </Text>
             )}
             
             {(app.status === 'CONFIRMED' || app.status === 'AWAITING_PREPAYMENT') && (
               <TouchableOpacity style={[styles.cancelBtn, { borderColor: '#2e8b57', borderWidth: 1, backgroundColor: 'transparent', marginBottom: 10 }]} onPress={() => showPaymentInfo(app.id)}>
-                <Text style={[styles.cancelBtnText, {color: '#2e8b57'}]}>Реквізити на Оплату</Text>
+                <Text style={[styles.cancelBtnText, {color: '#2e8b57'}]}>{t('clientAppointments.paymentDetailsBtn', {defaultValue: 'Реквізити на Оплату'})}</Text>
               </TouchableOpacity>
             )}
 
             {(app.status === 'PENDING' || app.status === 'CONFIRMED' || app.status === 'AWAITING_PREPAYMENT') && (
               <TouchableOpacity style={[styles.cancelBtn, { borderColor: '#8b0000', borderWidth: 1, backgroundColor: 'transparent' }]} onPress={() => clearAppointment(app.id)}>
-                <Text style={[styles.cancelBtnText, { color: '#8b0000' }]}>Скасувати запис</Text>
+                <Text style={[styles.cancelBtnText, { color: '#8b0000' }]}>{t('clientAppointments.cancelAppointment', {defaultValue: 'Скасувати запис'})}</Text>
               </TouchableOpacity>
             )}
 
             {(app.status === 'CANCELLED' || app.status === 'COMPLETED') && (
               <TouchableOpacity style={[styles.cancelBtn, { borderColor: colors.textSecondary, borderWidth: 1, backgroundColor: 'transparent' }]} onPress={() => deleteFromHistory(app.id)}>
-                <Text style={[styles.cancelBtnText, { color: colors.textSecondary }]}>Видалити з історії 🗑️</Text>
+                <Text style={[styles.cancelBtnText, { color: colors.textSecondary }]}>{t('clientAppointments.deleteHistory', {defaultValue: 'Видалити з історії 🗑️'})}</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -148,13 +148,13 @@ export const ClientAppointmentsScreen = () => {
       <Modal visible={paymentModalVisible} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1 }]}>
-            <Text style={[styles.modalTitle, { color: colors.text }]}>{paymentDetails?.isPrepayment ? 'Необхідна Передоплата' : 'Реквізити на оплату'}</Text>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>{paymentDetails?.isPrepayment ? t('clientAppointments.prepaymentRequired', {defaultValue: 'Необхідна Передоплата'}) : t('clientAppointments.paymentDetails', {defaultValue: 'Реквізити на оплату'})}</Text>
             
             {paymentDetails?.isPrepayment && (
               <View style={{backgroundColor: 'rgba(255, 165, 0, 0.2)', padding: 10, borderRadius: 10, marginBottom: 15}}>
-                 <Text style={{color: colors.text, textAlign: 'center', fontWeight: 'bold'}}>Увага!</Text>
-                 <Text style={{color: colors.text, textAlign: 'center', fontSize: 12}}>Сплатіть передоплату та надішліть скріншот майстру в чат.</Text>
-                 <Text style={{color: colors.text, textAlign: 'center', fontSize: 12, marginTop: 5}}>Запис скасується автоматично до: {new Date(paymentDetails.prepaymentDeadline).toLocaleTimeString('uk-UA', {hour: '2-digit', minute:'2-digit'})}</Text>
+                 <Text style={{color: colors.text, textAlign: 'center', fontWeight: 'bold'}}>{t('clientAppointments.attention', {defaultValue: 'Увага!'})}</Text>
+                 <Text style={{color: colors.text, textAlign: 'center', fontSize: 12}}>{t('clientAppointments.prepaymentInstructions', {defaultValue: 'Сплатіть передоплату та надішліть скріншот майстру в чат.'})}</Text>
+                 <Text style={{color: colors.text, textAlign: 'center', fontSize: 12, marginTop: 5}}>{t('clientAppointments.autoCancel', {defaultValue: 'Запис скасується автоматично до:'})} {new Date(paymentDetails.prepaymentDeadline).toLocaleTimeString('uk-UA', {hour: '2-digit', minute:'2-digit'})}</Text>
               </View>
             )}
             
@@ -166,14 +166,14 @@ export const ClientAppointmentsScreen = () => {
 
             {paymentDetails?.paymentLink ? (
                <TouchableOpacity style={[styles.cancelBtn, {backgroundColor: colors.primary, marginBottom: 15, borderWidth: 0}]} onPress={() => Linking.openURL(paymentDetails.paymentLink)}>
-                 <Text style={[styles.cancelBtnText, {color: isDark ? '#000' : '#fff'}]}>Відкрити посилання на оплату</Text>
+                 <Text style={[styles.cancelBtnText, {color: isDark ? '#000' : '#fff'}]}>{t('clientAppointments.openLink', {defaultValue: 'Відкрити посилання на оплату'})}</Text>
                </TouchableOpacity>
             ) : null}
 
             {paymentDetails?.cardNumber ? (
               <>
-               <Text style={[styles.payText, { color: colors.text }]}>Картка: {paymentDetails.cardNumber}</Text>
-               <Text style={[styles.payText, { color: colors.textSecondary }]}>Банк: {paymentDetails.bankName || 'Не вказано'}</Text>
+               <Text style={[styles.payText, { color: colors.text }]}>{t('clientAppointments.card', {defaultValue: 'Картка:'})} {paymentDetails.cardNumber}</Text>
+               <Text style={[styles.payText, { color: colors.textSecondary }]}>{t('clientAppointments.bank', {defaultValue: 'Банк:'})} {paymentDetails.bankName || t('clientAppointments.notSpecified', {defaultValue: 'Не вказано'})}</Text>
                
                <TouchableOpacity 
                  style={{backgroundColor: colors.border, padding: 8, borderRadius: 5, marginTop: 5, marginBottom: 10}}
@@ -182,17 +182,17 @@ export const ClientAppointmentsScreen = () => {
                     Alert.alert('Скопійовано', 'Номер картки скопійовано в буфер обміну');
                  }}
                >
-                 <Text style={{textAlign: 'center', color: colors.text, fontWeight: 'bold'}}>Скопіювати номер картки</Text>
+                 <Text style={{textAlign: 'center', color: colors.text, fontWeight: 'bold'}}>{t('clientAppointments.copyCard', {defaultValue: 'Скопіювати номер картки'})}</Text>
                </TouchableOpacity>
               </>
             ) : null}
 
             <Text style={[styles.payText, {fontSize: 20, fontWeight:'bold', marginTop: 10, color: colors.primary}]}>
-               Сума: {paymentDetails?.amount ? paymentDetails.amount + ' грн' : 'Не вказано'}
+               {t('clientAppointments.amount', {defaultValue: 'Сума:'})} {paymentDetails?.amount ? paymentDetails.amount + ' ' + t('currency.uah', {defaultValue: 'грн'}) : t('clientAppointments.notSpecified', {defaultValue: 'Не вказано'})}
             </Text>
             
             <TouchableOpacity style={[styles.cancelBtn, { borderColor: colors.textSecondary, borderWidth: 1, backgroundColor: 'transparent', marginTop: 20 }]} onPress={() => setPaymentModalVisible(false)}>
-              <Text style={[styles.cancelBtnText, { color: colors.textSecondary }]}>Закрити</Text>
+              <Text style={[styles.cancelBtnText, { color: colors.textSecondary }]}>{t('clientAppointments.close', {defaultValue: 'Закрити'})}</Text>
             </TouchableOpacity>
           </View>
         </View>

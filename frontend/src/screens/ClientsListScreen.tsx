@@ -50,7 +50,7 @@ export const ClientsListScreen = () => {
   const handleShareLink = async () => {
     try {
       await Share.share({
-        message: 'Привіт! Записуйся до мене на манікюр через NailsBook Pro!',
+        message: t('clients.shareMessage', {defaultValue: 'Привіт! Записуйся до мене на манікюр через NailsBook Pro!'}),
       });
     } catch (error) {
       Alert.alert('Помилка', 'Не вдалося поділитися посиланням');
@@ -76,7 +76,7 @@ export const ClientsListScreen = () => {
         clientIds: Array.from(selectedIds),
         message: bulkMsg
       });
-      Alert.alert('Успіх', `Повідомлення надіслано ${res.data.sentCount} клієнтам!`);
+      Alert.alert('Успіх', `Повідомлення надіслано ${res.data.sentCount} {t('clients.clientsCount', {defaultValue: 'клієнтам'})}!`);
       setShowBulkModal(false);
       setBulkMsg('');
       setSelectedIds(new Set());
@@ -108,7 +108,7 @@ export const ClientsListScreen = () => {
   };
 
   const handleDeleteClient = () => {
-    Alert.alert('Видлення', 'Ви впевнені, що хочете видалити цього клієнта з вашої бази?', [
+    Alert.alert(t('clients.deleteTitle', {defaultValue: 'Видлення'}), t('clients.deleteConfirm', {defaultValue: 'Ви впевнені, що хочете видалити цього клієнта з вашої бази?'}), [
       { text: 'Скасувати', style: 'cancel' },
       { text: 'Видалити', style: 'destructive', onPress: async () => {
           try {
@@ -137,7 +137,7 @@ export const ClientsListScreen = () => {
   const renderItem = ({ item }: any) => {
     const formattedDate = item.myAppointments && item.myAppointments.length > 0 
       ? new Date(item.myAppointments[0].date).toLocaleDateString() 
-      : 'Немає візитів';
+      : t('clients.noVisits', {defaultValue: 'Немає візитів'});
 
     return (
       <TouchableOpacity style={[styles.clientCard, { backgroundColor: colors.card, borderColor: colors.border }]} onPress={() => openClientDetails(item)}>
@@ -208,8 +208,8 @@ export const ClientsListScreen = () => {
       <Modal visible={showBulkModal} transparent={true} animationType="slide">
          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.modalBg}>
             <View style={[styles.modalCard, { backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1 }]}>
-               <Text style={[styles.modalTitle, { color: colors.text }]}>Нове повідомлення</Text>
-               <Text style={{color: colors.textSecondary}}>Буде надіслано: {selectedIds.size} клієнтам</Text>
+               <Text style={[styles.modalTitle, { color: colors.text }]}>{t('clients.newMessage', {defaultValue: 'Нове повідомлення'})}</Text>
+               <Text style={{color: colors.textSecondary}}>{t('clients.willBeSent', {defaultValue: 'Буде надіслано:'})} {selectedIds.size} {t('clients.clientsCount', {defaultValue: 'клієнтам'})}</Text>
                <TextInput 
                   style={[styles.modalInput, { borderColor: colors.border, color: colors.text, backgroundColor: colors.background }]}
                   multiline
@@ -221,10 +221,10 @@ export const ClientsListScreen = () => {
                />
                <View style={styles.modalActions}>
                   <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowBulkModal(false)}>
-                     <Text style={{color: colors.textSecondary}}>Скасувати</Text>
+                     <Text style={{color: colors.textSecondary}}>{t('clients.cancel', {defaultValue: 'Скасувати'})}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={[styles.saveBtn, { backgroundColor: colors.primary }]} onPress={handleSendBulk}>
-                     <Text style={{color: isDark ? '#000' : '#fff', fontWeight: 'bold'}}>Відправити</Text>
+                     <Text style={{color: isDark ? '#000' : '#fff', fontWeight: 'bold'}}>{t('clients.send', {defaultValue: 'Відправити'})}</Text>
                   </TouchableOpacity>
                </View>
             </View>
@@ -235,23 +235,23 @@ export const ClientsListScreen = () => {
       <Modal visible={!!selectedClient} transparent={true} animationType="fade">
          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.modalBg}>
             <View style={[styles.modalCard, { width: '90%', backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1 }]}>
-               <Text style={[styles.modalTitle, { color: colors.text }]}>Дані клієнта</Text>
+               <Text style={[styles.modalTitle, { color: colors.text }]}>{t('clients.clientData', {defaultValue: 'Дані клієнта'})}</Text>
                <TextInput style={[styles.modalInputSingle, { borderColor: colors.border, color: colors.text, backgroundColor: colors.background }]} placeholder="Ім'я" placeholderTextColor={colors.textSecondary} value={editName} onChangeText={setEditName} />
                <TextInput style={[styles.modalInputSingle, { borderColor: colors.border, color: colors.text, backgroundColor: colors.background }]} placeholder="Телефон" placeholderTextColor={colors.textSecondary} value={editPhone} onChangeText={setEditPhone} />
                <TextInput style={[styles.modalInput, { borderColor: colors.border, color: colors.text, backgroundColor: colors.background }]} multiline numberOfLines={3} placeholder="Нотатки (лише для вас)" placeholderTextColor={colors.textSecondary} value={editNotes} onChangeText={setEditNotes} />
                
                <View style={styles.modalActions}>
                   <TouchableOpacity style={styles.cancelBtn} onPress={() => setSelectedClient(null)}>
-                     <Text style={{color: colors.textSecondary}}>Закрити</Text>
+                     <Text style={{color: colors.textSecondary}}>{t('clients.close', {defaultValue: 'Закрити'})}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={[styles.saveBtn, {backgroundColor: '#e0c0b4', marginRight: 10}]} onPress={handleChat}>
-                     <Text style={{color: '#000', fontWeight: 'bold'}}>💬 Написати</Text>
+                     <Text style={{color: '#000', fontWeight: 'bold'}}>{t('clients.write', {defaultValue: '💬 Написати'})}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={[styles.saveBtn, {backgroundColor: '#FF3B30', marginRight: 10}]} onPress={handleDeleteClient}>
-                     <Text style={{color: '#fff', fontWeight: 'bold'}}>Видалити</Text>
+                     <Text style={{color: '#fff', fontWeight: 'bold'}}>{t('clients.delete', {defaultValue: 'Видалити'})}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={[styles.saveBtn, { backgroundColor: colors.primary }]} onPress={handleSaveClient}>
-                     <Text style={{color: isDark ? '#000' : '#fff', fontWeight: 'bold'}}>Зберегти</Text>
+                     <Text style={{color: isDark ? '#000' : '#fff', fontWeight: 'bold'}}>{t('clients.save', {defaultValue: 'Зберегти'})}</Text>
                   </TouchableOpacity>
                </View>
             </View>
