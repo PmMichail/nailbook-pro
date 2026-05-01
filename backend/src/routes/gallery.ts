@@ -55,7 +55,7 @@ router.get('/', async (req, res) => {
 router.get('/master/:masterId', async (req, res) => {
   const masterId = req.params.masterId;
   const items = await prisma.galleryItem.findMany({
-    where: { masterId: masterId, isPublic: false },
+    where: { masterId: masterId },
     orderBy: { createdAt: 'desc' }
   });
 

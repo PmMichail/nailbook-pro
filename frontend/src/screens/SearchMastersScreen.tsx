@@ -79,6 +79,7 @@ export const SearchMastersScreen = () => {
                         <Text style={styles.city}>
                            {item.city ? `${item.city}` : ''}
                            {item.address ? ` • ${item.address}` : ''}
+                           {item.distance !== undefined && item.distance !== null ? ` • ~${item.distance.toFixed(1)} км` : ''}
                         </Text>
                     </View>
                 </View>

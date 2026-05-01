@@ -93,15 +93,15 @@ router.get('/masters/search', async (req: any, res) => {
         select: { id: true, name: true, city: true, address: true, salonName: true, salonLogo: true, avatarUrl: true, lat: true, lng: true }
      });
      
-     let filteredMasters = masters;
+     let filteredMasters: any[] = masters.map(m => ({ ...m, distance: null }));
      
-     // Geolocation filter (Haversine formula, 20km radius)
+     // Geolocation filter (Haversine formula, 10km radius)
      if (lat && lng) {
         const clientLat = parseFloat(lat);
         const clientLng = parseFloat(lng);
         
-        filteredMasters = masters.filter(m => {
-           if (!m.lat || !m.lng) return false;
+        const mappedMasters = masters.map(m => {
+           if (!m.lat || !m.lng) return { ...m, distance: null };
            
            const R = 6371; // Earth radius in km
            const dLat = (m.lat - clientLat) * Math.PI / 180;
@@ -113,8 +113,12 @@ router.get('/masters/search', async (req: any, res) => {
            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
            const distance = R * c;
            
-           return distance <= 10; // Within 10km
+           return { ...m, distance };
         });
+        
+        filteredMasters = mappedMasters.filter(m => m.distance !== null && m.distance <= 10);
+        // Sort by distance
+        filteredMasters.sort((a, b) => a.distance - b.distance);
      }
      
      res.json(filteredMasters);

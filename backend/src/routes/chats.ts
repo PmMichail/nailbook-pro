@@ -158,6 +158,7 @@ router.put('/:id/read', async (req: AuthRequest, res) => {
   } catch (error) {
     res.status(500).json({ error: 'Помилка сервера' });
   }
+});
 // Видалити чат
 router.delete('/:id', async (req: AuthRequest, res) => {
   try {
