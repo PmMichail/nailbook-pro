@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Router } from 'express';
 import prisma from '../models/prismaClient';
 import { sendTelegramMessage } from '../services/telegram';

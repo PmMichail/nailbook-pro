@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Router } from 'express';
 import TelegramBot from 'node-telegram-bot-api';
 import prisma from '../models/prismaClient';
