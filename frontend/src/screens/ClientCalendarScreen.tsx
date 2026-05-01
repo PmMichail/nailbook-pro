@@ -228,6 +228,7 @@ export const ClientCalendarScreen = ({ navigation }: any) => {
         <Text style={[styles.sectionHeader, { color: colors.text }]}>Вибір Дати</Text>
         <View style={[styles.calendarContainer, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <Calendar
+                key={isDark ? 'dark' : 'light'}
                 current={new Date().toISOString().split('T')[0]}
                 minDate={new Date().toISOString().split('T')[0]}
                 theme={{
@@ -237,7 +238,7 @@ export const ClientCalendarScreen = ({ navigation }: any) => {
                   selectedDayTextColor: '#ffffff',
                   todayTextColor: colors.primary,
                   dayTextColor: colors.text,
-                  textDisabledColor: colors.border,
+                  textDisabledColor: isDark ? '#444444' : '#d9e1e8',
                   monthTextColor: colors.text,
                   arrowColor: colors.primary,
                 }}

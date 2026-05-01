@@ -393,6 +393,7 @@ export const MasterDashboardScreen = () => {
 
       <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <Calendar
+          key={isDark ? 'dark' : 'light'}
           current={selectedCalendarDay}
           onDayPress={(day: any) => setSelectedCalendarDay(day.dateString)}
           theme={{
@@ -402,7 +403,7 @@ export const MasterDashboardScreen = () => {
             selectedDayTextColor: '#ffffff',
             todayTextColor: colors.primary,
             dayTextColor: colors.text,
-            textDisabledColor: colors.border,
+            textDisabledColor: isDark ? '#444444' : '#d9e1e8',
             monthTextColor: colors.text,
             arrowColor: colors.primary,
           }}
@@ -428,7 +429,7 @@ export const MasterDashboardScreen = () => {
             selectedDayTextColor: '#ffffff',
             todayTextColor: colors.primary,
             dayTextColor: colors.text,
-            textDisabledColor: colors.border,
+            textDisabledColor: isDark ? '#444444' : '#d9e1e8',
             monthTextColor: colors.text,
             arrowColor: colors.primary,
           }}

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Switch } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
@@ -9,6 +10,17 @@ export const SettingsScreen = () => {
   const { t, i18n } = useTranslation();
   const { colors, isDark, toggleTheme } = useTheme();
   const [calendarConnected, setCalendarConnected] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    AsyncStorage.getItem('user').then(uStr => {
+      if (uStr) {
+        try {
+          setUserRole(JSON.parse(uStr).role);
+        } catch(e){}
+      }
+    });
+  }, []);
 
   const changeLanguage = () => {
       Alert.alert(t('language'), 'Оберіть мову / Choose language', [
@@ -37,10 +49,12 @@ export const SettingsScreen = () => {
           <Text style={styles.statusText}>{i18n.language.toUpperCase()} ›</Text>
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('SubscriptionScreen')}>
-          <Text style={[styles.menuText, { color: colors.text }]}>Керування підпискою</Text>
-          <Text style={styles.menuArrow}>›</Text>
-        </TouchableOpacity>
+        {userRole !== 'CLIENT' && (
+          <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('SubscriptionScreen')}>
+            <Text style={[styles.menuText, { color: colors.text }]}>{t('manageSubscription', {defaultValue: 'Manage Subscription'})}</Text>
+            <Text style={styles.menuArrow}>›</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -53,9 +67,9 @@ export const SettingsScreen = () => {
 
       <View style={styles.footer}>
         <Text style={styles.footerText}>NailsBook Pro v1.0.0</Text>
-        <TouchableOpacity><Text style={styles.footerLink}>Політика конфіденційності</Text></TouchableOpacity>
-        <TouchableOpacity><Text style={styles.footerLink}>Умови використання</Text></TouchableOpacity>
-        <TouchableOpacity><Text style={styles.footerLink}>Підтримка: t.me/nailbook_support</Text></TouchableOpacity>
+        <TouchableOpacity><Text style={styles.footerLink}>{t('privacyPolicy', {defaultValue: 'Privacy Policy'})}</Text></TouchableOpacity>
+        <TouchableOpacity><Text style={styles.footerLink}>{t('termsOfUse', {defaultValue: 'Terms of Use'})}</Text></TouchableOpacity>
+        <TouchableOpacity><Text style={styles.footerLink}>{t('support', {defaultValue: 'Support: t.me/nailbook_support'})}</Text></TouchableOpacity>
       </View>
     </ScrollView>
   );
