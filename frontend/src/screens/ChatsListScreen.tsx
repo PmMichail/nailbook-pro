@@ -23,7 +23,7 @@ export const ChatsListScreen = () => {
         const activeChats = res.data || [];
         
         const chatsData = activeChats.map((chat: any) => {
-            const lastMsg = chat.messages && chat.messages.length > 0 ? chat.messages[0].text : 'Відкрити чат...';
+            const lastMsg = chat.messages && chat.messages.length > 0 ? chat.messages[0].text : 'Почати чат...';
             // Extract other user from enriched property
             const otherUser = chat.otherUser || {};
             
