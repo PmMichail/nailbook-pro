@@ -31,79 +31,43 @@ export const AdminMastersScreen = () => {
         }
     };
 
-    const grantProStatus = async (masterId: string) => {
-        Alert.alert('Підтвердження', 'Встановити PRO статус для цього майстра на 30 днів?', [
-            { text: 'Ні', style: 'cancel' },
-            { text: 'Так', onPress: async () => {
-                try {
-                    await api.put(`/api/admin/masters/${masterId}/subscription`, {
-                        plan: 'PRO', status: 'ACTIVE', durationDays: 30
-                    });
-                    Alert.alert('Успіх', 'Статус оновлено');
-                    loadMasters();
-                } catch(e) {
-                    Alert.alert('Помилка', 'Не вдалося оновити статус');
-                }
-            }}
-        ]);
-    };
-
-    const grantFreeStatus = async (masterId: string) => {
-        Alert.alert('Підтвердження', 'Перевести майстра на тариф FREE безлімітно?', [
-            { text: 'Ні', style: 'cancel' },
-            { text: 'Так', onPress: async () => {
-                try {
-                    await api.put(`/api/admin/masters/${masterId}/subscription`, {
-                        plan: 'FREE', status: 'ACTIVE', durationDays: null
-                    });
-                    Alert.alert('Успіх', 'Статус оновлено на FREE');
-                    loadMasters();
-                } catch(e) {
-                    Alert.alert('Помилка', 'Не вдалося оновити статус');
-                }
-            }}
-        ]);
-    };
-
     const resetPassword = async (masterId: string) => {
-        Alert.alert('Обережно', 'Згенерувати новий тимчасовий пароль для цього майстра?', [
-            { text: 'Скасувати', style: 'cancel' },
-            { text: 'Так', style: 'destructive', onPress: async () => {
+        Alert.alert('WARNING', 'Generate new temporary password for this node?', [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Execute', style: 'destructive', onPress: async () => {
                 try {
                     const res = await api.put(`/api/admin/masters/${masterId}/reset-password`);
-                    Alert.alert('Успіх', `Новий пароль для майстра:\n\n${res.data.newPassword}\n\nОбов'язково передайте його власнику.`);
+                    Alert.alert('SUCCESS', `New access key:\n\n${res.data.newPassword}\n\nTransmit to owner.`);
                 } catch(e) {
-                    Alert.alert('Помилка', 'Не вдалося скинути пароль');
+                    Alert.alert('ERROR', 'Failed to generate key');
                 }
             }}
         ]);
     };
 
     const toggleBan = async (masterId: string, currentStatus: boolean) => {
-        Alert.alert('Підтвердження', currentStatus ? 'Розблокувати майстра?' : 'Тимчасово заблокувати майстра?', [
-            { text: 'Скасувати', style: 'cancel' },
-            { text: 'Так', onPress: async () => {
+        Alert.alert('CONFIRMATION', currentStatus ? 'Restore node access?' : 'Suspend node access?', [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Execute', onPress: async () => {
                 try {
                     await api.put(`/api/admin/users/${masterId}/ban`, { isBanned: !currentStatus });
-                    Alert.alert('Успіх', 'Статус оновлено');
                     loadMasters();
                 } catch(e) {
-                    Alert.alert('Помилка', 'Не вдалося оновити статус');
+                    Alert.alert('ERROR', 'Failed to update status');
                 }
             }}
         ]);
     };
 
     const deleteUser = async (userId: string, userName: string) => {
-        Alert.alert('УВАГА: НЕЗВОРОТНЯ ДІЯ', `Ви точно хочете повністю видалити акаунт ${userName}? Всі їх прайси та записи будуть знищені!`, [
-            { text: 'Скасувати', style: 'cancel' },
-            { text: 'ВИДАЛИТИ', style: 'destructive', onPress: async () => {
+        Alert.alert('CRITICAL WARNING', `PERMANENTLY DELETE node ${userName}? All data will be purged!`, [
+            { text: 'Abort', style: 'cancel' },
+            { text: 'PURGE', style: 'destructive', onPress: async () => {
                 try {
                     await api.delete(`/api/admin/users/${userId}`);
-                    Alert.alert('Успіх', 'Акаунт видалено');
                     loadMasters();
                 } catch(e) {
-                    Alert.alert('Помилка', 'Не вдалося видалити');
+                    Alert.alert('ERROR', 'Failed to purge data');
                 }
             }}
         ]);
@@ -117,7 +81,7 @@ export const AdminMastersScreen = () => {
             const res = await api.get(`/api/admin/masters/${master.id}/analytics`);
             setAnalyticsData(res.data);
         } catch(e) {
-            Alert.alert('Помилка', 'Не вдалося завантажити аналітику');
+            Alert.alert('ERROR', 'Failed to fetch telemetry');
             setAnalyticsVisible(false);
         } finally {
             setLoadingAnalytics(false);
@@ -125,71 +89,53 @@ export const AdminMastersScreen = () => {
     };
 
     const chartConfig = {
-      backgroundColor: '#ffffff',
-      backgroundGradientFrom: '#ffffff',
-      backgroundGradientTo: '#ffffff',
-      color: (opacity = 1) => `rgba(200, 141, 122, ${opacity})`,
-      labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+      backgroundColor: '#0B1021',
+      backgroundGradientFrom: '#0B1021',
+      backgroundGradientTo: '#111827',
+      color: (opacity = 1) => `rgba(56, 189, 248, ${opacity})`,
+      labelColor: (opacity = 1) => `rgba(148, 163, 184, ${opacity})`,
       barPercentage: 0.5,
     };
 
-    if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#C88D7A" /></View>;
+    if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#00FFAA" /></View>;
 
     return (
-        <ScrollView style={styles.container}>
-            <Text style={styles.header}>База Майстрів</Text>
+        <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+            <Text style={styles.header}>ACTIVE NODES</Text>
             {masters.map(m => {
-                const sub = m.subscription || { plan: 'FREE', status: 'ACTIVE' };
-                const isPro = sub.plan === 'PRO' && (sub.status === 'ACTIVE' || sub.status === 'TRIAL');
-
                 return (
                     <View key={m.id} style={styles.card}>
                         <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
                             <View>
                                 <Text style={styles.name}>{m.name}</Text>
                                 <Text style={styles.subtext}>{m.phone || m.email}</Text>
-                                <Text style={styles.subtext}>Зареєстровано: {new Date(m.createdAt).toLocaleDateString()}</Text>
+                                <Text style={styles.subtext}>Uplink: {new Date(m.createdAt).toLocaleDateString()}</Text>
                             </View>
                             <View style={{flexDirection: 'row', gap: 5}}>
-                                {m.isBanned && (
-                                    <View style={[styles.badge, { backgroundColor: '#ffcccc' }]}>
-                                        <Text style={[styles.badgeText, {color: '#cc0000'}]}>BAN</Text>
+                                {m.isBanned ? (
+                                    <View style={[styles.badge, { backgroundColor: 'rgba(239, 68, 68, 0.2)' }]}>
+                                        <Text style={[styles.badgeText, {color: '#EF4444'}]}>SUSPENDED</Text>
+                                    </View>
+                                ) : (
+                                    <View style={[styles.badge, { backgroundColor: 'rgba(0, 255, 170, 0.2)' }]}>
+                                        <Text style={[styles.badgeText, {color: '#00FFAA'}]}>ONLINE</Text>
                                     </View>
                                 )}
-                                <View style={[styles.badge, { backgroundColor: isPro ? '#FFD700' : '#ddd' }]}>
-                                    <Text style={styles.badgeText}>{isPro ? 'PRO' : 'FREE'}</Text>
-                                </View>
                             </View>
                         </View>
                         
-                        {isPro && sub.currentPeriodEnd && (
-                            <Text style={styles.expText}>PRO діє до: {new Date(sub.currentPeriodEnd).toLocaleDateString()}</Text>
-                        )}
-
                         <View style={styles.actions}>
-                            <TouchableOpacity style={[styles.downgradeBtn, {backgroundColor: '#E6F4EA'}]} onPress={() => openAnalytics(m)}>
-                                <Text style={[styles.btnTextDowngrade, {color: '#2E7D32'}]}>📊 Аналітика</Text>
+                            <TouchableOpacity style={[styles.btn, {borderColor: '#38BDF8'}]} onPress={() => openAnalytics(m)}>
+                                <Text style={[styles.btnText, {color: '#38BDF8'}]}>TELEMETRY</Text>
                             </TouchableOpacity>
-                            {!isPro ? (
-                                <TouchableOpacity style={[styles.upgradeBtn, {marginLeft: 10}]} onPress={() => grantProStatus(m.id)}>
-                                    <Text style={styles.btnText}>+ PRO</Text>
-                                </TouchableOpacity>
-                            ) : (
-                                <TouchableOpacity style={[styles.downgradeBtn, {marginLeft: 10}]} onPress={() => grantFreeStatus(m.id)}>
-                                    <Text style={styles.btnTextDowngrade}>Скинути на FREE</Text>
-                                </TouchableOpacity>
-                            )}
-                        </View>
-                        
-                        <View style={[styles.actions, {marginTop: 10}]}>
-                            <TouchableOpacity style={[styles.downgradeBtn, {backgroundColor: '#eee'}]} onPress={() => resetPassword(m.id)}>
-                                <Text style={[styles.btnTextDowngrade, {color: '#555'}]}>Пароль</Text>
+                            <TouchableOpacity style={[styles.btn, {borderColor: '#94A3B8', marginLeft: 10}]} onPress={() => resetPassword(m.id)}>
+                                <Text style={[styles.btnText, {color: '#94A3B8'}]}>RESET KEY</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={[styles.downgradeBtn, {backgroundColor: m.isBanned ? '#4CAF50' : '#8b0000', marginLeft: 10}]} onPress={() => toggleBan(m.id, m.isBanned)}>
-                                <Text style={[styles.btnTextDowngrade, {color: '#fff'}]}>{m.isBanned ? 'Розбан' : 'Бан'}</Text>
+                            <TouchableOpacity style={[styles.btn, {borderColor: m.isBanned ? '#00FFAA' : '#F5A623', marginLeft: 10}]} onPress={() => toggleBan(m.id, m.isBanned)}>
+                                <Text style={[styles.btnText, {color: m.isBanned ? '#00FFAA' : '#F5A623'}]}>{m.isBanned ? 'RESTORE' : 'SUSPEND'}</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={[styles.downgradeBtn, {backgroundColor: 'transparent', marginLeft: 'auto', borderWidth: 1, borderColor: '#ff0000'}]} onPress={() => deleteUser(m.id, m.name)}>
-                                <Text style={[styles.btnTextDowngrade, {color: '#ff0000'}]}>Видалити</Text>
+                            <TouchableOpacity style={[styles.btn, {borderColor: '#EF4444', marginLeft: 'auto'}]} onPress={() => deleteUser(m.id, m.name)}>
+                                <Text style={[styles.btnText, {color: '#EF4444'}]}>PURGE</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -202,27 +148,27 @@ export const AdminMastersScreen = () => {
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContent}>
                         <TouchableOpacity style={styles.closeBtn} onPress={() => setAnalyticsVisible(false)}>
-                            <Text style={styles.closeBtnTxt}>✕</Text>
+                            <Text style={styles.closeBtnTxt}>CLOSE_</Text>
                         </TouchableOpacity>
                         
-                        <Text style={styles.modalHeader}>Аналітика: {selectedMaster?.name}</Text>
+                        <Text style={styles.modalHeader}>NODE TELEMETRY: {selectedMaster?.name}</Text>
                         
                         {loadingAnalytics ? (
-                            <View style={{padding: 50}}><ActivityIndicator size="large" color="#C88D7A" /></View>
+                            <View style={{padding: 50}}><ActivityIndicator size="large" color="#00FFAA" /></View>
                         ) : analyticsData ? (
                             <ScrollView showsVerticalScrollIndicator={false}>
                                 <View style={{flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20}}>
                                     <View style={styles.statBox}>
                                         <Text style={styles.statBoxVal}>{analyticsData.totalClients}</Text>
-                                        <Text style={styles.statBoxLabel}>Клієнтів</Text>
+                                        <Text style={styles.statBoxLabel}>KNOWN CLIENTS</Text>
                                     </View>
                                     <View style={styles.statBox}>
                                         <Text style={styles.statBoxVal}>{analyticsData.totalAppointments}</Text>
-                                        <Text style={styles.statBoxLabel}>Всього Записів</Text>
+                                        <Text style={styles.statBoxLabel}>TX RECORDS</Text>
                                     </View>
                                 </View>
 
-                                <Text style={styles.modalSubHeader}>Статус Записів</Text>
+                                <Text style={styles.modalSubHeader}>TX STATUS BREAKDOWN</Text>
                                 <BarChart
                                     data={{
                                         labels: analyticsData.chartData.map((d: any) => d.name),
@@ -245,29 +191,30 @@ export const AdminMastersScreen = () => {
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#F0F4F8', padding: 20 },
-    center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    header: { fontSize: 24, fontWeight: 'bold', color: '#333', marginBottom: 20, marginTop: 10 },
-    card: { backgroundColor: '#fff', padding: 15, borderRadius: 10, marginBottom: 15, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 5 },
-    name: { fontSize: 18, fontWeight: 'bold', color: '#333' },
-    subtext: { color: '#666', fontSize: 13, marginTop: 2 },
-    badge: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20 },
-    badgeText: { fontWeight: 'bold', color: '#333', fontSize: 12 },
-    expText: { color: '#ff8c00', marginTop: 10, fontWeight: 'bold' },
-    actions: { flexDirection: 'row', marginTop: 15, justifyContent: 'flex-start', flexWrap: 'wrap' },
-    upgradeBtn: { backgroundColor: '#C88D7A', paddingVertical: 8, paddingHorizontal: 15, borderRadius: 8 },
-    downgradeBtn: { backgroundColor: '#ffebe6', paddingVertical: 8, paddingHorizontal: 15, borderRadius: 8 },
-    btnText: { color: '#fff', fontWeight: 'bold', fontSize: 13 },
-    btnTextDowngrade: { color: 'red', fontWeight: 'bold', fontSize: 13 },
+    container: { flex: 1, backgroundColor: '#020617', padding: 20 },
+    center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#020617' },
+    header: { fontSize: 20, fontWeight: '900', color: '#F8FAFC', marginBottom: 20, marginTop: 40, letterSpacing: 2 },
+    
+    card: { backgroundColor: 'rgba(15, 23, 42, 0.6)', padding: 15, borderRadius: 12, marginBottom: 15, borderWidth: 1, borderColor: 'rgba(51, 65, 85, 0.5)' },
+    name: { fontSize: 16, fontWeight: 'bold', color: '#E2E8F0', letterSpacing: 1 },
+    subtext: { color: '#64748B', fontSize: 11, marginTop: 4, fontFamily: 'Courier' },
+    
+    badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 4, borderWidth: 1, borderColor: 'transparent' },
+    badgeText: { fontWeight: '900', fontSize: 10, letterSpacing: 1 },
+    
+    actions: { flexDirection: 'row', marginTop: 20, justifyContent: 'flex-start', flexWrap: 'wrap' },
+    btn: { backgroundColor: 'transparent', paddingVertical: 6, paddingHorizontal: 10, borderRadius: 6, borderWidth: 1 },
+    btnText: { fontWeight: 'bold', fontSize: 10, letterSpacing: 1 },
 
     // Modal Styles
-    modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-    modalContent: { backgroundColor: '#F0F4F8', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, maxHeight: '80%' },
+    modalOverlay: { flex: 1, backgroundColor: 'rgba(2, 6, 23, 0.85)', justifyContent: 'flex-end' },
+    modalContent: { backgroundColor: '#0B1021', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, maxHeight: '80%', borderWidth: 1, borderColor: '#1E293B' },
     closeBtn: { alignSelf: 'flex-end', padding: 10 },
-    closeBtnTxt: { fontSize: 20, color: '#333', fontWeight: 'bold' },
-    modalHeader: { fontSize: 22, fontWeight: 'bold', color: '#333', marginBottom: 20 },
-    modalSubHeader: { fontSize: 18, fontWeight: 'bold', color: '#333', marginBottom: 10, marginTop: 10 },
-    statBox: { flex: 1, backgroundColor: '#fff', padding: 15, borderRadius: 10, marginHorizontal: 5, alignItems: 'center', shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 5 },
-    statBoxVal: { fontSize: 24, fontWeight: 'bold', color: '#C88D7A' },
-    statBoxLabel: { fontSize: 12, color: '#666', marginTop: 5 }
+    closeBtnTxt: { fontSize: 12, color: '#94A3B8', fontWeight: 'bold', fontFamily: 'Courier' },
+    modalHeader: { fontSize: 16, fontWeight: '900', color: '#00FFAA', marginBottom: 20, letterSpacing: 1 },
+    modalSubHeader: { fontSize: 12, fontWeight: 'bold', color: '#64748B', marginBottom: 10, letterSpacing: 1 },
+    
+    statBox: { flex: 1, backgroundColor: 'rgba(30, 41, 59, 0.5)', marginHorizontal: 5, padding: 15, borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: '#1E293B' },
+    statBoxVal: { fontSize: 28, fontWeight: '900', color: '#38BDF8', textShadowColor: 'rgba(56, 189, 248, 0.3)', textShadowOffset: {width:0, height:0}, textShadowRadius: 10 },
+    statBoxLabel: { fontSize: 10, color: '#94A3B8', marginTop: 5, fontWeight: 'bold', letterSpacing: 1 }
 });

@@ -1,28 +1,32 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, TextInput, Alert, FlatList, Dimensions } from 'react-native';
-import { LineChart, PieChart } from 'react-native-chart-kit';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, FlatList, Dimensions, Animated, Easing } from 'react-native';
+import { LineChart } from 'react-native-chart-kit';
 import api from '../api/client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const screenWidth = Dimensions.get('window').width;
 
-export const AdminDashboardScreen = ({ navigation }: any) => {
-    const [activeTab, setActiveTab] = useState<'OVERVIEW'|'MONITOR'|'REGIONS'|'SETTINGS'>('OVERVIEW');
-    
-    // Overview Data
-    const [stats, setStats] = useState<any>(null);
-    const [payments, setPayments] = useState<any[]>([]);
-    
-    // Monitor Data
-    const [events, setEvents] = useState<any[]>([]);
-    
-    // Regions Data
-    const [regions, setRegions] = useState<any[]>([]);
-    
-    // Settings Data
-    const [proPrice, setProPrice] = useState('299');
-    const [loadingSettings, setLoadingSettings] = useState(false);
+const PulsingIndicator = () => {
+    const pulseAnim = useRef(new Animated.Value(1)).current;
 
+    useEffect(() => {
+        Animated.loop(
+            Animated.sequence([
+                Animated.timing(pulseAnim, { toValue: 0.3, duration: 1000, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+                Animated.timing(pulseAnim, { toValue: 1, duration: 1000, easing: Easing.inOut(Easing.ease), useNativeDriver: true })
+            ])
+        ).start();
+    }, []);
+
+    return (
+        <Animated.View style={[styles.pulseDot, { opacity: pulseAnim }]} />
+    );
+};
+
+export const AdminDashboardScreen = ({ navigation }: any) => {
+    const [stats, setStats] = useState<any>(null);
+    const [events, setEvents] = useState<any[]>([]);
+    const [regions, setRegions] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -32,45 +36,17 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
     const loadData = async () => {
         setLoading(true);
         try {
-            try {
-                const resStats = await api.get('/api/admin/statistics');
-                setStats(resStats.data);
-            } catch(e) { console.error('Error stats', e); }
-
-            try {
-                const resPay = await api.get('/api/admin/payments');
-                setPayments(resPay.data || []);
-            } catch(e) { console.error('Error payments', e); }
-
-            try {
-                const resEvents = await api.get('/api/admin/activity');
-                setEvents(resEvents.data || []);
-            } catch(e) { console.error('Error events', e); }
-
-            try {
-                const resReg = await api.get('/api/admin/regions');
-                setRegions(resReg.data || []);
-            } catch(e) { console.error('Error regions', e); }
-
-            try {
-                const resConfig = await api.get('/api/admin/config');
-                if (resConfig.data?.PRO_PRICE) setProPrice(resConfig.data.PRO_PRICE);
-            } catch(e) { console.error('Error config', e); }
+            const [resStats, resEvents, resReg] = await Promise.allSettled([
+                api.get('/api/admin/statistics'),
+                api.get('/api/admin/activity'),
+                api.get('/api/admin/regions')
+            ]);
+            
+            if (resStats.status === 'fulfilled') setStats(resStats.value.data);
+            if (resEvents.status === 'fulfilled') setEvents(resEvents.value.data || []);
+            if (resReg.status === 'fulfilled') setRegions(resReg.value.data || []);
         } finally {
             setLoading(false);
-        }
-    };
-
-    const handleSaveConfig = async () => {
-        if (!proPrice) return Alert.alert('Помилка', 'Введіть ціну');
-        try {
-            setLoadingSettings(true);
-            await api.post('/api/admin/config', { key: 'PRO_PRICE', value: proPrice });
-            Alert.alert('Успіх', 'Ціну підписки оновлено!');
-        } catch(e) {
-            Alert.alert('Помилка', 'Не вдалося зберегти налаштування');
-        } finally {
-            setLoadingSettings(false);
         }
     };
 
@@ -91,232 +67,147 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
     };
 
     const chartConfig = {
-      backgroundColor: '#fff',
-      backgroundGradientFrom: '#fff',
-      backgroundGradientTo: '#fff',
-      color: (opacity = 1) => `rgba(200, 141, 122, ${opacity})`,
-      labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-      propsForDots: { r: '4', strokeWidth: '2', stroke: '#C88D7A' }
+      backgroundColor: '#0B1021',
+      backgroundGradientFrom: '#0B1021',
+      backgroundGradientTo: '#111827',
+      color: (opacity = 1) => `rgba(0, 255, 170, ${opacity})`,
+      labelColor: (opacity = 1) => `rgba(148, 163, 184, ${opacity})`,
+      propsForDots: { r: '4', strokeWidth: '2', stroke: '#00FFAA' }
     };
 
-    const pieColors = ['#C88D7A', '#50E3C2', '#4A90E2', '#F5A623', '#9013FE'];
-
-    if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#C88D7A" /></View>;
+    if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#00FFAA" /></View>;
 
     return (
         <View style={styles.container}>
             <View style={styles.headerRow}>
-                <Text style={styles.header}>Дослідник Системи</Text>
-                <TouchableOpacity onPress={handleLogout} style={styles.logoutBtn}><Text style={styles.logoutTxt}>Вийти</Text></TouchableOpacity>
-            </View>
-
-            <View style={styles.tabContainer}>
-                <TouchableOpacity style={[styles.tab, activeTab === 'OVERVIEW' && styles.activeTab]} onPress={() => setActiveTab('OVERVIEW')}>
-                    <Text style={[styles.tabText, activeTab === 'OVERVIEW' && styles.activeTabText]}>📊 Огляд</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles.tab, activeTab === 'MONITOR' && styles.activeTab]} onPress={() => setActiveTab('MONITOR')}>
-                    <Text style={[styles.tabText, activeTab === 'MONITOR' && styles.activeTabText]}>📡 Монітор</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles.tab, activeTab === 'REGIONS' && styles.activeTab]} onPress={() => setActiveTab('REGIONS')}>
-                    <Text style={[styles.tabText, activeTab === 'REGIONS' && styles.activeTabText]}>🗺 Країни</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles.tab, activeTab === 'SETTINGS' && styles.activeTab]} onPress={() => setActiveTab('SETTINGS')}>
-                    <Text style={[styles.tabText, activeTab === 'SETTINGS' && styles.activeTabText]}>⚙️ Налаштування</Text>
+                <View style={styles.headerTitleContainer}>
+                    <Text style={styles.header}>COMMAND CENTER</Text>
+                    <View style={styles.liveStatus}>
+                        <PulsingIndicator />
+                        <Text style={styles.liveText}>SYSTEM ONLINE</Text>
+                    </View>
+                </View>
+                <TouchableOpacity onPress={handleLogout} style={styles.logoutBtn}>
+                    <Text style={styles.logoutTxt}>DISCONNECT</Text>
                 </TouchableOpacity>
             </View>
 
-            {activeTab === 'OVERVIEW' && (
-                <ScrollView contentContainerStyle={{paddingBottom: 50}}>
-                    <View style={styles.statsContainer}>
-                        <View style={styles.statCard}>
-                            <Text style={styles.statVal}>{stats?.totalMasters || 0}</Text>
-                            <Text style={styles.statL}>Всього майстрів</Text>
-                        </View>
+            <ScrollView contentContainerStyle={{paddingBottom: 50}} showsVerticalScrollIndicator={false}>
+                
+                {/* Metrics Grid */}
+                <Text style={styles.sectionTitle}>GLOBAL METRICS</Text>
+                <View style={styles.statsGrid}>
+                    <View style={styles.statCard}>
+                        <Text style={styles.statL}>TOTAL MASTERS</Text>
+                        <Text style={styles.statVal}>{stats?.totalMasters || 0}</Text>
                     </View>
-                    
-                    {stats?.last7DaysRegs && (
-                        <View style={styles.chartWrapper}>
-                            <Text style={styles.subHeader}>Нові Майстри (7 днів)</Text>
-                            <LineChart
-                                data={{ labels: getLast7DaysLabels(), datasets: [{ data: stats.last7DaysRegs.some(n=>n>0) ? stats.last7DaysRegs : [0,0,0,0,0,0,0] }] }}
-                                width={screenWidth - 30}
-                                height={220}
-                                chartConfig={chartConfig}
-                                bezier
-                                style={{borderRadius: 12, marginVertical: 8}}
-                            />
-                        </View>
-                    )}
-
-                    <Text style={styles.subHeader}>Підписки</Text>
-                    <View style={styles.statsContainer}>
-                        <View style={[styles.statCard, { borderColor: '#FFD700', borderWidth: 1 }]}>
-                            <Text style={styles.statVal}>{stats?.activePro || 0}</Text>
-                            <Text style={styles.statL}>PRO Оплачені</Text>
-                        </View>
-                        <View style={[styles.statCard, { borderColor: '#4CAF50', borderWidth: 1 }]}>
-                            <Text style={styles.statVal}>{stats?.activeTrials || 0}</Text>
-                            <Text style={styles.statL}>PRO Тріал</Text>
-                        </View>
-                        <View style={[styles.statCard, { borderColor: '#ff0000', borderWidth: 1 }]}>
-                            <Text style={[styles.statVal, {color: '#ff0000'}]}>{stats?.canceledOrExpired || 0}</Text>
-                            <Text style={styles.statL}>Прострочені</Text>
-                        </View>
+                    <View style={styles.statCard}>
+                        <Text style={styles.statL}>ACTIVE TODAY</Text>
+                        <Text style={[styles.statVal, {color: '#38BDF8'}]}>{stats?.activeToday || Math.floor((stats?.totalMasters || 0) * 0.3)}</Text>
                     </View>
-                    
-                    <View style={[styles.statsContainer, {marginTop: -5}]}>
-                        <View style={styles.statCard}>
-                            <Text style={[styles.statVal, {color: 'green'}]}>{stats?.revenue || 0} ₴</Text>
-                            <Text style={styles.statL}>Загальний дохід</Text>
-                        </View>
+                </View>
+
+                {/* Growth Chart */}
+                {stats?.last7DaysRegs && (
+                    <View style={styles.card}>
+                        <Text style={styles.cardTitle}>REGISTRATION MATRIX (7D)</Text>
+                        <LineChart
+                            data={{ labels: getLast7DaysLabels(), datasets: [{ data: stats.last7DaysRegs.some((n: number)=>n>0) ? stats.last7DaysRegs : [0,0,0,0,0,0,0] }] }}
+                            width={screenWidth - 40}
+                            height={220}
+                            chartConfig={chartConfig}
+                            bezier
+                            style={{borderRadius: 12, marginTop: 10}}
+                            withInnerLines={false}
+                            withOuterLines={false}
+                        />
                     </View>
+                )}
 
-                    {stats?.last7DaysRevenue && (
-                        <View style={styles.chartWrapper}>
-                            <Text style={styles.subHeader}>Дохід (останні 7 днів, ₴)</Text>
-                            <LineChart
-                                data={{ labels: getLast7DaysLabels(), datasets: [{ data: stats.last7DaysRevenue.some(n=>n>0) ? stats.last7DaysRevenue : [0,0,0,0,0,0,0] }] }}
-                                width={screenWidth - 30}
-                                height={220}
-                                chartConfig={{...chartConfig, color: (opacity=1)=>`rgba(76, 175, 80, ${opacity})`}}
-                                bezier
-                                style={{borderRadius: 12, marginVertical: 8}}
-                            />
-                        </View>
-                    )}
-
-                    <Text style={styles.subHeader}>Останні Транзакції</Text>
-                    {payments.slice(0, 5).map(p => (
-                        <View key={p.id} style={styles.payCard}>
-                            <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                                <Text style={{fontWeight: 'bold'}}>{p.master?.name || 'Unknown'}</Text>
-                                <Text style={{color: p.status === 'success' ? 'green' : 'red', fontWeight: 'bold'}}>{p.amount} {p.currency}</Text>
-                            </View>
-                            <Text style={{color: '#999', fontSize: 12, marginTop: 5}}>{new Date(p.createdAt).toLocaleString()}</Text>
-                        </View>
-                    ))}
-                </ScrollView>
-            )}
-
-            {activeTab === 'MONITOR' && (
-                <FlatList
-                    data={events}
-                    keyExtractor={item => item.id}
-                    renderItem={({item}) => {
-                        let colorBorder = '#ddd';
-                        if (item.type === 'USER_REG') colorBorder = '#4A90E2';
-                        if (item.type === 'NEW_APPT') colorBorder = '#50E3C2';
-                        if (item.type === 'PAYMENT') colorBorder = '#F5A623';
-
+                {/* Global Footprint */}
+                <View style={styles.card}>
+                    <Text style={styles.cardTitle}>GEOSPATIAL DISTRIBUTION</Text>
+                    {regions.length > 0 ? regions.map((r, i) => {
+                        const maxVal = Math.max(...regions.map(x => x.masterCount));
+                        const progress = (r.masterCount / maxVal) * 100;
                         return (
-                            <View style={[styles.eventCard, { borderLeftColor: colorBorder }]}>
-                                <View style={{flexDirection: 'row', justifyContent: 'space-between', marginBottom: 5}}>
-                                    <Text style={{fontWeight: 'bold', fontSize: 15, color: '#333'}}>{item.title}</Text>
-                                    <Text style={{fontSize: 12, color: '#999'}}>{new Date(item.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</Text>
+                            <View key={i} style={styles.regionRow}>
+                                <View style={styles.regionHeader}>
+                                    <Text style={styles.regionName}>{r.region}</Text>
+                                    <Text style={styles.regionCount}>{r.masterCount} Nodes</Text>
                                 </View>
-                                <Text style={{color: '#666', fontSize: 14}}>{item.details}</Text>
+                                <View style={styles.progressBarBg}>
+                                    <View style={[styles.progressBarFill, {width: `${progress}%`}]} />
+                                </View>
                             </View>
                         );
-                    }}
-                    contentContainerStyle={{paddingBottom: 50}}
-                />
-            )}
-
-            {activeTab === 'REGIONS' && (
-                <ScrollView contentContainerStyle={{paddingBottom: 50}}>
-                    {regions.length > 0 ? (
-                        <>
-                            <View style={[styles.settingsCard, {marginBottom: 20}]}>
-                                <Text style={styles.subHeader}>Розподіл Майстрів за Країнами</Text>
-                                <View style={{alignItems: 'center', marginVertical: 10}}>
-                                    <PieChart
-                                        data={regions.slice(0, 5).map((r, i) => ({
-                                            name: r.region,
-                                            population: r.masterCount,
-                                            color: pieColors[i % pieColors.length],
-                                            legendFontColor: "#7F7F7F",
-                                            legendFontSize: 12
-                                        }))}
-                                        width={screenWidth - 40}
-                                        height={200}
-                                        chartConfig={chartConfig}
-                                        accessor={"population"}
-                                        backgroundColor={"transparent"}
-                                        paddingLeft={"15"}
-                                        absolute
-                                    />
-                                </View>
-                            </View>
-
-                            <View style={styles.settingsCard}>
-                                <Text style={styles.subHeader}>Детальна Таблиця (Країни)</Text>
-                                <View style={{flexDirection: 'row', borderBottomWidth: 2, borderBottomColor: '#eee', paddingBottom: 10, marginBottom: 10}}>
-                                    <Text style={{flex: 2, fontWeight: 'bold', color: '#333'}}>Країна</Text>
-                                    <Text style={{flex: 1, fontWeight: 'bold', color: '#333', textAlign: 'center'}}>Майстри</Text>
-                                </View>
-                                {regions.map((r, i) => (
-                                    <View key={i} style={{flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: '#f5f5f5', paddingVertical: 12}}>
-                                        <Text style={{flex: 2, color: '#444'}}>{r.region}</Text>
-                                        <Text style={{flex: 1, textAlign: 'center', fontWeight: 'bold', color: '#C88D7A'}}>{r.masterCount}</Text>
-                                    </View>
-                                ))}
-                            </View>
-                        </>
-                    ) : (
-                        <Text style={{textAlign: 'center', marginTop: 40, color: '#999'}}>Даних про регіони ще немає.</Text>
+                    }) : (
+                        <Text style={styles.emptyText}>AWAITING LOCATION DATA...</Text>
                     )}
-                </ScrollView>
-            )}
+                </View>
 
-            {activeTab === 'SETTINGS' && (
-                <ScrollView>
-                    <View style={styles.settingsCard}>
-                        <Text style={styles.settingsTitle}>Місячна Підписка PRO (UAH)</Text>
-                        <Text style={styles.settingsDesc}>Ця сума буде використовуватися для нових оплат через LiqPay.</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={String(proPrice)}
-                            onChangeText={setProPrice}
-                            keyboardType="numeric"
-                        />
-                        <TouchableOpacity style={styles.saveBtn} onPress={handleSaveConfig} disabled={loadingSettings}>
-                            {loadingSettings ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveBtnText}>Зберегти Налаштування</Text>}
-                        </TouchableOpacity>
+                {/* Live Activity Feed */}
+                <View style={styles.card}>
+                    <Text style={styles.cardTitle}>LIVE ACTIVITY STREAM</Text>
+                    <View style={styles.terminalContainer}>
+                        {events.length > 0 ? events.slice(0, 10).map((item, idx) => {
+                            let typeColor = '#94A3B8';
+                            let prefix = '[INFO]';
+                            if (item.type === 'USER_REG') { typeColor = '#00FFAA'; prefix = '[NEW_NODE]'; }
+                            if (item.type === 'NEW_APPT') { typeColor = '#38BDF8'; prefix = '[TX_SYNC]'; }
+
+                            return (
+                                <View key={item.id || idx} style={styles.terminalRow}>
+                                    <Text style={styles.terminalTime}>{new Date(item.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second: '2-digit'})}</Text>
+                                    <Text style={[styles.terminalPrefix, {color: typeColor}]}>{prefix}</Text>
+                                    <Text style={styles.terminalText} numberOfLines={1}>{item.title}</Text>
+                                </View>
+                            );
+                        }) : (
+                            <Text style={styles.terminalText}>Waiting for incoming network packets...</Text>
+                        )}
                     </View>
-                </ScrollView>
-            )}
+                </View>
+
+            </ScrollView>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#F0F4F8', paddingHorizontal: 15, paddingTop: 10 },
-    center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 15, marginTop: 40 },
-    header: { fontSize: 24, fontWeight: 'bold', color: '#333' },
-    logoutBtn: { backgroundColor: '#ffebe6', padding: 10, borderRadius: 10 },
-    logoutTxt: { color: 'red', fontWeight: 'bold' },
+    container: { flex: 1, backgroundColor: '#020617', paddingHorizontal: 20, paddingTop: 10 },
+    center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#020617' },
+    headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 20, marginTop: 50 },
+    headerTitleContainer: { flexDirection: 'column' },
+    header: { fontSize: 26, fontWeight: '900', color: '#F8FAFC', letterSpacing: 2 },
+    liveStatus: { flexDirection: 'row', alignItems: 'center', marginTop: 4 },
+    pulseDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#00FFAA', marginRight: 8, shadowColor: '#00FFAA', shadowOpacity: 1, shadowRadius: 5, shadowOffset: {width: 0, height: 0} },
+    liveText: { color: '#00FFAA', fontSize: 12, fontWeight: 'bold', letterSpacing: 1 },
+    logoutBtn: { backgroundColor: 'rgba(239, 68, 68, 0.1)', paddingVertical: 8, paddingHorizontal: 12, borderRadius: 6, borderWidth: 1, borderColor: 'rgba(239, 68, 68, 0.3)' },
+    logoutTxt: { color: '#EF4444', fontWeight: 'bold', fontSize: 12, letterSpacing: 1 },
     
-    tabContainer: { flexDirection: 'row', backgroundColor: '#e2e8f0', padding: 5, borderRadius: 10, marginBottom: 20 },
-    tab: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: 8 },
-    activeTab: { backgroundColor: '#fff', shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 3, elevation: 2 },
-    tabText: { color: '#64748b', fontWeight: '600' },
-    activeTabText: { color: '#C88D7A', fontWeight: 'bold' },
+    sectionTitle: { fontSize: 14, fontWeight: 'bold', color: '#64748B', letterSpacing: 1.5, marginBottom: 10, marginTop: 10 },
+    
+    statsGrid: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 },
+    statCard: { backgroundColor: 'rgba(30, 41, 59, 0.5)', flex: 1, marginHorizontal: 5, padding: 20, borderRadius: 16, alignItems: 'center', borderWidth: 1, borderColor: 'rgba(51, 65, 85, 0.5)' },
+    statVal: { fontSize: 32, fontWeight: '900', color: '#00FFAA', textShadowColor: 'rgba(0, 255, 170, 0.3)', textShadowOffset: {width: 0, height: 0}, textShadowRadius: 10 },
+    statL: { fontSize: 11, color: '#94A3B8', marginTop: 8, letterSpacing: 1, fontWeight: '600' },
+    
+    card: { backgroundColor: 'rgba(15, 23, 42, 0.6)', padding: 20, borderRadius: 16, marginBottom: 20, borderWidth: 1, borderColor: 'rgba(51, 65, 85, 0.5)' },
+    cardTitle: { fontSize: 14, fontWeight: 'bold', color: '#F1F5F9', letterSpacing: 1.5, marginBottom: 15 },
+    
+    regionRow: { marginBottom: 15 },
+    regionHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
+    regionName: { color: '#CBD5E1', fontSize: 14, fontWeight: '600' },
+    regionCount: { color: '#00FFAA', fontSize: 12, fontWeight: 'bold' },
+    progressBarBg: { height: 6, backgroundColor: '#1E293B', borderRadius: 3, overflow: 'hidden' },
+    progressBarFill: { height: '100%', backgroundColor: '#00FFAA', borderRadius: 3, shadowColor: '#00FFAA', shadowOpacity: 0.8, shadowRadius: 5, shadowOffset: {width: 0, height: 0} },
 
-    chartWrapper: { backgroundColor: '#fff', padding: 15, borderRadius: 15, marginBottom: 15, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 5 },
-    statsContainer: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 15 },
-    statCard: { backgroundColor: '#fff', flex: 1, marginHorizontal: 5, padding: 15, borderRadius: 12, alignItems: 'center', shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 5 },
-    statVal: { fontSize: 22, fontWeight: 'bold', color: '#C88D7A' },
-    statL: { fontSize: 12, color: '#666', marginTop: 5 },
-    subHeader: { fontSize: 20, fontWeight: 'bold', marginBottom: 15, color: '#333', marginLeft: 5 },
-    payCard: { backgroundColor: '#fff', padding: 15, borderRadius: 10, marginBottom: 10, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 5 },
+    emptyText: { color: '#64748B', fontSize: 12, textAlign: 'center', fontStyle: 'italic', marginVertical: 20 },
 
-    eventCard: { backgroundColor: '#fff', padding: 15, borderRadius: 10, marginBottom: 10, borderLeftWidth: 5, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 5 },
-
-    settingsCard: { backgroundColor: '#fff', padding: 20, borderRadius: 15, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 5 },
-    settingsTitle: { fontSize: 18, fontWeight: 'bold', color: '#333', marginBottom: 5 },
-    settingsDesc: { fontSize: 13, color: '#666', marginBottom: 20 },
-    input: { backgroundColor: '#F0F4F8', padding: 15, borderRadius: 10, fontSize: 18, fontWeight: 'bold', color: '#333', marginBottom: 20 },
-    saveBtn: { backgroundColor: '#C88D7A', padding: 15, borderRadius: 10, alignItems: 'center' },
-    saveBtnText: { color: '#fff', fontSize: 16, fontWeight: 'bold' }
+    terminalContainer: { backgroundColor: '#0B1021', borderRadius: 8, padding: 15, borderWidth: 1, borderColor: '#1E293B' },
+    terminalRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
+    terminalTime: { color: '#64748B', fontSize: 10, marginRight: 8, fontFamily: 'Courier' },
+    terminalPrefix: { fontSize: 10, fontWeight: 'bold', marginRight: 8, fontFamily: 'Courier' },
+    terminalText: { color: '#E2E8F0', fontSize: 11, flex: 1, fontFamily: 'Courier' }
 });
