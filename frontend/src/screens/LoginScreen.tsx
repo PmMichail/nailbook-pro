@@ -146,7 +146,7 @@ export const LoginScreen = ({ navigation }: any) => {
         />
       </View>
 
-      <TouchableOpacity style={styles.primaryButton} onPress={handleLogin} disabled={isAuthenticating}>
+      <TouchableOpacity style={[styles.primaryButton, { backgroundColor: colors.primary, shadowColor: colors.primary }]} onPress={handleLogin} disabled={isAuthenticating}>
         {isAuthenticating ? (
            <ActivityIndicator color="#fff" />
         ) : (
@@ -155,7 +155,7 @@ export const LoginScreen = ({ navigation }: any) => {
       </TouchableOpacity>
       
       <TouchableOpacity style={styles.secondaryButton} onPress={() => navigation.navigate('Register')}>
-        <Text style={styles.secondaryButtonText}>{t('register_btn')}</Text>
+        <Text style={[styles.secondaryButtonText, { color: colors.primary }]}>{t('register_btn')}</Text>
       </TouchableOpacity>
     </KeyboardAvoidingView>
   );
