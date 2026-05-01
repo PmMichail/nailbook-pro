@@ -246,16 +246,16 @@ export const MasterProfileScreen = ({ navigation }: any) => {
         </View>
 
         <View style={styles.editForm}>
-            <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={name} onChangeText={setName} placeholder="Ваше ім'я" placeholderTextColor={colors.textSecondary} />
-            <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={phone} onChangeText={setPhone} placeholder="Телефон" placeholderTextColor={colors.textSecondary} keyboardType="phone-pad" />
-            <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={salonName} onChangeText={setSalonName} placeholder="Назва салону (опц.)" placeholderTextColor={colors.textSecondary} />
+            <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={name} onChangeText={setName} placeholder={t('profile.namePlaceholder', {defaultValue: "Ваше ім'я"})} placeholderTextColor={colors.textSecondary} />
+            <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={phone} onChangeText={setPhone} placeholder={t('profile.phonePlaceholder', {defaultValue: 'Телефон'})} placeholderTextColor={colors.textSecondary} keyboardType="phone-pad" />
+            <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={salonName} onChangeText={setSalonName} placeholder={t('profile.salonNamePlaceholder', {defaultValue: 'Назва салону (опц.)'})} placeholderTextColor={colors.textSecondary} />
             
-            <Text style={{color: colors.textSecondary, marginTop: 10, marginBottom: 5, fontSize: 12}}>Соціальні мережі (посилання або нікнейми)</Text>
-            <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={instagram} onChangeText={setInstagram} placeholder="Instagram (без @)" placeholderTextColor={colors.textSecondary} />
-            <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={tiktok} onChangeText={setTiktok} placeholder="TikTok (без @)" placeholderTextColor={colors.textSecondary} />
-            <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={facebook} onChangeText={setFacebook} placeholder="Обліковий запис Facebook" placeholderTextColor={colors.textSecondary} />
+            <Text style={{color: colors.textSecondary, marginTop: 10, marginBottom: 5, fontSize: 12}}>{t('profile.socialNetworksDesc', {defaultValue: 'Соціальні мережі (посилання або нікнейми)'})}</Text>
+            <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={instagram} onChangeText={setInstagram} placeholder={t('profile.instagram', {defaultValue: 'Instagram (без @)'})} placeholderTextColor={colors.textSecondary} />
+            <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={tiktok} onChangeText={setTiktok} placeholder={t('profile.tiktok', {defaultValue: 'TikTok (без @)'})} placeholderTextColor={colors.textSecondary} />
+            <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={facebook} onChangeText={setFacebook} placeholder={t('profile.facebook', {defaultValue: 'Обліковий запис Facebook'})} placeholderTextColor={colors.textSecondary} />
             
-            <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={password} onChangeText={setPassword} placeholder="Новий пароль (залиште порожнім, щоб не змінювати)" placeholderTextColor={colors.textSecondary} secureTextEntry />
+            <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={password} onChangeText={setPassword} placeholder={t('profile.newPassword', {defaultValue: 'Новий пароль (залиште порожнім, щоб не змінювати)'})} placeholderTextColor={colors.textSecondary} secureTextEntry />
             <TouchableOpacity style={[styles.saveBtn, {backgroundColor: 'transparent', borderColor: colors.primary, borderWidth: 1, marginTop: 10, shadowColor: colors.text, elevation: 5, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.3}]} onPress={handleSaveProfile}>
                 <Text style={[styles.saveBtnText, {color: colors.primary}]}>{t('saveChanges', {defaultValue: 'Зберегти зміни'})}</Text>
             </TouchableOpacity>
@@ -263,22 +263,22 @@ export const MasterProfileScreen = ({ navigation }: any) => {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Підписка</Text>
+        <Text style={styles.sectionTitle}>{t('profile.subscription', {defaultValue: 'Підписка'})}</Text>
         <View style={[styles.settingRow, { backgroundColor: colors.card, flexDirection: 'column', alignItems: 'flex-start', padding: 20 }]}>
             <Text style={[styles.settingText, { color: colors.text, fontWeight: 'bold', marginBottom: 5 }]}>
-              Поточний тариф: {subData ? (subData.status === 'TRIAL' ? 'TRIAL PRO' : subData.plan) : 'Завантаження...'}
+              {t('profile.currentTariff', {defaultValue: 'Поточний тариф:'})} {subData ? (subData.status === 'TRIAL' ? 'TRIAL PRO' : subData.plan) : 'Завантаження...'}
             </Text>
             
             {subData?.plan === 'FREE' && subData?.status !== 'TRIAL' && (
-                <Text style={{color: colors.textSecondary, marginBottom: 10}}>Активних клієнтів: {activeClients}/10</Text>
+                <Text style={{color: colors.textSecondary, marginBottom: 10}}>{t('profile.activeClientsCount', {defaultValue: 'Активних клієнтів:'})} {activeClients}/10</Text>
             )}
             
             {subData?.status === 'TRIAL' && subData?.trialEndsAt && (
-                <Text style={{color: colors.textSecondary, marginBottom: 10}}>Тріал закінчується: {new Date(subData.trialEndsAt).toLocaleDateString()}</Text>
+                <Text style={{color: colors.textSecondary, marginBottom: 10}}>{t('profile.trialEndsAt', {defaultValue: 'Тріал закінчується:'})} {new Date(subData.trialEndsAt).toLocaleDateString()}</Text>
             )}
 
             {subData?.plan === 'PRO' && subData?.status === 'ACTIVE' && subData?.currentPeriodEnd && (
-                <Text style={{color: colors.textSecondary, marginBottom: 10}}>Сплачено до: {new Date(subData.currentPeriodEnd).toLocaleDateString()}</Text>
+                <Text style={{color: colors.textSecondary, marginBottom: 10}}>{t('profile.paidUntil', {defaultValue: 'Сплачено до:'})} {new Date(subData.currentPeriodEnd).toLocaleDateString()}</Text>
             )}
 
             <TouchableOpacity 
@@ -286,18 +286,18 @@ export const MasterProfileScreen = ({ navigation }: any) => {
                onPress={() => navigation.navigate('SubscriptionScreen')}
             >
                <Text style={[styles.saveBtnText, {color: colors.primary}]}>
-                   {(subData?.plan === 'FREE' || subData?.status === 'TRIAL' || subData?.status === 'EXPIRED') ? '⭐️ Оновити до Pro' : '💳 Керувати підпискою'}
+                   {(subData?.plan === 'FREE' || subData?.status === 'TRIAL' || subData?.status === 'EXPIRED') ? t('profile.upgradeToPro', {defaultValue: '⭐️ Оновити до Pro'}) : t('profile.manageSubscription', {defaultValue: '💳 Керувати підпискою'})}
                </Text>
             </TouchableOpacity>
         </View>
 
-        <Text style={[styles.sectionTitle, {marginTop: 15}]}>Налаштування</Text>
+        <Text style={[styles.sectionTitle, {marginTop: 15}]}>{t('settings', {defaultValue: 'Налаштування'})}</Text>
 
 
         <View style={[styles.settingRow, { backgroundColor: colors.card, flexDirection: 'column', alignItems: 'flex-start' }]}>
           <Text style={[styles.settingText, { color: colors.text, fontWeight: 'bold' }]}>{t('profile.fixLocation', {defaultValue: 'Геолокація салону'})}</Text>
-          <Text style={{color: colors.textSecondary, marginBottom: 10, marginTop: 5, fontSize: 13}}>Дозвольте новим клієнтам поблизу знаходити вас на карті.</Text>
-          {address ? <Text style={{color: colors.primary, marginBottom: 10, fontWeight: 'bold'}}>Поточна адреса: {address}</Text> : null}
+          <Text style={{color: colors.textSecondary, marginBottom: 10, marginTop: 5, fontSize: 13}}>{t('profile.fixLocationDesc', {defaultValue: 'Дозвольте новим клієнтам поблизу знаходити вас на карті.'})}</Text>
+          {address ? <Text style={{color: colors.primary, marginBottom: 10, fontWeight: 'bold'}}>{t('profile.currentAddress', {defaultValue: 'Поточна адреса:'})} {address}</Text> : null}
           <TouchableOpacity 
              style={[styles.saveBtn, {backgroundColor: 'transparent', width: '100%', borderColor: colors.primary, borderWidth: 1}]}
              onPress={handleFixLocation}
@@ -330,7 +330,7 @@ export const MasterProfileScreen = ({ navigation }: any) => {
         </View>
         <View style={[styles.settingRow, { backgroundColor: colors.card, flexDirection: 'column', alignItems: 'flex-start' }]}>
           <Text style={[styles.settingText, { color: colors.text, fontWeight: 'bold' }]}>{t('profile.inviteClient', {defaultValue: 'Запросити клієнта'})}</Text>
-          <Text style={{color: colors.textSecondary, marginBottom: 10, marginTop: 5, fontSize: 13}}>Згенеруйте тимчасовий код для клієнта.</Text>
+          <Text style={{color: colors.textSecondary, marginBottom: 10, marginTop: 5, fontSize: 13}}>{t('profile.generateCodeDesc', {defaultValue: 'Згенеруйте тимчасовий код для клієнта.'})}</Text>
           <TouchableOpacity 
              style={[styles.saveBtn, {backgroundColor: 'transparent', width: '100%', borderColor: colors.primary, borderWidth: 1}]}
              onPress={async () => {
@@ -347,8 +347,8 @@ export const MasterProfileScreen = ({ navigation }: any) => {
           </TouchableOpacity>
           {generatedCode && (
               <View style={{marginTop: 15, padding: 15, backgroundColor: '#e6ffe6', borderRadius: 10, width: '100%', alignItems: 'center'}}>
-                  <Text style={{color: '#006600', fontSize: 18, fontWeight: 'bold'}}>Ваш код: {generatedCode}</Text>
-                  <Text style={{color: '#006600', fontSize: 12, marginTop: 5, textAlign: 'center'}}>Передайте його клієнту. Дійсний 24 години.</Text>
+                  <Text style={{color: '#006600', fontSize: 18, fontWeight: 'bold'}}>{t('profile.yourCode', {defaultValue: 'Ваш код:'})} {generatedCode}</Text>
+                  <Text style={{color: '#006600', fontSize: 12, marginTop: 5, textAlign: 'center'}}>{t('profile.codeValid24h', {defaultValue: 'Передайте його клієнту. Дійсний 24 години.'})}</Text>
               </View>
           )}
         </View>
