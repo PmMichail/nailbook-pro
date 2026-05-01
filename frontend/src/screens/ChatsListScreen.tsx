@@ -29,7 +29,7 @@ export const ChatsListScreen = () => {
             
             // Fallback logically if backend not yet pushed to Render
             let fallbackName = 'Співрозмовник';
-            if (currentUser.role === 'MASTER' && lastMsg.includes('Майстер код')) fallbackName = 'Новий клієнт (за запитом)';
+            if (currentUser.role === 'MASTER' && lastMsg && lastMsg.includes('Майстер код')) fallbackName = 'Новий клієнт (за запитом)';
             
             let displayTime = '';
             if (chat.messages && chat.messages.length > 0) {
