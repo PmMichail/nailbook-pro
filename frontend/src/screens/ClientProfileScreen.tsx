@@ -171,6 +171,12 @@ export const ClientProfileScreen = ({ navigation }: any) => {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
     >
       <View style={[styles.header, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
+        <TouchableOpacity 
+          style={{position: 'absolute', top: 10, right: 10, zIndex: 10, padding: 10}}
+          onPress={() => navigation.navigate('SettingsScreen')}
+        >
+          <Text style={{fontSize: 24}}>⚙️</Text>
+        </TouchableOpacity>
         <TouchableOpacity onPress={handlePickAvatar}>
           {avatar ? (
              <Image source={{uri: avatar}} style={styles.avatarImage} />

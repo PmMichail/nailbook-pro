@@ -12,5 +12,14 @@
   "success": "Успіх",
   "error": "Помилка",
   "saved": "Збережено",
-  "languageChanged": "Мову змінено"
+  "languageChanged": "Мову змінено",
+  "login_title": "Ласкаво просимо в NailsBook!",
+  "phone": "Номер телефону",
+  "password": "Пароль",
+  "login_btn": "Увійти",
+  "register_btn": "Створити акаунт",
+  "register_title": "Реєстрація ✨",
+  "name": "Ваше ім'я",
+  "role_master": "Я майстер",
+  "role_client": "Я клієнт"
 }

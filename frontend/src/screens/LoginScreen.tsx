@@ -130,7 +130,7 @@ export const LoginScreen = ({ navigation }: any) => {
       <View style={styles.inputContainer}>
         <TextInput 
           style={[styles.input, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border }]}
-          placeholder="Номер телефону або Email"
+          placeholder={t('phone')}
           placeholderTextColor={colors.textSecondary}
           value={phone}
           onChangeText={setPhone}

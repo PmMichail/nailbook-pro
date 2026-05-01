@@ -216,6 +216,12 @@ export const MasterProfileScreen = ({ navigation }: any) => {
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
+        <TouchableOpacity 
+          style={{position: 'absolute', top: 0, right: 10, zIndex: 10, padding: 10}}
+          onPress={() => navigation.navigate('SettingsScreen')}
+        >
+          <Text style={{fontSize: 24}}>⚙️</Text>
+        </TouchableOpacity>
         <View style={{flexDirection: 'row', justifyContent: 'center', width: '100%', gap: 20}}>
             <TouchableOpacity onPress={handlePickAvatar} style={{alignItems: 'center'}}>
               {avatar ? (

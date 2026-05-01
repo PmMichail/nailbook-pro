@@ -17,14 +17,14 @@ const languageDetectorPlugin: any = {
     try {
       await AsyncStorage.getItem(STORE_LANGUAGE_KEY).then((language) => {
         if (language) {
-          return callback(language);
+          return callback('en');
         } else {
-          return callback('uk'); // Default to Ukrainian
+          return callback('en'); // Default to Ukrainian
         }
       });
     } catch (error) {
       console.log('Error reading language', error);
-      callback('uk');
+      callback('en');
     }
   },
   cacheUserLanguage: async function (language: string) {
@@ -46,7 +46,7 @@ i18n
   .use(languageDetectorPlugin)
   .init({
     resources,
-    fallbackLng: 'uk',
+    fallbackLng: 'en',
     interpolation: {
       escapeValue: false, // react is already safe from xss
     },

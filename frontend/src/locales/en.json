@@ -12,5 +12,14 @@
   "success": "Success",
   "error": "Error",
   "saved": "Saved",
-  "languageChanged": "Language changed"
+  "languageChanged": "Language changed",
+  "login_title": "Welcome to NailsBook!",
+  "phone": "Phone number",
+  "password": "Password",
+  "login_btn": "Log in",
+  "register_btn": "Create account",
+  "register_title": "Registration ✨",
+  "name": "Your name",
+  "role_master": "I am a master",
+  "role_client": "I am a client"
 }
