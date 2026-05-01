@@ -4,6 +4,7 @@ import api from '../api/client';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 const { width } = Dimensions.get('window');
 
@@ -11,6 +12,7 @@ type TabType = 'ALL' | 'MY' | 'FAV';
 
 export const GalleryScreen = () => {
   const { colors, isDark } = useTheme();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<TabType>('ALL');
   const [images, setImages] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -192,7 +194,7 @@ export const GalleryScreen = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Text style={[styles.header, { color: colors.text }]}>Галерея</Text>
+      <Text style={[styles.header, { color: colors.text }]}>{t('gallery.galleryTitle', {defaultValue: 'Галерея'})}</Text>
 
       <View style={styles.tabContainer}>
         <TouchableOpacity style={[styles.tab, activeTab === 'ALL' && styles.tabActive]} onPress={() => setActiveTab('ALL')}>

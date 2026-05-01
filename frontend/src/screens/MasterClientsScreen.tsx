@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Linking } from 'react-native';
 import api from '../api/client';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const MasterClientsScreen = () => {
     const { colors } = useTheme();
+  const { t } = useTranslation();
     const navigation = useNavigation<any>();
     const [clients, setClients] = useState([]);
     const [loading, setLoading] = useState(true);

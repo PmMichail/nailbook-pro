@@ -34,7 +34,9 @@
     "breakEnd": "Koniec Przerwy:",
     "timePerClient": "Czas na klienta (min):",
     "copyToAllDays": "Skopiuj na wszystkie dni",
-    "saveSchedule": "Zapisz Harmonogram"
+    "saveSchedule": "Zapisz Harmonogram",
+    "salon": "Salon",
+    "dashboardTitle": "Pulpit"
   },
   "profile": {
     "referralProgram": "Program Poleceń 🎁",
@@ -59,6 +61,44 @@
     "inviteClient": "Zaproś klienta",
     "generateCode": "🔑 Wygeneruj kod",
     "subscription": "Subskrypcja",
-    "manageSubscription": "Zarządzaj Subskrypcją"
+    "manageSubscription": "Zarządzaj Subskrypcją",
+    "dataSecurity": "Dane i bezpieczeństwo",
+    "avatar": "Awatar",
+    "logo": "Logo",
+    "phone": "Telefon",
+    "salonName": "Nazwa salonu",
+    "facebook": "Konto Facebook",
+    "newPassword": "Nowe hasło",
+    "saveChanges": "Zapisz zmiany",
+    "currentTariff": "Obecna taryfa:",
+    "settings": "Ustawienia"
+  },
+  "clients": {
+    "inviteMore": "Zaproś więcej",
+    "myClients": "Moi klienci",
+    "selectAll": "Zaznacz wszystko",
+    "broadcast": "Wiadomość masowa",
+    "searchClients": "Szukaj klientów..."
+  },
+  "chats": {
+    "messages": "Wiadomości",
+    "noMessages": "Brak wiadomości",
+    "typeMessage": "Wpisz wiadomość..."
+  },
+  "gallery": {
+    "galleryTitle": "Galeria",
+    "allWorks": "Wszystkie prace",
+    "myPortfolio": "Moje portfolio",
+    "favorites": "Ulubione",
+    "uploadPhoto": "Prześlij zdjęcie"
+  },
+  "client": {
+    "appointments": "Moje wizyty",
+    "calendar": "Kalendarz",
+    "noAppointments": "Brak wizyt",
+    "bookAppointment": "Zarezerwuj wizytę",
+    "selectMaster": "Wybierz mistrza",
+    "selectService": "Wybierz usługę",
+    "selectTime": "Wybierz czas"
   }
 }

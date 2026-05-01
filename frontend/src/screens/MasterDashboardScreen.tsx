@@ -302,7 +302,7 @@ export const MasterDashboardScreen = () => {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
     >
       <Text style={[styles.header, { color: colors.text }]}>
-        {masterProfile?.salonName ? `Салон ${masterProfile.salonName}` : (masterProfile?.name ? `Майстер ${masterProfile.name}` : 'Дашборд')}
+        {masterProfile?.salonName ? `${t('dashboard.salon', {defaultValue: 'Салон'})} ${masterProfile.salonName}` : (masterProfile?.name ? `${t('dashboard.master', {defaultValue: 'Майстер'})} ${masterProfile.name}` : t('dashboard.dashboardTitle', {defaultValue: 'Дашборд'}))}
       </Text>
       
       {/* Top Actions */}

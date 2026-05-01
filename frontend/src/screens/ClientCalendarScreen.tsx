@@ -6,11 +6,13 @@ import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import api from '../api/client';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 
 export const ClientCalendarScreen = ({ navigation }: any) => {
   const { colors, isDark } = useTheme();
+  const { t } = useTranslation();
   const [selectedDay, setSelectedDay] = useState('');
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);

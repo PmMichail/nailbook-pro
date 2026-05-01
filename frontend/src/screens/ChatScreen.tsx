@@ -6,12 +6,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import api from '../api/client';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
 
 export const ChatScreen = ({ route }: any) => {
   const navigation = useNavigation();
   const { colors, isDark } = useTheme();
+  const { t } = useTranslation();
   const { appointmentId, roomId: paramRoomId, receiverName } = route.params || {};
   const roomId = paramRoomId || appointmentId || 'mock-123'; 
   

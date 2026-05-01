@@ -6,12 +6,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../api/client';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
 
 export const ClientAppointmentsScreen = () => {
   const navigation = useNavigation();
   const { colors, isDark } = useTheme();
+  const { t } = useTranslation();
   const [appointments, setAppointments] = useState<any[]>([]);
   const [paymentModalVisible, setPaymentModalVisible] = useState(false);
   const [paymentDetails, setPaymentDetails] = useState<any>(null);

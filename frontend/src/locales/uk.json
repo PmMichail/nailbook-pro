@@ -43,7 +43,9 @@
     "breakEnd": "Кін. Перерви:",
     "timePerClient": "Час на клієнта (хв):",
     "copyToAllDays": "Скопіювати на всі дні",
-    "saveSchedule": "Зберегти Розклад"
+    "saveSchedule": "Зберегти Розклад",
+    "salon": "Салон",
+    "dashboardTitle": "Дашборд"
   },
   "profile": {
     "referralProgram": "Реферальна програма 🎁",
@@ -68,6 +70,44 @@
     "inviteClient": "Запросити клієнта",
     "generateCode": "🔑 Згенерувати код",
     "subscription": "Підписка",
-    "manageSubscription": "Керувати підпискою"
+    "manageSubscription": "Керувати підпискою",
+    "dataSecurity": "Дані та безпека",
+    "avatar": "Аватар",
+    "logo": "Логотип",
+    "phone": "Телефон",
+    "salonName": "Назва салону",
+    "facebook": "Обліковий запис Facebook",
+    "newPassword": "Новий пароль",
+    "saveChanges": "Зберегти зміни",
+    "currentTariff": "Поточний тариф:",
+    "settings": "Налаштування"
+  },
+  "clients": {
+    "inviteMore": "Запросити ще",
+    "myClients": "Мої клієнти",
+    "selectAll": "Вибрати всіх",
+    "broadcast": "Розсилка",
+    "searchClients": "Пошук клієнтів..."
+  },
+  "chats": {
+    "messages": "Повідомлення",
+    "noMessages": "Немає повідомлень",
+    "typeMessage": "Введіть повідомлення..."
+  },
+  "gallery": {
+    "galleryTitle": "Галерея",
+    "allWorks": "Всі роботи",
+    "myPortfolio": "Моє портфоліо",
+    "favorites": "Обране",
+    "uploadPhoto": "Завантажити фото"
+  },
+  "client": {
+    "appointments": "Мої записи",
+    "calendar": "Календар",
+    "noAppointments": "Немає записів",
+    "bookAppointment": "Записатися",
+    "selectMaster": "Оберіть майстра",
+    "selectService": "Оберіть послугу",
+    "selectTime": "Оберіть час"
   }
 }

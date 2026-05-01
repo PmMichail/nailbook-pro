@@ -3,12 +3,14 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, RefreshContr
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from 'react-i18next';
 import api from '../api/client';
 
 export const ChatsListScreen = () => {
   const navigation = useNavigation<any>();
   const isFocused = useIsFocused();
   const { colors, isDark } = useTheme();
+  const { t } = useTranslation();
   
   const [chats, setChats] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -119,7 +121,7 @@ export const ChatsListScreen = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.card }]}>
-      <Text style={[styles.headerTitle, { backgroundColor: colors.card, color: colors.text, borderBottomColor: colors.border, borderBottomWidth: 1 }]}>Повідомлення</Text>
+      <Text style={[styles.headerTitle, { backgroundColor: colors.card, color: colors.text, borderBottomColor: colors.border, borderBottomWidth: 1 }]}>{t('chats.messages', {defaultValue: 'Повідомлення'})}</Text>
       
       <FlatList 
         data={chats}

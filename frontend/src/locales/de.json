@@ -34,7 +34,9 @@
     "breakEnd": "Pause Ende:",
     "timePerClient": "Zeit pro Kunde (Min):",
     "copyToAllDays": "Auf alle Tage kopieren",
-    "saveSchedule": "Zeitplan speichern"
+    "saveSchedule": "Zeitplan speichern",
+    "salon": "Salon",
+    "dashboardTitle": "Kabinett"
   },
   "profile": {
     "referralProgram": "Empfehlungsprogramm 🎁",
@@ -59,6 +61,44 @@
     "inviteClient": "Kunden einladen",
     "generateCode": "🔑 Code generieren",
     "subscription": "Abonnement",
-    "manageSubscription": "Abonnement verwalten"
+    "manageSubscription": "Abonnement verwalten",
+    "dataSecurity": "Daten & Sicherheit",
+    "avatar": "Avatar",
+    "logo": "Logo",
+    "phone": "Telefon",
+    "salonName": "Salonname",
+    "facebook": "Facebook-Konto",
+    "newPassword": "Neues Passwort",
+    "saveChanges": "Änderungen speichern",
+    "currentTariff": "Aktueller Tarif:",
+    "settings": "Einstellungen"
+  },
+  "clients": {
+    "inviteMore": "Mehr einladen",
+    "myClients": "Meine Kunden",
+    "selectAll": "Alle auswählen",
+    "broadcast": "Rundsendung",
+    "searchClients": "Kunden suchen..."
+  },
+  "chats": {
+    "messages": "Nachrichten",
+    "noMessages": "Keine Nachrichten",
+    "typeMessage": "Nachricht eingeben..."
+  },
+  "gallery": {
+    "galleryTitle": "Galerie",
+    "allWorks": "Alle Arbeiten",
+    "myPortfolio": "Mein Portfolio",
+    "favorites": "Favoriten",
+    "uploadPhoto": "Foto hochladen"
+  },
+  "client": {
+    "appointments": "Meine Termine",
+    "calendar": "Kalender",
+    "noAppointments": "Keine Termine",
+    "bookAppointment": "Termin buchen",
+    "selectMaster": "Meister auswählen",
+    "selectService": "Service auswählen",
+    "selectTime": "Zeit auswählen"
   }
 }

@@ -232,7 +232,7 @@ export const MasterProfileScreen = ({ navigation }: any) => {
               ) : (
                  <View style={[styles.avatarPlaceholder, {backgroundColor: colors.border}]} />
               )}
-              <Text style={{textAlign: 'center', color: colors.primary, marginTop: 5}}>Аватар</Text>
+              <Text style={{textAlign: 'center', color: colors.primary, marginTop: 5}}>{t('profile.avatar', {defaultValue: 'Аватар'})}</Text>
             </TouchableOpacity>
             
             <TouchableOpacity onPress={handlePickLogo} style={{alignItems: 'center'}}>
@@ -241,7 +241,7 @@ export const MasterProfileScreen = ({ navigation }: any) => {
               ) : (
                  <View style={[styles.avatarPlaceholder, {backgroundColor: colors.border, borderRadius: 10}]} />
               )}
-              <Text style={{textAlign: 'center', color: colors.primary, marginTop: 5}}>Логотип</Text>
+              <Text style={{textAlign: 'center', color: colors.primary, marginTop: 5}}>{t('profile.logo', {defaultValue: 'Логотип'})}</Text>
             </TouchableOpacity>
         </View>
 

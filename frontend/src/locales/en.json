@@ -43,7 +43,9 @@
     "breakEnd": "Break End:",
     "timePerClient": "Time per client (min):",
     "copyToAllDays": "Copy to all days",
-    "saveSchedule": "Save Schedule"
+    "saveSchedule": "Save Schedule",
+    "salon": "Salon",
+    "dashboardTitle": "Dashboard"
   },
   "profile": {
     "referralProgram": "Referral Program 🎁",
@@ -68,6 +70,44 @@
     "inviteClient": "Invite a client",
     "generateCode": "🔑 Generate code",
     "subscription": "Subscription",
-    "manageSubscription": "Manage Subscription"
+    "manageSubscription": "Manage Subscription",
+    "dataSecurity": "Data & Security",
+    "avatar": "Avatar",
+    "logo": "Logo",
+    "phone": "Phone",
+    "salonName": "Salon name",
+    "facebook": "Facebook account",
+    "newPassword": "New password",
+    "saveChanges": "Save changes",
+    "currentTariff": "Current tariff:",
+    "settings": "Settings"
+  },
+  "clients": {
+    "inviteMore": "Invite more",
+    "myClients": "My clients",
+    "selectAll": "Select all",
+    "broadcast": "Broadcast",
+    "searchClients": "Search clients..."
+  },
+  "chats": {
+    "messages": "Messages",
+    "noMessages": "No messages",
+    "typeMessage": "Type a message..."
+  },
+  "gallery": {
+    "galleryTitle": "Gallery",
+    "allWorks": "All works",
+    "myPortfolio": "My portfolio",
+    "favorites": "Favorites",
+    "uploadPhoto": "Upload photo"
+  },
+  "client": {
+    "appointments": "My Appointments",
+    "calendar": "Calendar",
+    "noAppointments": "No appointments",
+    "bookAppointment": "Book Appointment",
+    "selectMaster": "Select Master",
+    "selectService": "Select Service",
+    "selectTime": "Select Time"
   }
 }
