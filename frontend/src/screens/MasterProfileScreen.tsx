@@ -108,20 +108,10 @@ export const MasterProfileScreen = ({ navigation }: any) => {
       formData.append('referralEnabled', referralEnabled ? 'true' : 'false');
       
       if (avatar && !avatar.startsWith('http')) {
-        const ext = avatar.split('.').pop() || 'jpg';
         formData.append('avatar', {
           uri: avatar,
-          name: `avatar-${Date.now()}.${ext}`,
-          type: `image/${ext}`
-        } as any);
-      }
-      
-      if (salonLogo && !salonLogo.startsWith('http')) {
-        const ext = salonLogo.split('.').pop() || 'jpg';
-        formData.append('salonLogo', {
-          uri: salonLogo,
-          name: `logo-${Date.now()}.${ext}`,
-          type: `image/${ext}`
+          name: `photo.jpg`,
+          type: `image/jpeg`
         } as any);
       }
 
@@ -231,16 +221,7 @@ export const MasterProfileScreen = ({ navigation }: any) => {
               ) : (
                  <View style={[styles.avatarPlaceholder, {backgroundColor: colors.border}]} />
               )}
-              <Text style={{textAlign: 'center', color: colors.primary, marginTop: 5}}>{t('profile.avatar', {defaultValue: 'Аватар'})}</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity onPress={handlePickLogo} style={{alignItems: 'center'}}>
-              {salonLogo ? (
-                 <Image source={{uri: salonLogo}} style={[styles.avatarImage, {borderRadius: 10}]} />
-              ) : (
-                 <View style={[styles.avatarPlaceholder, {backgroundColor: colors.border, borderRadius: 10}]} />
-              )}
-              <Text style={{textAlign: 'center', color: colors.primary, marginTop: 5}}>{t('profile.logo', {defaultValue: 'Логотип'})}</Text>
+              <Text style={{textAlign: 'center', color: colors.primary, marginTop: 5}}>{t('profile.avatar', {defaultValue: 'Змінити фото профілю'})}</Text>
             </TouchableOpacity>
         </View>
 
@@ -250,9 +231,9 @@ export const MasterProfileScreen = ({ navigation }: any) => {
             <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={salonName} onChangeText={setSalonName} placeholder={t('profile.salonNamePlaceholder', {defaultValue: 'Назва салону (опц.)'})} placeholderTextColor={colors.textSecondary} />
             
             <Text style={{color: colors.textSecondary, marginTop: 10, marginBottom: 5, fontSize: 12}}>{t('profile.socialNetworksDesc', {defaultValue: 'Соціальні мережі (посилання або нікнейми)'})}</Text>
-            <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={instagram} onChangeText={setInstagram} placeholder={t('profile.instagram', {defaultValue: 'Instagram (без @)'})} placeholderTextColor={colors.textSecondary} />
-            <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={tiktok} onChangeText={setTiktok} placeholder={t('profile.tiktok', {defaultValue: 'TikTok (без @)'})} placeholderTextColor={colors.textSecondary} />
-            <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={facebook} onChangeText={setFacebook} placeholder={t('profile.facebook', {defaultValue: 'Обліковий запис Facebook'})} placeholderTextColor={colors.textSecondary} />
+            <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={instagram} onChangeText={setInstagram} placeholder="Instagram (наприклад: _nails_top_)" placeholderTextColor={colors.textSecondary} />
+            <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={tiktok} onChangeText={setTiktok} placeholder="TikTok (наприклад: @nails_top)" placeholderTextColor={colors.textSecondary} />
+            <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={facebook} onChangeText={setFacebook} placeholder="Facebook (повне посилання або нік)" placeholderTextColor={colors.textSecondary} />
             
             <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={password} onChangeText={setPassword} placeholder={t('profile.newPassword', {defaultValue: 'Новий пароль (залиште порожнім, щоб не змінювати)'})} placeholderTextColor={colors.textSecondary} secureTextEntry />
             <TouchableOpacity style={[styles.saveBtn, {backgroundColor: 'transparent', borderColor: colors.primary, borderWidth: 1, marginTop: 10, shadowColor: colors.text, elevation: 5, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.3}]} onPress={handleSaveProfile}>

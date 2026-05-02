@@ -76,11 +76,18 @@ export const SearchMastersScreen = () => {
                     </View>
                     <View style={styles.info}>
                         <Text style={[styles.name, { color: colors.text }]}>{item.salonName || item.name}</Text>
-                        <Text style={styles.city}>
-                           {item.city ? `${item.city}` : ''}
-                           {item.address ? ` • ${item.address}` : ''}
-                           {item.distance !== undefined && item.distance !== null ? ` • ~${item.distance.toFixed(1)} км` : ''}
-                        </Text>
+                        <View style={{flexDirection: 'row', alignItems: 'center', marginTop: 6}}>
+                            <Text style={{fontSize: 14, marginRight: 4}}>📍</Text>
+                            <Text style={[styles.city, {flex: 1, color: colors.textSecondary}]}>
+                               {item.city ? `${item.city}` : 'Місто не вказано'}
+                               {item.address ? ` • ${item.address}` : ''}
+                            </Text>
+                        </View>
+                        {item.distance !== undefined && item.distance !== null && (
+                            <Text style={{fontSize: 12, color: colors.primary, marginTop: 4, fontWeight: '600'}}>
+                                Відстань: ~{item.distance.toFixed(1)} км від вас
+                            </Text>
+                        )}
                     </View>
                 </View>
             </TouchableOpacity>

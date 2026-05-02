@@ -103,6 +103,16 @@ export const PublicMasterGalleryScreen = () => {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Text style={[styles.header, { color: colors.text }]}>Роботи майстра: {masterName}</Text>
       
+      {masterInfo && (masterInfo.city || masterInfo.address) && (
+        <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: 15, paddingHorizontal: 5}}>
+          <Text style={{fontSize: 16, marginRight: 5}}>📍</Text>
+          <Text style={{color: colors.textSecondary, fontSize: 14}}>
+             {masterInfo.city ? masterInfo.city : ''}
+             {masterInfo.address ? ` • ${masterInfo.address}` : ''}
+          </Text>
+        </View>
+      )}
+      
       {masterInfo && (masterInfo.instagram || masterInfo.tiktok || masterInfo.facebook) ? (
         <View style={{flexDirection: 'row', gap: 15, marginBottom: 15, paddingHorizontal: 5}}>
           {!!masterInfo.instagram && (

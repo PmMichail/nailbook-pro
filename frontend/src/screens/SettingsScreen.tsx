@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Switch } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Switch, Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
+import Constants from 'expo-constants';
+
 export const SettingsScreen = () => {
   const navigation = useNavigation<any>();
   const [isDarkMode, setIsDarkMode] = useState(false);
   const { t, i18n } = useTranslation();
   const { colors, isDark, toggleTheme } = useTheme();
-  const [calendarConnected, setCalendarConnected] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
 
   React.useEffect(() => {
@@ -51,7 +52,7 @@ export const SettingsScreen = () => {
         
         {userRole !== 'CLIENT' && (
           <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('SubscriptionScreen')}>
-            <Text style={[styles.menuText, { color: colors.text }]}>{t('manageSubscription', {defaultValue: 'Manage Subscription'})}</Text>
+            <Text style={[styles.menuText, { color: colors.text }]}>{t('manageSubscription', {defaultValue: 'Керувати підпискою'})}</Text>
             <Text style={styles.menuArrow}>›</Text>
           </TouchableOpacity>
         )}
@@ -66,10 +67,10 @@ export const SettingsScreen = () => {
       </View>
 
       <View style={styles.footer}>
-        <Text style={styles.footerText}>NailsBook Pro v1.0.0</Text>
-        <TouchableOpacity><Text style={styles.footerLink}>{t('privacyPolicy', {defaultValue: 'Privacy Policy'})}</Text></TouchableOpacity>
-        <TouchableOpacity><Text style={styles.footerLink}>{t('termsOfUse', {defaultValue: 'Terms of Use'})}</Text></TouchableOpacity>
-        <TouchableOpacity><Text style={styles.footerLink}>{t('support', {defaultValue: 'Support: t.me/nailbook_support'})}</Text></TouchableOpacity>
+        <Text style={styles.footerText}>NailsBook Pro v{Constants.expoConfig?.version || '1.0.1'}</Text>
+        <TouchableOpacity onPress={() => Linking.openURL('https://telegra.ph/Poltika-konfdencijnost-NailsBook-Pro-05-02')}><Text style={styles.footerLink}>{t('privacyPolicy', {defaultValue: 'Політика конфіденційності'})}</Text></TouchableOpacity>
+        <TouchableOpacity onPress={() => Linking.openURL('https://telegra.ph/Umovi-vikoristannya-NailsBook-Pro-05-02')}><Text style={styles.footerLink}>{t('termsOfUse', {defaultValue: 'Умови використання'})}</Text></TouchableOpacity>
+        <TouchableOpacity onPress={() => Linking.openURL('https://t.me/nailbook_support')}><Text style={styles.footerLink}>{t('support', {defaultValue: 'Підтримка (Telegram)'})}</Text></TouchableOpacity>
       </View>
     </ScrollView>
   );
