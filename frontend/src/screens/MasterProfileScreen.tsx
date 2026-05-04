@@ -132,7 +132,7 @@ export const MasterProfileScreen = ({ navigation }: any) => {
       
       const newUStr = await AsyncStorage.getItem('user') || '{}';
       const parsedU = JSON.parse(newUStr);
-      const combinedProfile = { ...parsedU, ...res.data, instagram, tiktok, facebook };
+      const combinedProfile = { ...parsedU, ...res.data, instagram, tiktok, facebook, city, address };
       await AsyncStorage.setItem('user', JSON.stringify(combinedProfile));
       Alert.alert('Успіх', 'Профіль оновлено');
       setPassword('');
@@ -302,7 +302,7 @@ export const MasterProfileScreen = ({ navigation }: any) => {
         </View>
         <View style={[styles.settingRow, { backgroundColor: colors.card }]}>
           <Text style={[styles.settingText, { color: colors.text }]}>{t('profile.referralProgram', {defaultValue: 'Реферальна програма'})}</Text>
-          <Switch value={referralEnabled} onValueChange={(val) => { setReferralEnabled(val); handleSaveProfile(); }} trackColor={{true: colors.primary}} />
+          <Switch value={referralEnabled} onValueChange={setReferralEnabled} trackColor={{true: colors.primary}} />
         </View>
         <View style={[styles.settingRow, { backgroundColor: colors.card, flexDirection: 'column', alignItems: 'flex-start' }]}>
           <Text style={[styles.settingText, { color: colors.text, fontWeight: 'bold' }]}>{t('profile.telegramNotifications', {defaultValue: 'Сповіщення Telegram'})}</Text>
