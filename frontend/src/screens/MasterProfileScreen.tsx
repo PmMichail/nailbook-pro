@@ -18,6 +18,7 @@ export const MasterProfileScreen = ({ navigation }: any) => {
   const [userId, setUserId] = useState('');
   const [salonName, setSalonName] = useState('');
   const [salonLogo, setSalonLogo] = useState<string | null>(null);
+  const [city, setCity] = useState('');
   const [address, setAddress] = useState('');
   const [instagram, setInstagram] = useState('');
   const [tiktok, setTiktok] = useState('');
@@ -44,6 +45,7 @@ export const MasterProfileScreen = ({ navigation }: any) => {
         setName(u.name || '');
         setPhone(u.phone || '');
         setSalonName(u.salonName || '');
+        setCity(u.city || '');
         setAddress(u.address || '');
         setInstagram(u.instagram || '');
         setTiktok(u.tiktok || '');
@@ -125,7 +127,7 @@ export const MasterProfileScreen = ({ navigation }: any) => {
       // Social networks are saved via salon-info route separately or we can just send them together 
       // Wait, /api/master/salon-info is where we put instagram, tiktok, facebook
       await api.put('/api/master/salon-info', {
-         instagram, tiktok, facebook
+         instagram, tiktok, facebook, city, address
       });
       
       const newUStr = await AsyncStorage.getItem('user') || '{}';
@@ -229,6 +231,10 @@ export const MasterProfileScreen = ({ navigation }: any) => {
             <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={name} onChangeText={setName} placeholder={t('profile.namePlaceholder', {defaultValue: "Ваше ім'я"})} placeholderTextColor={colors.textSecondary} />
             <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={phone} onChangeText={setPhone} placeholder={t('profile.phonePlaceholder', {defaultValue: 'Телефон'})} placeholderTextColor={colors.textSecondary} keyboardType="phone-pad" />
             <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={salonName} onChangeText={setSalonName} placeholder={t('profile.salonNamePlaceholder', {defaultValue: 'Назва салону (опц.)'})} placeholderTextColor={colors.textSecondary} />
+            
+            <Text style={{color: colors.textSecondary, marginTop: 10, marginBottom: 5, fontSize: 12}}>Адреса салону / кабінету</Text>
+            <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={city} onChangeText={setCity} placeholder="Місто (наприклад: Київ)" placeholderTextColor={colors.textSecondary} />
+            <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={address} onChangeText={setAddress} placeholder="Вулиця (наприклад: Хрещатик, 1)" placeholderTextColor={colors.textSecondary} />
             
             <Text style={{color: colors.textSecondary, marginTop: 10, marginBottom: 5, fontSize: 12}}>{t('profile.socialNetworksDesc', {defaultValue: 'Соціальні мережі (посилання або нікнейми)'})}</Text>
             <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={instagram} onChangeText={setInstagram} placeholder="Instagram (наприклад: _nails_top_)" placeholderTextColor={colors.textSecondary} />
