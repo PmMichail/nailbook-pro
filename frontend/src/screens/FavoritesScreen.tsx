@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Image } from 'react-native';
 
 export const FavoritesScreen = () => {
   const dummyData = [
@@ -11,13 +11,13 @@ export const FavoritesScreen = () => {
     <View style={styles.imageContainer}>
       <Image source={{ uri: item.url }} style={styles.image} />
       <View style={styles.overlay}>
-        <TouchableOpacity style={styles.actionBtn}>
+        <View style={styles.actionBtn}>
           <Text style={{ fontSize: 16 }}>❤️</Text>
           <Text style={styles.actionText}>{item.likes}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.actionBtn}>
+        </View>
+        <View style={styles.actionBtn}>
           <Text style={{ fontSize: 16 }}>⭐</Text>
-        </TouchableOpacity>
+        </View>
       </View>
     </View>
   );

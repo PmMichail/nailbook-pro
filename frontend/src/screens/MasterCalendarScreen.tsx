@@ -97,7 +97,7 @@ export const MasterCalendarScreen = () => {
       <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1 }]}>
         <View style={styles.cardHeaderRow}>
             <Text style={[styles.cardTitle, { color: colors.text }]}>Записи на {selectedDay}</Text>
-            <TouchableOpacity style={[styles.editBtn, { backgroundColor: colors.background }]}>
+            <TouchableOpacity style={[styles.editBtn, { backgroundColor: colors.background }]} onPress={() => Alert.alert('Редагування дня', 'Щоб змінити робочий графік або заблокувати час, відкрийте налаштування розкладу в профілі майстра.')}>
                 <Text style={[styles.editBtnText, { color: colors.textSecondary }]}>✎ Ред. день</Text>
             </TouchableOpacity>
         </View>

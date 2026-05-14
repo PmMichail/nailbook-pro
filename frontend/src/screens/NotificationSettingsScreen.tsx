@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Switch, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Switch, TextInput, TouchableOpacity, ScrollView, Linking } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 
 export const NotificationSettingsScreen = () => {
   const [allPush, setAllPush] = useState(true);
@@ -11,6 +12,12 @@ export const NotificationSettingsScreen = () => {
   const generateTgLink = () => {
     // В реальності тут викликається GET /api/telegram/link
     setBotLinkCode('https://t.me/nailbook_bot?start=12345uuid');
+  };
+
+  const openTgLink = async () => {
+    if (!botLinkCode) return;
+    await Clipboard.setStringAsync(botLinkCode);
+    Linking.openURL(botLinkCode);
   };
 
   return (
@@ -49,7 +56,7 @@ export const NotificationSettingsScreen = () => {
             {botLinkCode ? (
               <View>
                 <Text style={styles.linkCode}>{botLinkCode}</Text>
-                <TouchableOpacity style={styles.btnSecondary}>
+                <TouchableOpacity style={styles.btnSecondary} onPress={openTgLink}>
                   <Text style={styles.btnSecondaryText}>Скопіювати або Відкрити</Text>
                 </TouchableOpacity>
               </View>

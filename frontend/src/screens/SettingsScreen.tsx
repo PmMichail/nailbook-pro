@@ -33,6 +33,17 @@ export const SettingsScreen = () => {
       ]);
   };
 
+  const handleDeleteAccount = () => {
+      Alert.alert(
+        t('deleteAccount'),
+        'Для безпечного видалення акаунта напишіть у підтримку. Ми підтвердимо особу та видалимо дані згідно з політикою конфіденційності.',
+        [
+          { text: t('cancel'), style: 'cancel' },
+          { text: t('support', {defaultValue: 'Підтримка'}), onPress: () => Linking.openURL('https://t.me/nailbook_support') }
+        ]
+      );
+  };
+
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
       <Text style={[styles.header, { color: colors.text }]}>{t('settings')}</Text>
@@ -61,7 +72,7 @@ export const SettingsScreen = () => {
       <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('profile.dataSecurity', {defaultValue: 'Дані та Безпека'})}</Text>
         
-        <TouchableOpacity style={[styles.menuItem, { borderBottomWidth: 0 }]}>
+        <TouchableOpacity style={[styles.menuItem, { borderBottomWidth: 0 }]} onPress={handleDeleteAccount}>
           <Text style={[styles.menuText, { color: 'red' }]}>{t('deleteAccount')}</Text>
         </TouchableOpacity>
       </View>
