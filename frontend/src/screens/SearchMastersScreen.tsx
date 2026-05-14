@@ -79,8 +79,7 @@ export const SearchMastersScreen = () => {
                         <View style={{flexDirection: 'row', alignItems: 'center', marginTop: 6}}>
                             <Text style={{fontSize: 14, marginRight: 4}}>📍</Text>
                             <Text style={[styles.city, {flex: 1, color: colors.textSecondary}]}>
-                               {item.city ? `${item.city}` : 'Місто не вказано'}
-                               {item.address ? ` • ${item.address}` : ''}
+                               {[item.city, item.address].filter(Boolean).join(', ') || 'Адресу салону не вказано'}
                             </Text>
                         </View>
                         {item.distance !== undefined && item.distance !== null && (

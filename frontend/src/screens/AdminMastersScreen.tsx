@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, Modal, Dimensions } from 'react-native';
+import React, { useMemo, useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, Modal, Dimensions, TextInput } from 'react-native';
 import { BarChart } from 'react-native-chart-kit';
 import api from '../api/client';
 
@@ -8,6 +8,7 @@ const screenWidth = Dimensions.get('window').width;
 export const AdminMastersScreen = () => {
     const [masters, setMasters] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [query, setQuery] = useState('');
     
     // Analytics Modal State
     const [analyticsVisible, setAnalyticsVisible] = useState(false);
@@ -18,6 +19,21 @@ export const AdminMastersScreen = () => {
     useEffect(() => {
         loadMasters();
     }, []);
+
+    const filteredMasters = useMemo(() => {
+        const q = query.trim().toLowerCase();
+        if (!q) return masters;
+        return masters.filter(m => [
+            m.name,
+            m.salonName,
+            m.phone,
+            m.email,
+            m.city,
+            m.address,
+            m.subscription?.plan,
+            m.subscription?.status
+        ].filter(Boolean).join(' ').toLowerCase().includes(q));
+    }, [masters, query]);
 
     const loadMasters = async () => {
         try {
@@ -40,6 +56,25 @@ export const AdminMastersScreen = () => {
                     Alert.alert('SUCCESS', `New access key:\n\n${res.data.newPassword}\n\nTransmit to owner.`);
                 } catch(e) {
                     Alert.alert('ERROR', 'Failed to generate key');
+                }
+            }}
+        ]);
+    };
+
+    const updateSubscription = async (masterId: string, plan: 'PRO' | 'FREE') => {
+        const isPro = plan === 'PRO';
+        Alert.alert('Підтвердження', isPro ? 'Увімкнути PRO для майстра на 30 днів?' : 'Перевести майстра на FREE?', [
+            { text: 'Скасувати', style: 'cancel' },
+            { text: 'Так', onPress: async () => {
+                try {
+                    await api.put(`/api/admin/masters/${masterId}/subscription`, {
+                        plan,
+                        status: 'ACTIVE',
+                        durationDays: isPro ? 30 : null
+                    });
+                    loadMasters();
+                } catch(e) {
+                    Alert.alert('ERROR', 'Failed to update PRO status');
                 }
             }}
         ]);
@@ -101,17 +136,42 @@ export const AdminMastersScreen = () => {
 
     return (
         <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-            <Text style={styles.header}>АКТИВНІ ВУЗЛИ</Text>
-            {masters.map(m => {
+            <Text style={styles.header}>ЦЕНТР КЕРУВАННЯ МАЙСТРАМИ</Text>
+            <View style={styles.summaryRow}>
+                <View style={styles.summaryCard}><Text style={styles.summaryVal}>{masters.length}</Text><Text style={styles.summaryLabel}>МАЙСТРІВ</Text></View>
+                <View style={styles.summaryCard}><Text style={[styles.summaryVal, {color: '#00FFAA'}]}>{masters.filter(m => m.subscription?.plan === 'PRO').length}</Text><Text style={styles.summaryLabel}>PRO</Text></View>
+                <View style={styles.summaryCard}><Text style={[styles.summaryVal, {color: '#F5A623'}]}>{masters.filter(m => m.referralEnabled === false).length}</Text><Text style={styles.summaryLabel}>БЕЗ РЕФ.</Text></View>
+            </View>
+            <TextInput
+                style={styles.searchInput}
+                value={query}
+                onChangeText={setQuery}
+                placeholder="Пошук: ім'я, телефон, місто, PRO..."
+                placeholderTextColor="#64748B"
+            />
+            <TouchableOpacity style={styles.refreshBtn} onPress={loadMasters}>
+                <Text style={styles.refreshText}>ОНОВИТИ ДАНІ</Text>
+            </TouchableOpacity>
+            {filteredMasters.map(m => {
+                const isPro = m.subscription?.plan === 'PRO' && ['ACTIVE', 'TRIAL'].includes(m.subscription?.status);
                 return (
                     <View key={m.id} style={styles.card}>
                         <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
                             <View>
-                                <Text style={styles.name}>{m.name}</Text>
+                                <Text style={styles.name}>{m.salonName || m.name}</Text>
                                 <Text style={styles.subtext}>{m.phone || m.email}</Text>
-                                <Text style={styles.subtext}>Аплінк: {new Date(m.createdAt).toLocaleDateString()}</Text>
+                                <Text style={styles.subtext}>Власник: {m.name}</Text>
+                                <Text style={styles.subtext}>Адреса: {[m.city, m.address].filter(Boolean).join(', ') || 'не вказано'}</Text>
+                                <Text style={styles.subtext}>Клієнти: {m._count?.myClients || 0} • Записи: {m._count?.appointments || 0}</Text>
+                                <Text style={styles.subtext}>Реєстрація: {new Date(m.createdAt).toLocaleDateString()}</Text>
                             </View>
-                            <View style={{flexDirection: 'row', gap: 5}}>
+                            <View style={{gap: 5, alignItems: 'flex-end'}}>
+                                <View style={[styles.badge, { backgroundColor: isPro ? 'rgba(0, 255, 170, 0.2)' : 'rgba(148, 163, 184, 0.15)' }]}>
+                                    <Text style={[styles.badgeText, {color: isPro ? '#00FFAA' : '#94A3B8'}]}>{isPro ? 'PRO' : 'FREE'}</Text>
+                                </View>
+                                <View style={[styles.badge, { backgroundColor: m.referralEnabled === false ? 'rgba(245, 166, 35, 0.15)' : 'rgba(56, 189, 248, 0.15)' }]}>
+                                    <Text style={[styles.badgeText, {color: m.referralEnabled === false ? '#F5A623' : '#38BDF8'}]}>{m.referralEnabled === false ? 'REF OFF' : 'REF ON'}</Text>
+                                </View>
                                 {m.isBanned ? (
                                     <View style={[styles.badge, { backgroundColor: 'rgba(239, 68, 68, 0.2)' }]}>
                                         <Text style={[styles.badgeText, {color: '#EF4444'}]}>ЗАБЛОКОВАНО</Text>
@@ -125,6 +185,9 @@ export const AdminMastersScreen = () => {
                         </View>
                         
                         <View style={styles.actions}>
+                            <TouchableOpacity style={[styles.btn, {borderColor: isPro ? '#F5A623' : '#00FFAA'}]} onPress={() => updateSubscription(m.id, isPro ? 'FREE' : 'PRO')}>
+                                <Text style={[styles.btnText, {color: isPro ? '#F5A623' : '#00FFAA'}]}>{isPro ? 'ЗНЯТИ PRO' : 'УВІМКНУТИ PRO'}</Text>
+                            </TouchableOpacity>
                             <TouchableOpacity style={[styles.btn, {borderColor: '#38BDF8'}]} onPress={() => openAnalytics(m)}>
                                 <Text style={[styles.btnText, {color: '#38BDF8'}]}>ТЕЛЕМЕТРІЯ</Text>
                             </TouchableOpacity>
@@ -141,6 +204,7 @@ export const AdminMastersScreen = () => {
                     </View>
                 );
             })}
+            {filteredMasters.length === 0 && <Text style={styles.emptyText}>Нічого не знайдено</Text>}
             <View style={{height: 50}} />
 
             {/* Analytics Modal */}
@@ -194,6 +258,14 @@ const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#020617', padding: 20 },
     center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#020617' },
     header: { fontSize: 20, fontWeight: '900', color: '#F8FAFC', marginBottom: 20, marginTop: 40, letterSpacing: 2 },
+    summaryRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 },
+    summaryCard: { flex: 1, backgroundColor: 'rgba(15, 23, 42, 0.8)', borderWidth: 1, borderColor: '#1E293B', borderRadius: 12, padding: 12, marginHorizontal: 4, alignItems: 'center' },
+    summaryVal: { color: '#38BDF8', fontSize: 24, fontWeight: '900' },
+    summaryLabel: { color: '#94A3B8', fontSize: 10, fontWeight: 'bold', marginTop: 4 },
+    searchInput: { backgroundColor: '#0B1021', color: '#F8FAFC', borderWidth: 1, borderColor: '#1E293B', borderRadius: 12, padding: 12, marginBottom: 10 },
+    refreshBtn: { alignSelf: 'flex-end', borderWidth: 1, borderColor: '#38BDF8', paddingVertical: 7, paddingHorizontal: 12, borderRadius: 8, marginBottom: 14 },
+    refreshText: { color: '#38BDF8', fontSize: 11, fontWeight: 'bold' },
+    emptyText: { color: '#64748B', textAlign: 'center', marginTop: 20, fontStyle: 'italic' },
     
     card: { backgroundColor: 'rgba(15, 23, 42, 0.6)', padding: 15, borderRadius: 12, marginBottom: 15, borderWidth: 1, borderColor: 'rgba(51, 65, 85, 0.5)' },
     name: { fontSize: 16, fontWeight: 'bold', color: '#E2E8F0', letterSpacing: 1 },

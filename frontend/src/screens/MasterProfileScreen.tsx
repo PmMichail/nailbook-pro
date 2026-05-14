@@ -127,12 +127,12 @@ export const MasterProfileScreen = ({ navigation }: any) => {
       // Social networks are saved via salon-info route separately or we can just send them together 
       // Wait, /api/master/salon-info is where we put instagram, tiktok, facebook
       await api.put('/api/master/salon-info', {
-         instagram, tiktok, facebook, city, address
+         salonName, instagram, tiktok, facebook, city, address
       });
       
       const newUStr = await AsyncStorage.getItem('user') || '{}';
       const parsedU = JSON.parse(newUStr);
-      const combinedProfile = { ...parsedU, ...res.data, instagram, tiktok, facebook, city, address };
+      const combinedProfile = { ...parsedU, ...res.data, salonName, instagram, tiktok, facebook, city, address };
       await AsyncStorage.setItem('user', JSON.stringify(combinedProfile));
       Alert.alert('Успіх', 'Профіль оновлено');
       setPassword('');

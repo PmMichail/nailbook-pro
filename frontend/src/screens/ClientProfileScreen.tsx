@@ -22,6 +22,7 @@ export const ClientProfileScreen = ({ navigation }: any) => {
   const [referralCode, setReferralCode] = useState('');
   const [referralUses, setReferralUses] = useState(0);
   const [referralPendingBonuses, setReferralPendingBonuses] = useState(0);
+  const [referralAvailable, setReferralAvailable] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
@@ -50,7 +51,10 @@ export const ClientProfileScreen = ({ navigation }: any) => {
             const masterRes = await api.get(`/api/client/master/${u.masterId}`);
             if (masterRes.data && masterRes.data.name) {
                 setMyMaster(masterRes.data);
+                setReferralAvailable(masterRes.data.referralEnabled !== false);
             }
+        } else {
+            setReferralAvailable(true);
         }
       }
     } catch(e) {}
@@ -58,6 +62,21 @@ export const ClientProfileScreen = ({ navigation }: any) => {
 
   const loadReferralStats = async () => {
     try {
+      const uStr = await AsyncStorage.getItem('user');
+      if (uStr) {
+        const u = JSON.parse(uStr);
+        if (u.masterId) {
+          const masterRes = await api.get(`/api/client/master/${u.masterId}`);
+          if (masterRes.data?.referralEnabled === false) {
+            setReferralAvailable(false);
+            setReferralCode('');
+            setReferralUses(0);
+            setReferralPendingBonuses(0);
+            return;
+          }
+        }
+      }
+      setReferralAvailable(true);
       const resCode = await api.get('/api/client/referral-code');
       if (resCode.data?.code) {
         setReferralCode(resCode.data.code);
@@ -212,7 +231,7 @@ export const ClientProfileScreen = ({ navigation }: any) => {
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('profile.referralProgram', {defaultValue: 'Реферальна програма 🎁'})}</Text>
         <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          {myMaster?.referralEnabled === false ? (
+          {!referralAvailable ? (
              <View style={{padding: 20, alignItems: 'center'}}>
                  <Text style={{fontSize: 30, marginBottom: 10}}>😔</Text>
                  <Text style={{color: colors.textSecondary, textAlign: 'center'}}>Ваш майстер тимчасово вимкнув реферальну програму.</Text>
@@ -262,6 +281,7 @@ export const ClientProfileScreen = ({ navigation }: any) => {
                      <Text style={{ color: colors.textSecondary, fontSize: 12, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>{t('profile.currentMaster', {defaultValue: 'Поточний майстер'})}</Text>
                      <Text style={{ color: colors.text, fontFamily: 'serif', fontStyle: 'italic', fontSize: 28, fontWeight: 'bold' }}>{myMaster.name}</Text>
                      {myMaster.salonName && <Text style={{ color: colors.primary, fontSize: 18, marginTop: 4, fontWeight: 'bold' }}>💅 {myMaster.salonName}</Text>}
+                     {(myMaster.city || myMaster.address) && <Text style={{ color: colors.textSecondary, fontSize: 14, marginTop: 4 }}>📍 {[myMaster.city, myMaster.address].filter(Boolean).join(', ')}</Text>}
                      <Text style={{ color: colors.textSecondary, fontSize: 15, marginTop: 4 }}>{myMaster.phone}</Text>
                  </View>
              </View>

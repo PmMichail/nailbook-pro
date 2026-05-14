@@ -10,6 +10,7 @@ import pl from './locales/pl.json';
 import de from './locales/de.json';
 
 const STORE_LANGUAGE_KEY = 'settings.lang';
+const DEFAULT_LANGUAGE = 'uk';
 
 const languageDetectorPlugin: any = {
   type: 'languageDetector',
@@ -17,16 +18,11 @@ const languageDetectorPlugin: any = {
   init: () => {},
   detect: async function (callback: (lang: string) => void) {
     try {
-      await AsyncStorage.getItem(STORE_LANGUAGE_KEY).then((language) => {
-        if (language) {
-          return callback(language);
-        } else {
-          return callback(language); // Default to Ukrainian
-        }
-      });
+      const language = await AsyncStorage.getItem(STORE_LANGUAGE_KEY);
+      callback(language || DEFAULT_LANGUAGE);
     } catch (error) {
       console.log('Error reading language', error);
-      callback('en');
+      callback(DEFAULT_LANGUAGE);
     }
   },
   cacheUserLanguage: async function (language: string) {
@@ -48,7 +44,9 @@ i18n
   .use(languageDetectorPlugin)
   .init({
     resources,
-    fallbackLng: 'en',
+    lng: DEFAULT_LANGUAGE,
+    fallbackLng: DEFAULT_LANGUAGE,
+    supportedLngs: ['uk', 'en', 'pl', 'de'],
     interpolation: {
       escapeValue: false, // react is already safe from xss
     },

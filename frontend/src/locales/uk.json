@@ -22,6 +22,19 @@
   "name": "Ваше ім'я",
   "role_master": "Я майстер",
   "role_client": "Я клієнт",
+  "auth": {
+    "fillAllFields": "Заповніть всі поля",
+    "genericError": "Щось пішло не так",
+    "connectionError": "Не вдалося з'єднатися з сервером",
+    "biometricPrompt": "Увійти за допомогою біометрії",
+    "usePassword": "Використати пароль",
+    "accountCreated": "Акаунт успішно створено!",
+    "inviteCodePlaceholder": "Код майстра (необов'язково)",
+    "referralCodePlaceholder": "Промокод на знижку 10% (необов'язково)",
+    "pleaseWait": "Зачекайте...",
+    "acceptTermsPrefix": "Натискаючи кнопку, ви погоджуєтесь з нашою",
+    "publicOffer": "Публічною Офертою"
+  },
   "tabs": {
     "dashboard": "Кабінет",
     "clients": "Клієнти",

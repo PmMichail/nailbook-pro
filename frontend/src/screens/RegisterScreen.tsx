@@ -11,17 +11,20 @@ export const RegisterScreen = ({ navigation }: any) => {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<'MASTER'|'CLIENT'>('CLIENT');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [inviteCode, setInviteCode] = useState('');
   const [referralCode, setReferralCode] = useState('');
   const { colors, isDark } = useTheme();
 
   const handleRegister = async () => {
+    if (isSubmitting) return;
     try {
       if (!name || !phone || !password) {
-        Alert.alert('Помилка', 'Заповніть всі поля');
+        Alert.alert(t('error'), t('auth.fillAllFields'));
         return;
       }
+      setIsSubmitting(true);
       
       const API_URL = api.defaults.baseURL;
       const payload: any = { name, phone, password, role };
@@ -39,7 +42,7 @@ export const RegisterScreen = ({ navigation }: any) => {
       const data = await response.json();
       
       if (!response.ok) {
-        Alert.alert('Помилка', data.error || 'Щось пішло не так');
+        Alert.alert(t('error'), data.error || t('auth.genericError'));
         return;
       }
 
@@ -69,7 +72,7 @@ export const RegisterScreen = ({ navigation }: any) => {
          }
       });
 
-      Alert.alert('Успіх', 'Акаунт успішно створено!', [
+      Alert.alert(t('success'), t('auth.accountCreated'), [
         { text: 'OK', onPress: () => {
              if (data.user.role === 'MASTER') {
                navigation.replace('MasterTabs');
@@ -80,7 +83,9 @@ export const RegisterScreen = ({ navigation }: any) => {
       ]);
     } catch (error) {
       console.error(error);
-      Alert.alert('Помилка', 'Не вдалося з\'єднатися з сервером');
+      Alert.alert(t('error'), t('auth.connectionError'));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -149,7 +154,7 @@ export const RegisterScreen = ({ navigation }: any) => {
           <>
             <TextInput 
               style={[styles.input, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border }]}
-              placeholder="Код майстра (необов'язково)"
+              placeholder={t('auth.inviteCodePlaceholder')}
               placeholderTextColor={colors.textSecondary}
               value={inviteCode}
               onChangeText={setInviteCode}
@@ -157,7 +162,7 @@ export const RegisterScreen = ({ navigation }: any) => {
             />
             <TextInput 
               style={[styles.input, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border }]}
-              placeholder="ПРОМОКОД на знижку 10% (опц.)"
+              placeholder={t('auth.referralCodePlaceholder')}
               placeholderTextColor={colors.textSecondary}
               value={referralCode}
               onChangeText={setReferralCode}
@@ -168,13 +173,13 @@ export const RegisterScreen = ({ navigation }: any) => {
         )}
       </View>
 
-      <TouchableOpacity style={styles.primaryButton} onPress={handleRegister}>
-        <Text style={styles.primaryButtonText}>{t('register_btn')}</Text>
+      <TouchableOpacity style={[styles.primaryButton, isSubmitting && styles.disabledButton]} onPress={handleRegister} disabled={isSubmitting}>
+        <Text style={styles.primaryButtonText}>{isSubmitting ? t('auth.pleaseWait') : t('register_btn')}</Text>
       </TouchableOpacity>
       
       <Text style={{textAlign: 'center', fontSize: 11, color: colors.textSecondary, marginBottom: 15}}>
-          Натискаючи кнопку, ви погоджуєтесь з нашою{'\n'}
-          <Text style={{color: colors.primary, textDecorationLine: 'underline'}} onPress={() => navigation.navigate('TermsScreen')}>Публічною Офертою</Text>
+          {t('auth.acceptTermsPrefix')}{'\n'}
+          <Text style={{color: colors.primary, textDecorationLine: 'underline'}} onPress={() => navigation.navigate('TermsScreen')}>{t('auth.publicOffer')}</Text>
       </Text>
 
       <TouchableOpacity style={styles.secondaryButton} onPress={() => navigation.navigate('Login')}>
@@ -261,6 +266,9 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  disabledButton: {
+    opacity: 0.6,
   },
   secondaryButton: {
     width: '100%',

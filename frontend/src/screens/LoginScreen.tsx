@@ -32,8 +32,8 @@ export const LoginScreen = ({ navigation }: any) => {
       if (hasHardware && isEnrolled) {
         setIsAuthenticating(true);
         const result = await LocalAuthentication.authenticateAsync({
-          promptMessage: 'Увійти за допомогою біометрії',
-          fallbackLabel: 'Використати пароль'
+          promptMessage: t('auth.biometricPrompt'),
+          fallbackLabel: t('auth.usePassword')
         });
         
         if (result.success) {
@@ -50,7 +50,7 @@ export const LoginScreen = ({ navigation }: any) => {
 
   const handleLogin = () => {
     if (!phone || !password) {
-      Alert.alert('Помилка', 'Заповніть всі поля');
+      Alert.alert(t('error'), t('auth.fillAllFields'));
       return;
     }
     executeLogin(phone, password);
@@ -69,7 +69,7 @@ export const LoginScreen = ({ navigation }: any) => {
       const data = await response.json();
 
       if (!response.ok) {
-        Alert.alert('Помилка', data.error || 'Щось пішло не так');
+        Alert.alert(t('error'), data.error || t('auth.genericError'));
         setIsAuthenticating(false);
         return;
       }
@@ -117,7 +117,8 @@ export const LoginScreen = ({ navigation }: any) => {
       
     } catch (error) {
       console.error(error);
-      Alert.alert('Помилка', 'Не вдалося з\'єднатися з сервером');
+      Alert.alert(t('error'), t('auth.connectionError'));
+      setIsAuthenticating(false);
     }
   };
 

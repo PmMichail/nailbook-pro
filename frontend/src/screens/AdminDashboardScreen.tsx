@@ -102,8 +102,28 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
                         <Text style={styles.statVal}>{stats?.totalMasters || 0}</Text>
                     </View>
                     <View style={styles.statCard}>
+                        <Text style={styles.statL}>КЛІЄНТІВ</Text>
+                        <Text style={[styles.statVal, {color: '#F472B6'}]}>{stats?.totalClients || 0}</Text>
+                    </View>
+                </View>
+                <View style={styles.statsGrid}>
+                    <View style={styles.statCard}>
+                        <Text style={styles.statL}>PRO МАЙСТРІВ</Text>
+                        <Text style={[styles.statVal, {color: '#00FFAA'}]}>{stats?.proMasters || 0}</Text>
+                    </View>
+                    <View style={styles.statCard}>
                         <Text style={styles.statL}>АКТИВНІ СЬОГОДНІ</Text>
                         <Text style={[styles.statVal, {color: '#38BDF8'}]}>{stats?.activeToday || Math.floor((stats?.totalMasters || 0) * 0.3)}</Text>
+                    </View>
+                </View>
+                <View style={styles.statsGrid}>
+                    <View style={styles.statCard}>
+                        <Text style={styles.statL}>З АДРЕСОЮ/GEO</Text>
+                        <Text style={[styles.statVal, {color: '#A78BFA'}]}>{stats?.mastersWithLocation || 0}</Text>
+                    </View>
+                    <View style={styles.statCard}>
+                        <Text style={styles.statL}>ЗАПИСИ СЬОГОДНІ</Text>
+                        <Text style={[styles.statVal, {color: '#F5A623'}]}>{stats?.appointmentsToday || 0}</Text>
                     </View>
                 </View>
 

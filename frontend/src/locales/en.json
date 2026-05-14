@@ -22,6 +22,19 @@
   "name": "Your name",
   "role_master": "I am a master",
   "role_client": "I am a client",
+  "auth": {
+    "fillAllFields": "Fill in all fields",
+    "genericError": "Something went wrong",
+    "connectionError": "Could not connect to the server",
+    "biometricPrompt": "Log in with biometrics",
+    "usePassword": "Use password",
+    "accountCreated": "Account created successfully!",
+    "inviteCodePlaceholder": "Master code (optional)",
+    "referralCodePlaceholder": "10% discount promo code (optional)",
+    "pleaseWait": "Please wait...",
+    "acceptTermsPrefix": "By pressing the button, you agree to our",
+    "publicOffer": "Public Offer"
+  },
   "tabs": {
     "dashboard": "Dashboard",
     "clients": "Clients",

@@ -29,6 +29,10 @@ router.get('/masters', async (req, res) => {
             where: { role: 'MASTER' },
             select: {
                 id: true, name: true, phone: true, email: true, createdAt: true, isBanned: true,
+                city: true, address: true, referralEnabled: true, salonName: true,
+                _count: {
+                    select: { myClients: true, appointments: true }
+                },
                 subscription: {
                     select: { plan: true, status: true, currentPeriodEnd: true }
                 }
@@ -45,12 +49,18 @@ router.get('/masters', async (req, res) => {
 router.get('/statistics', async (req, res) => {
    try {
        const totalMasters = await prisma.user.count({ where: { role: 'MASTER' } });
+       const totalClients = await prisma.user.count({ where: { role: 'CLIENT' } });
+       const bannedMasters = await prisma.user.count({ where: { role: 'MASTER', isBanned: true } });
+       const mastersWithLocation = await prisma.user.count({ where: { role: 'MASTER', lat: { not: null }, lng: { not: null } } });
+       const proMasters = await prisma.subscription.count({ where: { plan: 'PRO', status: { in: ['ACTIVE', 'TRIAL'] } } });
+       const todayStart = new Date(new Date().setHours(0,0,0,0));
+       const appointmentsToday = await prisma.appointment.count({ where: { createdAt: { gte: todayStart } } });
        
        const sevenDaysAgo = new Date();
        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
        
        const recentUsers = await prisma.user.findMany({
-           where: { role: 'MASTER', createdAt: { gte: sevenDaysAgo } },
+           where: { createdAt: { gte: sevenDaysAgo } },
            select: { createdAt: true }
        });
        
@@ -70,11 +80,16 @@ router.get('/statistics', async (req, res) => {
 
        const activeToday = await prisma.appointment.groupBy({
            by: ['masterId'],
-           where: { createdAt: { gte: new Date(new Date().setHours(0,0,0,0)) } },
+           where: { createdAt: { gte: todayStart } },
        }).then(res => res.length);
 
        res.json({
            totalMasters,
+           totalClients,
+           proMasters,
+           bannedMasters,
+           mastersWithLocation,
+           appointmentsToday,
            last7DaysRegs,
            activeToday
        });
@@ -96,6 +111,22 @@ router.put('/masters/:id/reset-password', async (req, res) => {
        });
        
        res.json({ newPassword });
+   } catch(e) {
+       res.status(500).json({ error: 'Server error' });
+   }
+});
+
+router.put('/masters/:id/subscription', async (req, res) => {
+   try {
+       const masterId = req.params.id;
+       const { plan, status, durationDays } = req.body;
+       const currentPeriodEnd = durationDays ? new Date(Date.now() + Number(durationDays) * 24 * 60 * 60 * 1000) : null;
+       const subscription = await prisma.subscription.upsert({
+           where: { masterId },
+           update: { plan, status, currentPeriodEnd },
+           create: { masterId, plan, status, currentPeriodEnd }
+       });
+       res.json(subscription);
    } catch(e) {
        res.status(500).json({ error: 'Server error' });
    }
