@@ -47,6 +47,7 @@ export const SearchMastersScreen = () => {
     const renderMaster = ({ item }: { item: any }) => {
         const isCurrentMaster = currentUser?.masterId === item.id;
         const hasAddress = !![item.city, item.address].filter(Boolean).length;
+        const hasSocials = !![item.instagram, item.tiktok, item.facebook].filter(Boolean).length;
         
         return (
             <TouchableOpacity 
@@ -93,8 +94,16 @@ export const SearchMastersScreen = () => {
                                 Відстань: ~{item.distance.toFixed(1)} км від вас
                             </Text>
                         )}
+                        {hasSocials && (
+                            <View style={styles.socialRow}>
+                                {!!item.instagram && <Text style={styles.socialChip}>Instagram</Text>}
+                                {!!item.tiktok && <Text style={styles.socialChip}>TikTok</Text>}
+                                {!!item.facebook && <Text style={styles.socialChip}>Facebook</Text>}
+                            </View>
+                        )}
                     </View>
                 </View>
+                <Text style={[styles.openHint, { color: colors.primary }]}>Відкрити портфоліо, адресу та соцмережі →</Text>
             </TouchableOpacity>
         );
     };
@@ -122,7 +131,13 @@ export const SearchMastersScreen = () => {
 
     return (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
-           <View style={[styles.codeSection, { backgroundColor: colors.card }]}>
+           <View style={[styles.heroCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+               <Text style={styles.kicker}>BEAUTY NEAR YOU</Text>
+               <Text style={[styles.title, { color: colors.text }]}>Майстри поруч</Text>
+               <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Адреса, соцмережі та портфоліо майстра в один дотик.</Text>
+           </View>
+
+           <View style={[styles.codeSection, { backgroundColor: colors.card, borderColor: colors.border }]}>
                <Text style={{fontWeight: 'bold', marginBottom: 5, color: colors.text}}>Підключитись за кодом від майстра:</Text>
                <View style={styles.row}>
                    <TextInput 
@@ -139,7 +154,7 @@ export const SearchMastersScreen = () => {
                </View>
            </View>
 
-            <Text style={[styles.title, { color: colors.text }]}>Майстри поруч (до 10 км)</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Результати пошуку до 10 км</Text>
             {loading ? (
                 <ActivityIndicator color={colors.primary} size="large" style={{marginTop: 50}} />
             ) : masters.length === 0 ? (
@@ -158,17 +173,24 @@ export const SearchMastersScreen = () => {
 
 const styles = StyleSheet.create({
     container: { flex: 1, padding: 15 },
-    title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
-    codeSection: { padding: 15, borderRadius: 15, marginBottom: 20, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2 },
+    heroCard: { borderRadius: 32, borderWidth: 1, padding: 24, marginBottom: 16, shadowColor: '#D6A99A', shadowOffset: { width: 0, height: 16 }, shadowOpacity: 0.16, shadowRadius: 26, elevation: 5 },
+    kicker: { color: '#C88D7A', fontSize: 12, fontWeight: '900', letterSpacing: 2.5, marginBottom: 8 },
+    title: { fontSize: 34, fontWeight: '900', marginBottom: 8 },
+    subtitle: { fontSize: 14, lineHeight: 22 },
+    sectionTitle: { fontSize: 20, fontWeight: '900', marginBottom: 16 },
+    codeSection: { padding: 16, borderRadius: 24, marginBottom: 20, borderWidth: 1, elevation: 4, shadowColor: '#C88D7A', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.1, shadowRadius: 18 },
     row: { flexDirection: 'row', alignItems: 'center' },
     input: { padding: 12, borderRadius: 10, borderWidth: 1 },
-    btn: { backgroundColor: '#C88D7A', padding: 12, borderRadius: 10 },
+    btn: { backgroundColor: '#C88D7A', padding: 12, borderRadius: 18 },
     btnText: { color: '#fff', fontWeight: 'bold' },
-    card: { borderRadius: 15, padding: 15, marginBottom: 15, borderWidth: 1, shadowColor: '#000', shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.1, shadowRadius: 5, elevation: 3 },
+    card: { borderRadius: 28, padding: 18, marginBottom: 15, borderWidth: 1, shadowColor: '#C88D7A', shadowOffset: {width: 0, height: 12}, shadowOpacity: 0.1, shadowRadius: 22, elevation: 4 },
     header: { flexDirection: 'row', alignItems: 'center' },
     avatarPlaceholder: { width: 50, height: 50, borderRadius: 25, backgroundColor: '#C88D7A', justifyContent: 'center', alignItems: 'center', marginRight: 15 },
     info: { flex: 1 },
-    name: { fontSize: 18, fontWeight: 'bold' },
+    name: { fontSize: 20, fontWeight: '900' },
     city: { fontSize: 14, color: '#888', fontWeight: '700' },
-    address: { fontSize: 13, marginTop: 3, lineHeight: 18 }
+    address: { fontSize: 13, marginTop: 3, lineHeight: 18 },
+    socialRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 10 },
+    socialChip: { color: '#7A3E2F', backgroundColor: '#F7E9E3', borderColor: '#E3C4B8', borderWidth: 1, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, fontSize: 11, fontWeight: '900', overflow: 'hidden' },
+    openHint: { marginTop: 14, fontSize: 13, fontWeight: '800', textAlign: 'right' }
 });

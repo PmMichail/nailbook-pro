@@ -104,7 +104,7 @@ router.get('/masters/search', async (req: any, res) => {
      
      const masters = await prisma.user.findMany({
         where: whereClause,
-        select: { id: true, name: true, city: true, address: true, salonName: true, salonLogo: true, avatarUrl: true, lat: true, lng: true }
+        select: { id: true, name: true, city: true, address: true, salonName: true, salonLogo: true, avatarUrl: true, lat: true, lng: true, instagram: true, tiktok: true, facebook: true }
      });
      
      let filteredMasters: any[] = masters.map(m => ({ ...m, distance: null }));

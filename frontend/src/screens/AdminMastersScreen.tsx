@@ -48,14 +48,14 @@ export const AdminMastersScreen = () => {
     };
 
     const resetPassword = async (masterId: string) => {
-        Alert.alert('WARNING', 'Generate new temporary password for this node?', [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Execute', style: 'destructive', onPress: async () => {
+        Alert.alert('Скидання пароля', 'Створити новий тимчасовий пароль для майстра?', [
+            { text: 'Скасувати', style: 'cancel' },
+            { text: 'Створити', style: 'destructive', onPress: async () => {
                 try {
                     const res = await api.put(`/api/admin/masters/${masterId}/reset-password`);
-                    Alert.alert('SUCCESS', `New access key:\n\n${res.data.newPassword}\n\nTransmit to owner.`);
+                    Alert.alert('Готово', `Новий тимчасовий пароль:\n\n${res.data.newPassword}\n\nПередайте його власнику акаунта.`);
                 } catch(e) {
-                    Alert.alert('ERROR', 'Failed to generate key');
+                    Alert.alert('Помилка', 'Не вдалося створити пароль');
                 }
             }}
         ]);
@@ -74,35 +74,35 @@ export const AdminMastersScreen = () => {
                     });
                     loadMasters();
                 } catch(e) {
-                    Alert.alert('ERROR', 'Failed to update PRO status');
+                    Alert.alert('Помилка', 'Не вдалося оновити PRO статус');
                 }
             }}
         ]);
     };
 
     const toggleBan = async (masterId: string, currentStatus: boolean) => {
-        Alert.alert('CONFIRMATION', currentStatus ? 'Restore node access?' : 'Suspend node access?', [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Execute', onPress: async () => {
+        Alert.alert('Підтвердження', currentStatus ? 'Відновити доступ майстру?' : 'Заблокувати доступ майстру?', [
+            { text: 'Скасувати', style: 'cancel' },
+            { text: 'Так', onPress: async () => {
                 try {
                     await api.put(`/api/admin/users/${masterId}/ban`, { isBanned: !currentStatus });
                     loadMasters();
                 } catch(e) {
-                    Alert.alert('ERROR', 'Failed to update status');
+                    Alert.alert('Помилка', 'Не вдалося оновити статус');
                 }
             }}
         ]);
     };
 
     const deleteUser = async (userId: string, userName: string) => {
-        Alert.alert('CRITICAL WARNING', `PERMANENTLY DELETE node ${userName}? All data will be purged!`, [
-            { text: 'Abort', style: 'cancel' },
-            { text: 'PURGE', style: 'destructive', onPress: async () => {
+        Alert.alert('Видалення акаунта', `Назавжди видалити майстра ${userName}? Усі дані буде втрачено.`, [
+            { text: 'Скасувати', style: 'cancel' },
+            { text: 'Видалити', style: 'destructive', onPress: async () => {
                 try {
                     await api.delete(`/api/admin/users/${userId}`);
                     loadMasters();
                 } catch(e) {
-                    Alert.alert('ERROR', 'Failed to purge data');
+                    Alert.alert('Помилка', 'Не вдалося видалити акаунт');
                 }
             }}
         ]);
@@ -116,7 +116,7 @@ export const AdminMastersScreen = () => {
             const res = await api.get(`/api/admin/masters/${master.id}/analytics`);
             setAnalyticsData(res.data);
         } catch(e) {
-            Alert.alert('ERROR', 'Failed to fetch telemetry');
+            Alert.alert('Помилка', 'Не вдалося завантажити аналітику');
             setAnalyticsVisible(false);
         } finally {
             setLoadingAnalytics(false);
@@ -124,33 +124,34 @@ export const AdminMastersScreen = () => {
     };
 
     const chartConfig = {
-      backgroundColor: '#0B1021',
-      backgroundGradientFrom: '#0B1021',
-      backgroundGradientTo: '#111827',
-      color: (opacity = 1) => `rgba(56, 189, 248, ${opacity})`,
-      labelColor: (opacity = 1) => `rgba(148, 163, 184, ${opacity})`,
+      backgroundColor: '#FFF8F5',
+      backgroundGradientFrom: '#FFF8F5',
+      backgroundGradientTo: '#F9E8E1',
+      color: (opacity = 1) => `rgba(184, 116, 96, ${opacity})`,
+      labelColor: (opacity = 1) => `rgba(116, 100, 94, ${opacity})`,
       barPercentage: 0.5,
     };
 
-    if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#00FFAA" /></View>;
+    if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#C88D7A" /></View>;
 
     return (
         <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-            <Text style={styles.header}>ЦЕНТР КЕРУВАННЯ МАЙСТРАМИ</Text>
+            <Text style={styles.kicker}>MASTERS CRM</Text>
+            <Text style={styles.header}>Майстри та салони</Text>
             <View style={styles.summaryRow}>
-                <View style={styles.summaryCard}><Text style={styles.summaryVal}>{masters.length}</Text><Text style={styles.summaryLabel}>МАЙСТРІВ</Text></View>
-                <View style={styles.summaryCard}><Text style={[styles.summaryVal, {color: '#00FFAA'}]}>{masters.filter(m => m.subscription?.plan === 'PRO').length}</Text><Text style={styles.summaryLabel}>PRO</Text></View>
-                <View style={styles.summaryCard}><Text style={[styles.summaryVal, {color: '#F5A623'}]}>{masters.filter(m => m.referralEnabled === false).length}</Text><Text style={styles.summaryLabel}>БЕЗ РЕФ.</Text></View>
+                <View style={styles.summaryCard}><Text style={styles.summaryVal}>{masters.length}</Text><Text style={styles.summaryLabel}>Усього</Text></View>
+                <View style={styles.summaryCard}><Text style={styles.summaryVal}>{masters.filter(m => m.subscription?.plan === 'PRO').length}</Text><Text style={styles.summaryLabel}>PRO</Text></View>
+                <View style={styles.summaryCard}><Text style={styles.summaryVal}>{masters.filter(m => m.referralEnabled === false).length}</Text><Text style={styles.summaryLabel}>Без реф.</Text></View>
             </View>
             <TextInput
                 style={styles.searchInput}
                 value={query}
                 onChangeText={setQuery}
                 placeholder="Пошук: ім'я, телефон, місто, адреса, PRO..."
-                placeholderTextColor="#64748B"
+                placeholderTextColor="#9B8580"
             />
             <TouchableOpacity style={styles.refreshBtn} onPress={loadMasters}>
-                <Text style={styles.refreshText}>ОНОВИТИ ДАНІ</Text>
+                <Text style={styles.refreshText}>Оновити дані</Text>
             </TouchableOpacity>
             {filteredMasters.map(m => {
                 const isPro = m.subscription?.plan === 'PRO' && ['ACTIVE', 'TRIAL'].includes(m.subscription?.status);
@@ -166,39 +167,39 @@ export const AdminMastersScreen = () => {
                                 <Text style={styles.subtext}>Реєстрація: {new Date(m.createdAt).toLocaleDateString()}</Text>
                             </View>
                             <View style={{gap: 5, alignItems: 'flex-end'}}>
-                                <View style={[styles.badge, { backgroundColor: isPro ? 'rgba(0, 255, 170, 0.2)' : 'rgba(148, 163, 184, 0.15)' }]}>
-                                    <Text style={[styles.badgeText, {color: isPro ? '#00FFAA' : '#94A3B8'}]}>{isPro ? 'PRO' : 'FREE'}</Text>
+                                <View style={[styles.badge, { backgroundColor: isPro ? '#F7E9E3' : '#F5EFEA' }]}>
+                                    <Text style={[styles.badgeText, {color: isPro ? '#7A3E2F' : '#74645E'}]}>{isPro ? 'PRO' : 'FREE'}</Text>
                                 </View>
-                                <View style={[styles.badge, { backgroundColor: m.referralEnabled === false ? 'rgba(245, 166, 35, 0.15)' : 'rgba(56, 189, 248, 0.15)' }]}>
-                                    <Text style={[styles.badgeText, {color: m.referralEnabled === false ? '#F5A623' : '#38BDF8'}]}>{m.referralEnabled === false ? 'REF OFF' : 'REF ON'}</Text>
+                                <View style={[styles.badge, { backgroundColor: m.referralEnabled === false ? '#FFF3D8' : '#EFF7EA' }]}>
+                                    <Text style={[styles.badgeText, {color: m.referralEnabled === false ? '#9A6A00' : '#5C8A48'}]}>{m.referralEnabled === false ? 'Реф. вимк.' : 'Реф. увімк.'}</Text>
                                 </View>
                                 {m.isBanned ? (
-                                    <View style={[styles.badge, { backgroundColor: 'rgba(239, 68, 68, 0.2)' }]}>
-                                        <Text style={[styles.badgeText, {color: '#EF4444'}]}>ЗАБЛОКОВАНО</Text>
+                                    <View style={[styles.badge, { backgroundColor: '#FFE8E2' }]}>
+                                        <Text style={[styles.badgeText, {color: '#B75B4B'}]}>Заблоковано</Text>
                                     </View>
                                 ) : (
-                                    <View style={[styles.badge, { backgroundColor: 'rgba(0, 255, 170, 0.2)' }]}>
-                                        <Text style={[styles.badgeText, {color: '#00FFAA'}]}>ОНЛАЙН</Text>
+                                    <View style={[styles.badge, { backgroundColor: '#EFF7EA' }]}>
+                                        <Text style={[styles.badgeText, {color: '#7FB069'}]}>Активний</Text>
                                     </View>
                                 )}
                             </View>
                         </View>
                         
                         <View style={styles.actions}>
-                            <TouchableOpacity style={[styles.btn, {borderColor: isPro ? '#F5A623' : '#00FFAA'}]} onPress={() => updateSubscription(m.id, isPro ? 'FREE' : 'PRO')}>
-                                <Text style={[styles.btnText, {color: isPro ? '#F5A623' : '#00FFAA'}]}>{isPro ? 'ЗНЯТИ PRO' : 'УВІМКНУТИ PRO'}</Text>
+                            <TouchableOpacity style={[styles.btn, {borderColor: isPro ? '#B75B4B' : '#C88D7A'}]} onPress={() => updateSubscription(m.id, isPro ? 'FREE' : 'PRO')}>
+                                <Text style={[styles.btnText, {color: isPro ? '#B75B4B' : '#7A3E2F'}]}>{isPro ? 'Зняти PRO' : 'Увімкнути PRO'}</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={[styles.btn, {borderColor: '#38BDF8'}]} onPress={() => openAnalytics(m)}>
-                                <Text style={[styles.btnText, {color: '#38BDF8'}]}>ТЕЛЕМЕТРІЯ</Text>
+                            <TouchableOpacity style={[styles.btn, {borderColor: '#C88D7A'}]} onPress={() => openAnalytics(m)}>
+                                <Text style={[styles.btnText, {color: '#7A3E2F'}]}>Аналітика</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={[styles.btn, {borderColor: '#94A3B8', marginLeft: 10}]} onPress={() => resetPassword(m.id)}>
-                                <Text style={[styles.btnText, {color: '#94A3B8'}]}>СКИДАННЯ</Text>
+                            <TouchableOpacity style={[styles.btn, {borderColor: '#E7DAD4', marginLeft: 10}]} onPress={() => resetPassword(m.id)}>
+                                <Text style={[styles.btnText, {color: '#74645E'}]}>Пароль</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={[styles.btn, {borderColor: m.isBanned ? '#00FFAA' : '#F5A623', marginLeft: 10}]} onPress={() => toggleBan(m.id, m.isBanned)}>
-                                <Text style={[styles.btnText, {color: m.isBanned ? '#00FFAA' : '#F5A623'}]}>{m.isBanned ? 'РОЗБАН' : 'БАН'}</Text>
+                            <TouchableOpacity style={[styles.btn, {borderColor: m.isBanned ? '#7FB069' : '#B75B4B', marginLeft: 10}]} onPress={() => toggleBan(m.id, m.isBanned)}>
+                                <Text style={[styles.btnText, {color: m.isBanned ? '#7FB069' : '#B75B4B'}]}>{m.isBanned ? 'Розблокувати' : 'Блокувати'}</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={[styles.btn, {borderColor: '#EF4444', marginLeft: 'auto'}]} onPress={() => deleteUser(m.id, m.name)}>
-                                <Text style={[styles.btnText, {color: '#EF4444'}]}>ВИДАЛИТИ</Text>
+                            <TouchableOpacity style={[styles.btn, {borderColor: '#B75B4B', marginLeft: 'auto'}]} onPress={() => deleteUser(m.id, m.name)}>
+                                <Text style={[styles.btnText, {color: '#B75B4B'}]}>Видалити</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -212,27 +213,27 @@ export const AdminMastersScreen = () => {
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContent}>
                         <TouchableOpacity style={styles.closeBtn} onPress={() => setAnalyticsVisible(false)}>
-                            <Text style={styles.closeBtnTxt}>ЗАКРИТИ_</Text>
+                            <Text style={styles.closeBtnTxt}>Закрити</Text>
                         </TouchableOpacity>
                         
-                        <Text style={styles.modalHeader}>ТЕЛЕМЕТРІЯ ВУЗЛА: {selectedMaster?.name}</Text>
+                        <Text style={styles.modalHeader}>Аналітика майстра: {selectedMaster?.name}</Text>
                         
                         {loadingAnalytics ? (
-                            <View style={{padding: 50}}><ActivityIndicator size="large" color="#00FFAA" /></View>
+                            <View style={{padding: 50}}><ActivityIndicator size="large" color="#C88D7A" /></View>
                         ) : analyticsData ? (
                             <ScrollView showsVerticalScrollIndicator={false}>
                                 <View style={{flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20}}>
                                     <View style={styles.statBox}>
                                         <Text style={styles.statBoxVal}>{analyticsData.totalClients}</Text>
-                                        <Text style={styles.statBoxLabel}>ВІДОМІ КЛІЄНТИ</Text>
+                                        <Text style={styles.statBoxLabel}>Клієнти</Text>
                                     </View>
                                     <View style={styles.statBox}>
                                         <Text style={styles.statBoxVal}>{analyticsData.totalAppointments}</Text>
-                                        <Text style={styles.statBoxLabel}>ЗАПИСИ (TX)</Text>
+                                        <Text style={styles.statBoxLabel}>Записи</Text>
                                     </View>
                                 </View>
 
-                                <Text style={styles.modalSubHeader}>АНАЛІЗ СТАТУСІВ TX</Text>
+                                <Text style={styles.modalSubHeader}>Статуси записів</Text>
                                 <BarChart
                                     data={{
                                         labels: analyticsData.chartData.map((d: any) => d.name),
@@ -255,38 +256,39 @@ export const AdminMastersScreen = () => {
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#020617', padding: 20 },
-    center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#020617' },
-    header: { fontSize: 20, fontWeight: '900', color: '#F8FAFC', marginBottom: 20, marginTop: 40, letterSpacing: 2 },
+    container: { flex: 1, backgroundColor: '#FFF9F6', padding: 20 },
+    center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFF9F6' },
+    kicker: { color: '#C88D7A', fontSize: 12, fontWeight: '900', letterSpacing: 2.2, marginTop: 40, marginBottom: 6 },
+    header: { fontSize: 30, fontWeight: '900', color: '#2A1D19', marginBottom: 20 },
     summaryRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 },
-    summaryCard: { flex: 1, backgroundColor: 'rgba(15, 23, 42, 0.8)', borderWidth: 1, borderColor: '#1E293B', borderRadius: 12, padding: 12, marginHorizontal: 4, alignItems: 'center' },
-    summaryVal: { color: '#38BDF8', fontSize: 24, fontWeight: '900' },
-    summaryLabel: { color: '#94A3B8', fontSize: 10, fontWeight: 'bold', marginTop: 4 },
-    searchInput: { backgroundColor: '#0B1021', color: '#F8FAFC', borderWidth: 1, borderColor: '#1E293B', borderRadius: 12, padding: 12, marginBottom: 10 },
-    refreshBtn: { alignSelf: 'flex-end', borderWidth: 1, borderColor: '#38BDF8', paddingVertical: 7, paddingHorizontal: 12, borderRadius: 8, marginBottom: 14 },
-    refreshText: { color: '#38BDF8', fontSize: 11, fontWeight: 'bold' },
-    emptyText: { color: '#64748B', textAlign: 'center', marginTop: 20, fontStyle: 'italic' },
+    summaryCard: { flex: 1, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#E7DAD4', borderRadius: 22, padding: 14, marginHorizontal: 4, alignItems: 'center', shadowColor: '#C88D7A', shadowOffset: {width:0,height:8}, shadowOpacity: 0.08, shadowRadius: 16, elevation: 3 },
+    summaryVal: { color: '#B87460', fontSize: 26, fontWeight: '900' },
+    summaryLabel: { color: '#74645E', fontSize: 11, fontWeight: '800', marginTop: 4 },
+    searchInput: { backgroundColor: '#FFFFFF', color: '#2A1D19', borderWidth: 1, borderColor: '#E7DAD4', borderRadius: 18, padding: 14, marginBottom: 10 },
+    refreshBtn: { alignSelf: 'flex-end', borderWidth: 1, borderColor: '#C88D7A', paddingVertical: 9, paddingHorizontal: 14, borderRadius: 999, marginBottom: 14, backgroundColor: '#FFF1EC' },
+    refreshText: { color: '#7A3E2F', fontSize: 12, fontWeight: '900' },
+    emptyText: { color: '#74645E', textAlign: 'center', marginTop: 20, fontStyle: 'italic' },
     
-    card: { backgroundColor: 'rgba(15, 23, 42, 0.6)', padding: 15, borderRadius: 12, marginBottom: 15, borderWidth: 1, borderColor: 'rgba(51, 65, 85, 0.5)' },
-    name: { fontSize: 16, fontWeight: 'bold', color: '#E2E8F0', letterSpacing: 1 },
-    subtext: { color: '#64748B', fontSize: 11, marginTop: 4, fontFamily: 'Courier' },
+    card: { backgroundColor: '#FFFFFF', padding: 18, borderRadius: 26, marginBottom: 15, borderWidth: 1, borderColor: '#E7DAD4', shadowColor: '#C88D7A', shadowOffset: {width:0,height:10}, shadowOpacity: 0.08, shadowRadius: 18, elevation: 3 },
+    name: { fontSize: 18, fontWeight: '900', color: '#2A1D19' },
+    subtext: { color: '#74645E', fontSize: 12, marginTop: 4 },
     
-    badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 4, borderWidth: 1, borderColor: 'transparent' },
-    badgeText: { fontWeight: '900', fontSize: 10, letterSpacing: 1 },
+    badge: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, borderWidth: 1, borderColor: 'transparent' },
+    badgeText: { fontWeight: '900', fontSize: 10 },
     
     actions: { flexDirection: 'row', marginTop: 20, justifyContent: 'flex-start', flexWrap: 'wrap', gap: 8 },
-    btn: { backgroundColor: 'transparent', paddingVertical: 8, paddingHorizontal: 10, borderRadius: 8, borderWidth: 1, marginBottom: 8 },
-    btnText: { fontWeight: 'bold', fontSize: 10, letterSpacing: 1 },
+    btn: { backgroundColor: '#FFF8F5', paddingVertical: 9, paddingHorizontal: 12, borderRadius: 999, borderWidth: 1, marginBottom: 8 },
+    btnText: { fontWeight: '900', fontSize: 11 },
 
     // Modal Styles
-    modalOverlay: { flex: 1, backgroundColor: 'rgba(2, 6, 23, 0.85)', justifyContent: 'flex-end' },
-    modalContent: { backgroundColor: '#0B1021', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, maxHeight: '80%', borderWidth: 1, borderColor: '#1E293B' },
+    modalOverlay: { flex: 1, backgroundColor: 'rgba(42, 29, 25, 0.35)', justifyContent: 'flex-end' },
+    modalContent: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 30, borderTopRightRadius: 30, padding: 20, maxHeight: '80%', borderWidth: 1, borderColor: '#E7DAD4' },
     closeBtn: { alignSelf: 'flex-end', padding: 10 },
-    closeBtnTxt: { fontSize: 12, color: '#94A3B8', fontWeight: 'bold', fontFamily: 'Courier' },
-    modalHeader: { fontSize: 16, fontWeight: '900', color: '#00FFAA', marginBottom: 20, letterSpacing: 1 },
-    modalSubHeader: { fontSize: 12, fontWeight: 'bold', color: '#64748B', marginBottom: 10, letterSpacing: 1 },
+    closeBtnTxt: { fontSize: 12, color: '#74645E', fontWeight: '900' },
+    modalHeader: { fontSize: 18, fontWeight: '900', color: '#2A1D19', marginBottom: 20 },
+    modalSubHeader: { fontSize: 13, fontWeight: '900', color: '#74645E', marginBottom: 10 },
     
-    statBox: { flex: 1, backgroundColor: 'rgba(30, 41, 59, 0.5)', marginHorizontal: 5, padding: 15, borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: '#1E293B' },
-    statBoxVal: { fontSize: 28, fontWeight: '900', color: '#38BDF8', textShadowColor: 'rgba(56, 189, 248, 0.3)', textShadowOffset: {width:0, height:0}, textShadowRadius: 10 },
-    statBoxLabel: { fontSize: 10, color: '#94A3B8', marginTop: 5, fontWeight: 'bold', letterSpacing: 1 }
+    statBox: { flex: 1, backgroundColor: '#FFF8F5', marginHorizontal: 5, padding: 15, borderRadius: 20, alignItems: 'center', borderWidth: 1, borderColor: '#F0D4C8' },
+    statBoxVal: { fontSize: 28, fontWeight: '900', color: '#B87460' },
+    statBoxLabel: { fontSize: 11, color: '#74645E', marginTop: 5, fontWeight: '900' }
 });

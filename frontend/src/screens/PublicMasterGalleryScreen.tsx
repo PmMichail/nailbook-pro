@@ -116,37 +116,37 @@ export const PublicMasterGalleryScreen = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Text style={[styles.header, { color: colors.text }]}>Роботи майстра: {masterName}</Text>
-      
-      {masterInfo && (masterInfo.city || masterInfo.address) && (
-        <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: 15, paddingHorizontal: 5}}>
-          <Text style={{fontSize: 16, marginRight: 5}}>📍</Text>
-          <Text style={{color: colors.textSecondary, fontSize: 14}}>
-             {masterInfo.city ? masterInfo.city : ''}
-             {masterInfo.address ? ` • ${masterInfo.address}` : ''}
-          </Text>
-        </View>
-      )}
-      
-      {masterInfo && (masterInfo.instagram || masterInfo.tiktok || masterInfo.facebook) ? (
-        <View style={styles.socialRow}>
-          {!!masterInfo.instagram && (
-            <TouchableOpacity style={styles.socialBtn} onPress={() => openSocial(masterInfo.instagram, 'instagram')}>
-               <Text style={styles.socialText}>Instagram</Text>
-            </TouchableOpacity>
-          )}
-          {!!masterInfo.tiktok && (
-            <TouchableOpacity style={styles.socialBtn} onPress={() => openSocial(masterInfo.tiktok, 'tiktok')}>
-               <Text style={styles.socialText}>TikTok</Text>
-            </TouchableOpacity>
-          )}
-          {!!masterInfo.facebook && (
-            <TouchableOpacity style={styles.socialBtn} onPress={() => openSocial(masterInfo.facebook, 'facebook')}>
-               <Text style={styles.socialText}>Facebook</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      ) : null}
+      <View style={[styles.heroCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+        <Text style={styles.kicker}>PORTFOLIO</Text>
+        <Text style={[styles.header, { color: colors.text }]}>{masterName}</Text>
+        <Text style={[styles.heroText, { color: colors.textSecondary }]}>Ніжні роботи, адреса салону та соцмережі майстра.</Text>
+        {masterInfo && (
+          <View style={styles.infoBlock}>
+            <Text style={[styles.infoText, { color: colors.text }]}>📍 {masterInfo.city || 'Місто не вказано'}{masterInfo.address ? ` • ${masterInfo.address}` : ' • Адресу ще не вказано'}</Text>
+          </View>
+        )}
+        {masterInfo && (masterInfo.instagram || masterInfo.tiktok || masterInfo.facebook) ? (
+          <View style={styles.socialRow}>
+            {!!masterInfo.instagram && (
+              <TouchableOpacity style={styles.socialBtn} onPress={() => openSocial(masterInfo.instagram, 'instagram')}>
+                 <Text style={styles.socialText}>Instagram</Text>
+              </TouchableOpacity>
+            )}
+            {!!masterInfo.tiktok && (
+              <TouchableOpacity style={styles.socialBtn} onPress={() => openSocial(masterInfo.tiktok, 'tiktok')}>
+                 <Text style={styles.socialText}>TikTok</Text>
+              </TouchableOpacity>
+            )}
+            {!!masterInfo.facebook && (
+              <TouchableOpacity style={styles.socialBtn} onPress={() => openSocial(masterInfo.facebook, 'facebook')}>
+                 <Text style={styles.socialText}>Facebook</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        ) : (
+          <Text style={[styles.noSocialText, { color: colors.textSecondary }]}>Соцмережі майстра ще не додані</Text>
+        )}
+      </View>
       
       {loading ? (
          <ActivityIndicator size="large" color={colors.primary} style={{marginTop: 50}} />
@@ -182,13 +182,19 @@ export const PublicMasterGalleryScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 10 },
-  header: { fontSize: 20, fontWeight: 'bold', marginBottom: 15, paddingHorizontal: 5 },
-  imageCard: { width: (width / 2) - 15, marginHorizontal: 5, marginBottom: 15, borderRadius: 15, overflow: 'hidden', shadowColor: '#000', shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.1, shadowRadius: 3, elevation: 2, borderWidth: 1 },
+  container: { flex: 1, padding: 12 },
+  heroCard: { borderRadius: 34, borderWidth: 1, padding: 24, marginBottom: 18, shadowColor: '#D6A99A', shadowOffset: {width: 0, height: 18}, shadowOpacity: 0.16, shadowRadius: 28, elevation: 5 },
+  kicker: { color: '#C88D7A', fontSize: 12, fontWeight: '900', letterSpacing: 2.5, marginBottom: 8 },
+  header: { fontSize: 32, fontWeight: '900', marginBottom: 8 },
+  heroText: { fontSize: 14, lineHeight: 22, marginBottom: 14 },
+  infoBlock: { backgroundColor: '#FFF7F3', borderColor: '#F0D4C8', borderWidth: 1, borderRadius: 20, padding: 12, marginBottom: 12 },
+  infoText: { fontSize: 13, fontWeight: '700', lineHeight: 19 },
+  imageCard: { width: (width / 2) - 17, marginHorizontal: 5, marginBottom: 15, borderRadius: 24, overflow: 'hidden', shadowColor: '#C88D7A', shadowOffset: {width: 0, height: 10}, shadowOpacity: 0.12, shadowRadius: 20, elevation: 4, borderWidth: 1 },
   image: { width: '100%', height: 180, resizeMode: 'cover' },
-  socialRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 15, paddingHorizontal: 5 },
-  socialBtn: { backgroundColor: '#F3E7E2', borderWidth: 1, borderColor: '#E0C0B4', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999 },
-  socialText: { color: '#7A3E2F', fontSize: 13, fontWeight: '800' },
+  socialRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  socialBtn: { backgroundColor: '#F3E7E2', borderWidth: 1, borderColor: '#E0C0B4', paddingHorizontal: 14, paddingVertical: 9, borderRadius: 999 },
+  socialText: { color: '#7A3E2F', fontSize: 13, fontWeight: '900' },
+  noSocialText: { fontSize: 13, fontStyle: 'italic' },
   imageFooter: { padding: 10, alignItems: 'flex-start' },
   tagsContainer: { flexDirection: 'row', flexWrap: 'wrap' },
   tagText: { color: '#fff', backgroundColor: '#e0c0b4', fontSize: 10, paddingHorizontal: 5, paddingVertical: 2, borderRadius: 5, marginRight: 3, marginBottom: 3, overflow: 'hidden' },
@@ -196,6 +202,6 @@ const styles = StyleSheet.create({
   viewerCloseBtn: { position: 'absolute', top: 50, right: 20, zIndex: 10, padding: 10, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 20 },
   viewerCloseText: { color: '#fff', fontSize: 24, fontWeight: 'bold' },
   viewerImage: { width: '100%', height: '80%' },
-  requestBtn: { position: 'absolute', bottom: 30, left: 20, right: 20, padding: 15, backgroundColor: '#C88D7A', borderRadius: 15, elevation: 5, shadowColor: '#000', shadowOffset: {width:0, height:2}, shadowOpacity: 0.3, shadowRadius: 5 },
+  requestBtn: { position: 'absolute', bottom: 30, left: 20, right: 20, padding: 16, backgroundColor: '#C88D7A', borderRadius: 24, elevation: 6, shadowColor: '#C88D7A', shadowOffset: {width:0, height:12}, shadowOpacity: 0.28, shadowRadius: 22 },
   requestBtnText: { color: '#fff', fontSize: 16, fontWeight: 'bold', textAlign: 'center' }
 });

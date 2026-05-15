@@ -67,70 +67,71 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
     };
 
     const chartConfig = {
-      backgroundColor: '#0B1021',
-      backgroundGradientFrom: '#0B1021',
-      backgroundGradientTo: '#111827',
-      color: (opacity = 1) => `rgba(0, 255, 170, ${opacity})`,
-      labelColor: (opacity = 1) => `rgba(148, 163, 184, ${opacity})`,
-      propsForDots: { r: '4', strokeWidth: '2', stroke: '#00FFAA' }
+      backgroundColor: '#FFF8F5',
+      backgroundGradientFrom: '#FFF8F5',
+      backgroundGradientTo: '#F9E8E1',
+      color: (opacity = 1) => `rgba(184, 116, 96, ${opacity})`,
+      labelColor: (opacity = 1) => `rgba(116, 100, 94, ${opacity})`,
+      propsForDots: { r: '4', strokeWidth: '2', stroke: '#B87460' }
     };
 
-    if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#00FFAA" /></View>;
+    if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#C88D7A" /></View>;
 
     return (
         <View style={styles.container}>
             <View style={styles.headerRow}>
                 <View style={styles.headerTitleContainer}>
-                    <Text style={styles.header}>КОМАНДНИЙ ЦЕНТР</Text>
+                    <Text style={styles.kicker}>ADMIN OVERVIEW</Text>
+                    <Text style={styles.header}>Панель керування</Text>
                     <View style={styles.liveStatus}>
                         <PulsingIndicator />
-                        <Text style={styles.liveText}>СИСТЕМА ОНЛАЙН</Text>
+                        <Text style={styles.liveText}>сервіс працює</Text>
                     </View>
                 </View>
                 <TouchableOpacity onPress={handleLogout} style={styles.logoutBtn}>
-                    <Text style={styles.logoutTxt}>ВИЙТИ</Text>
+                    <Text style={styles.logoutTxt}>Вийти</Text>
                 </TouchableOpacity>
             </View>
 
             <ScrollView contentContainerStyle={{paddingBottom: 50}} showsVerticalScrollIndicator={false}>
                 
                 {/* Metrics Grid */}
-                <Text style={styles.sectionTitle}>ГЛОБАЛЬНІ МЕТРИКИ</Text>
+                <Text style={styles.sectionTitle}>Ключові показники</Text>
                 <View style={styles.statsGrid}>
                     <View style={styles.statCard}>
-                        <Text style={styles.statL}>ВСЬОГО МАЙСТРІВ</Text>
+                        <Text style={styles.statL}>Майстрів</Text>
                         <Text style={styles.statVal}>{stats?.totalMasters || 0}</Text>
                     </View>
                     <View style={styles.statCard}>
-                        <Text style={styles.statL}>КЛІЄНТІВ</Text>
-                        <Text style={[styles.statVal, {color: '#F472B6'}]}>{stats?.totalClients || 0}</Text>
+                        <Text style={styles.statL}>Клієнтів</Text>
+                        <Text style={styles.statVal}>{stats?.totalClients || 0}</Text>
                     </View>
                 </View>
                 <View style={styles.statsGrid}>
                     <View style={styles.statCard}>
-                        <Text style={styles.statL}>PRO МАЙСТРІВ</Text>
-                        <Text style={[styles.statVal, {color: '#00FFAA'}]}>{stats?.proMasters || 0}</Text>
+                        <Text style={styles.statL}>PRO майстрів</Text>
+                        <Text style={styles.statVal}>{stats?.proMasters || 0}</Text>
                     </View>
                     <View style={styles.statCard}>
-                        <Text style={styles.statL}>АКТИВНІ СЬОГОДНІ</Text>
-                        <Text style={[styles.statVal, {color: '#38BDF8'}]}>{stats?.activeToday || Math.floor((stats?.totalMasters || 0) * 0.3)}</Text>
+                        <Text style={styles.statL}>Активні сьогодні</Text>
+                        <Text style={styles.statVal}>{stats?.activeToday || Math.floor((stats?.totalMasters || 0) * 0.3)}</Text>
                     </View>
                 </View>
                 <View style={styles.statsGrid}>
                     <View style={styles.statCard}>
-                        <Text style={styles.statL}>З АДРЕСОЮ/GEO</Text>
-                        <Text style={[styles.statVal, {color: '#A78BFA'}]}>{stats?.mastersWithLocation || 0}</Text>
+                        <Text style={styles.statL}>З адресою</Text>
+                        <Text style={styles.statVal}>{stats?.mastersWithLocation || 0}</Text>
                     </View>
                     <View style={styles.statCard}>
-                        <Text style={styles.statL}>ЗАПИСИ СЬОГОДНІ</Text>
-                        <Text style={[styles.statVal, {color: '#F5A623'}]}>{stats?.appointmentsToday || 0}</Text>
+                        <Text style={styles.statL}>Записи сьогодні</Text>
+                        <Text style={styles.statVal}>{stats?.appointmentsToday || 0}</Text>
                     </View>
                 </View>
 
                 {/* Growth Chart */}
                 {stats?.last7DaysRegs && (
                     <View style={styles.card}>
-                        <Text style={styles.cardTitle}>МАТРИЦЯ РЕЄСТРАЦІЙ (7 ДНІВ)</Text>
+                        <Text style={styles.cardTitle}>Реєстрації за 7 днів</Text>
                         <LineChart
                             data={{ labels: getLast7DaysLabels(), datasets: [{ data: stats.last7DaysRegs.some((n: number)=>n>0) ? stats.last7DaysRegs : [0,0,0,0,0,0,0] }] }}
                             width={screenWidth - 40}
@@ -146,7 +147,7 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
 
                 {/* Global Footprint */}
                 <View style={styles.card}>
-                    <Text style={styles.cardTitle}>ГЕОПРОСТОРОВИЙ РОЗПОДІЛ</Text>
+                    <Text style={styles.cardTitle}>Майстри по регіонах</Text>
                     {regions.length > 0 ? regions.map((r, i) => {
                         const maxVal = Math.max(...regions.map(x => x.masterCount));
                         const progress = (r.masterCount / maxVal) * 100;
@@ -154,7 +155,7 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
                             <View key={i} style={styles.regionRow}>
                                 <View style={styles.regionHeader}>
                                     <Text style={styles.regionName}>{r.region}</Text>
-                                    <Text style={styles.regionCount}>{r.masterCount} Вузлів</Text>
+                                    <Text style={styles.regionCount}>{r.masterCount} майстрів</Text>
                                 </View>
                                 <View style={styles.progressBarBg}>
                                     <View style={[styles.progressBarFill, {width: `${progress}%`}]} />
@@ -162,19 +163,19 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
                             </View>
                         );
                     }) : (
-                        <Text style={styles.emptyText}>ОЧІКУВАННЯ ДАНИХ ЛОКАЦІЇ...</Text>
+                        <Text style={styles.emptyText}>Поки немає даних по регіонах</Text>
                     )}
                 </View>
 
                 {/* Live Activity Feed */}
                 <View style={styles.card}>
-                    <Text style={styles.cardTitle}>ЖИВА СТРІЧКА АКТИВНОСТІ</Text>
+                    <Text style={styles.cardTitle}>Остання активність</Text>
                     <View style={styles.terminalContainer}>
                         {events.length > 0 ? events.slice(0, 10).map((item, idx) => {
                             let typeColor = '#94A3B8';
-                            let prefix = '[INFO]';
-                            if (item.type === 'USER_REG') { typeColor = '#00FFAA'; prefix = '[NEW_NODE]'; }
-                            if (item.type === 'NEW_APPT') { typeColor = '#38BDF8'; prefix = '[TX_SYNC]'; }
+                            let prefix = 'Подія';
+                            if (item.type === 'USER_REG') { typeColor = '#B87460'; prefix = 'Реєстрація'; }
+                            if (item.type === 'NEW_APPT') { typeColor = '#8E6A5C'; prefix = 'Новий запис'; }
 
                             return (
                                 <View key={item.id || idx} style={styles.terminalRow}>
@@ -184,7 +185,7 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
                                 </View>
                             );
                         }) : (
-                            <Text style={styles.terminalText}>Очікування вхідних мережевих пакетів...</Text>
+                            <Text style={styles.terminalText}>Поки немає нових подій</Text>
                         )}
                     </View>
                 </View>
@@ -195,39 +196,40 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#020617', paddingHorizontal: 20, paddingTop: 10 },
-    center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#020617' },
+    container: { flex: 1, backgroundColor: '#FFF9F6', paddingHorizontal: 20, paddingTop: 10 },
+    center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFF9F6' },
     headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 20, marginTop: 50, gap: 12 },
-    headerTitleContainer: { flexDirection: 'column' },
-    header: { fontSize: 24, fontWeight: '900', color: '#F8FAFC', letterSpacing: 1.4 },
+    headerTitleContainer: { flexDirection: 'column', flex: 1 },
+    kicker: { color: '#C88D7A', fontSize: 12, fontWeight: '900', letterSpacing: 2.2, marginBottom: 5 },
+    header: { fontSize: 30, fontWeight: '900', color: '#2A1D19' },
     liveStatus: { flexDirection: 'row', alignItems: 'center', marginTop: 4 },
-    pulseDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#00FFAA', marginRight: 8, shadowColor: '#00FFAA', shadowOpacity: 1, shadowRadius: 5, shadowOffset: {width: 0, height: 0} },
-    liveText: { color: '#00FFAA', fontSize: 12, fontWeight: 'bold', letterSpacing: 1 },
-    logoutBtn: { backgroundColor: 'rgba(239, 68, 68, 0.1)', paddingVertical: 8, paddingHorizontal: 12, borderRadius: 6, borderWidth: 1, borderColor: 'rgba(239, 68, 68, 0.3)' },
-    logoutTxt: { color: '#EF4444', fontWeight: 'bold', fontSize: 12, letterSpacing: 1 },
+    pulseDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#7FB069', marginRight: 8 },
+    liveText: { color: '#7FB069', fontSize: 12, fontWeight: '800' },
+    logoutBtn: { backgroundColor: '#FFF1EC', paddingVertical: 10, paddingHorizontal: 14, borderRadius: 999, borderWidth: 1, borderColor: '#F0D4C8' },
+    logoutTxt: { color: '#B75B4B', fontWeight: '900', fontSize: 12 },
     
-    sectionTitle: { fontSize: 14, fontWeight: 'bold', color: '#64748B', letterSpacing: 1.5, marginBottom: 10, marginTop: 10 },
+    sectionTitle: { fontSize: 18, fontWeight: '900', color: '#2A1D19', marginBottom: 12, marginTop: 10 },
     
     statsGrid: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 },
-    statCard: { backgroundColor: 'rgba(30, 41, 59, 0.5)', flex: 1, marginHorizontal: 5, padding: 20, borderRadius: 16, alignItems: 'center', borderWidth: 1, borderColor: 'rgba(51, 65, 85, 0.5)' },
-    statVal: { fontSize: 32, fontWeight: '900', color: '#00FFAA', textShadowColor: 'rgba(0, 255, 170, 0.3)', textShadowOffset: {width: 0, height: 0}, textShadowRadius: 10 },
-    statL: { fontSize: 11, color: '#94A3B8', marginTop: 8, letterSpacing: 1, fontWeight: '600' },
+    statCard: { backgroundColor: '#FFFFFF', flex: 1, marginHorizontal: 5, padding: 20, borderRadius: 24, alignItems: 'center', borderWidth: 1, borderColor: '#E7DAD4', shadowColor: '#C88D7A', shadowOffset: {width: 0, height: 10}, shadowOpacity: 0.09, shadowRadius: 18, elevation: 3 },
+    statVal: { fontSize: 34, fontWeight: '900', color: '#B87460' },
+    statL: { fontSize: 12, color: '#74645E', marginTop: 8, fontWeight: '800', textAlign: 'center' },
     
-    card: { backgroundColor: 'rgba(15, 23, 42, 0.6)', padding: 20, borderRadius: 16, marginBottom: 20, borderWidth: 1, borderColor: 'rgba(51, 65, 85, 0.5)' },
-    cardTitle: { fontSize: 14, fontWeight: 'bold', color: '#F1F5F9', letterSpacing: 1.5, marginBottom: 15 },
+    card: { backgroundColor: '#FFFFFF', padding: 20, borderRadius: 26, marginBottom: 20, borderWidth: 1, borderColor: '#E7DAD4', shadowColor: '#C88D7A', shadowOffset: {width: 0, height: 10}, shadowOpacity: 0.08, shadowRadius: 18, elevation: 3 },
+    cardTitle: { fontSize: 18, fontWeight: '900', color: '#2A1D19', marginBottom: 15 },
     
     regionRow: { marginBottom: 15 },
     regionHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
-    regionName: { color: '#CBD5E1', fontSize: 14, fontWeight: '600' },
-    regionCount: { color: '#00FFAA', fontSize: 12, fontWeight: 'bold' },
-    progressBarBg: { height: 6, backgroundColor: '#1E293B', borderRadius: 3, overflow: 'hidden' },
-    progressBarFill: { height: '100%', backgroundColor: '#00FFAA', borderRadius: 3, shadowColor: '#00FFAA', shadowOpacity: 0.8, shadowRadius: 5, shadowOffset: {width: 0, height: 0} },
+    regionName: { color: '#2A1D19', fontSize: 14, fontWeight: '800' },
+    regionCount: { color: '#B87460', fontSize: 12, fontWeight: '900' },
+    progressBarBg: { height: 8, backgroundColor: '#F5E8E2', borderRadius: 999, overflow: 'hidden' },
+    progressBarFill: { height: '100%', backgroundColor: '#C88D7A', borderRadius: 999 },
 
-    emptyText: { color: '#64748B', fontSize: 12, textAlign: 'center', fontStyle: 'italic', marginVertical: 20 },
+    emptyText: { color: '#74645E', fontSize: 13, textAlign: 'center', fontStyle: 'italic', marginVertical: 20 },
 
-    terminalContainer: { backgroundColor: '#0B1021', borderRadius: 8, padding: 15, borderWidth: 1, borderColor: '#1E293B' },
+    terminalContainer: { backgroundColor: '#FFF8F5', borderRadius: 20, padding: 15, borderWidth: 1, borderColor: '#F0D4C8' },
     terminalRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
-    terminalTime: { color: '#64748B', fontSize: 10, marginRight: 8, fontFamily: 'Courier' },
-    terminalPrefix: { fontSize: 10, fontWeight: 'bold', marginRight: 8, fontFamily: 'Courier' },
-    terminalText: { color: '#E2E8F0', fontSize: 11, flex: 1, fontFamily: 'Courier' }
+    terminalTime: { color: '#74645E', fontSize: 11, marginRight: 8 },
+    terminalPrefix: { fontSize: 11, fontWeight: '900', marginRight: 8 },
+    terminalText: { color: '#2A1D19', fontSize: 12, flex: 1 }
 });

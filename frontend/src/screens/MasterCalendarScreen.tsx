@@ -98,9 +98,17 @@ export const MasterCalendarScreen = () => {
         <Text style={{color: colors.background, fontWeight: 'bold'}}>🧹 Очистити минулі записи</Text>
       </TouchableOpacity>
 
+      <View style={[styles.daySummary, { backgroundColor: colors.card, borderColor: colors.border }]}>
+        <Text style={styles.dayKicker}>ОБРАНА ДАТА</Text>
+        <Text style={[styles.dayDate, { color: colors.text }]}>{selectedDay}</Text>
+        <Text style={[styles.dayMeta, { color: colors.textSecondary }]}>
+          {appointments.length} записів • {totalSum} грн за день
+        </Text>
+      </View>
+
       <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1 }]}>
         <View style={styles.cardHeaderRow}>
-            <Text style={[styles.cardTitle, { color: colors.text }]}>Записи на {selectedDay}</Text>
+            <Text style={[styles.cardTitle, { color: colors.text }]}>Клієнти, записані на дату</Text>
             <TouchableOpacity style={[styles.editBtn, { backgroundColor: colors.background }]} onPress={() => Alert.alert('Редагування дня', 'Щоб змінити робочий графік або заблокувати час, відкрийте налаштування розкладу в профілі майстра.')}>
                 <Text style={[styles.editBtnText, { color: colors.textSecondary }]}>✎ Ред. день</Text>
             </TouchableOpacity>
@@ -112,9 +120,6 @@ export const MasterCalendarScreen = () => {
           <Text style={[styles.noData, { color: colors.textSecondary }]}>{t('dashboard.noRecordsToday', {defaultValue: 'Немає записів на цей день'})}</Text>
         ) : (
           <>
-            <Text style={{fontWeight: 'bold', color: colors.text, marginBottom: 10, fontSize: 16}}>
-              Загальна сума за день: {totalSum} грн
-            </Text>
             {appointments.map((app) => (
               <View key={app.id} style={[styles.appointmentCard, { borderBottomColor: colors.border }]}>
                 <View style={{ flex: 1 }}>
@@ -155,6 +160,10 @@ const styles = StyleSheet.create({
   header: { fontSize: 32, fontWeight: '900', color: '#333', marginBottom: 8 },
   subtitle: { fontSize: 14, lineHeight: 21 },
   calendarWrapper: { borderRadius: 24, overflow: 'hidden', shadowColor: '#000', shadowOffset: {width: 0, height: 8}, shadowOpacity: 0.07, shadowRadius: 18, elevation: 4, marginBottom: 20 },
+  daySummary: { borderRadius: 26, borderWidth: 1, padding: 18, marginBottom: 16, shadowColor: '#C88D7A', shadowOffset: {width: 0, height: 12}, shadowOpacity: 0.12, shadowRadius: 22, elevation: 4 },
+  dayKicker: { color: '#C88D7A', fontSize: 11, fontWeight: '900', letterSpacing: 2, marginBottom: 6 },
+  dayDate: { fontSize: 26, fontWeight: '900', marginBottom: 6 },
+  dayMeta: { fontSize: 14, fontWeight: '700' },
   card: { backgroundColor: '#fff', borderRadius: 24, padding: 20, marginBottom: 40, shadowColor: '#000', shadowOffset: {width: 0, height: 8}, shadowOpacity: 0.07, shadowRadius: 18, elevation: 4 },
   cardHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 },
   cardTitle: { fontSize: 18, fontWeight: '600', color: '#C88D7A' },
