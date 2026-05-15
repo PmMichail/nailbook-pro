@@ -51,8 +51,12 @@ export const MasterCalendarScreen = () => {
   };
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
-      <Text style={[styles.header, { color: colors.text }]}>Мій Розклад</Text>
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]} showsVerticalScrollIndicator={false}>
+      <View style={[styles.heroCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+        <Text style={styles.kicker}>MASTER CALENDAR</Text>
+        <Text style={[styles.header, { color: colors.text }]}>Мій Розклад</Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Керуйте записами, статусами та денним доходом в одному місці.</Text>
+      </View>
 
       <View style={[styles.calendarWrapper, { backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1 }]}>
         <Calendar
@@ -145,16 +149,19 @@ export const MasterCalendarScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1,  padding: 15 },
-  header: { fontSize: 24, fontWeight: 'bold', color: '#333', marginBottom: 20 },
-  calendarWrapper: { borderRadius: 20, overflow: 'hidden', shadowColor: '#000', shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.1, shadowRadius: 5, elevation: 3, marginBottom: 20 },
-  card: { backgroundColor: '#fff', borderRadius: 20, padding: 20, marginBottom: 40, shadowColor: '#000', shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.1, shadowRadius: 5, elevation: 3 },
+  container: { flex: 1, padding: 16 },
+  heroCard: { borderRadius: 28, borderWidth: 1, padding: 22, marginBottom: 18, shadowColor: '#C88D7A', shadowOffset: {width: 0, height: 12}, shadowOpacity: 0.1, shadowRadius: 22, elevation: 4 },
+  kicker: { color: '#C88D7A', fontSize: 12, fontWeight: '900', letterSpacing: 2, marginBottom: 8 },
+  header: { fontSize: 32, fontWeight: '900', color: '#333', marginBottom: 8 },
+  subtitle: { fontSize: 14, lineHeight: 21 },
+  calendarWrapper: { borderRadius: 24, overflow: 'hidden', shadowColor: '#000', shadowOffset: {width: 0, height: 8}, shadowOpacity: 0.07, shadowRadius: 18, elevation: 4, marginBottom: 20 },
+  card: { backgroundColor: '#fff', borderRadius: 24, padding: 20, marginBottom: 40, shadowColor: '#000', shadowOffset: {width: 0, height: 8}, shadowOpacity: 0.07, shadowRadius: 18, elevation: 4 },
   cardHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 },
   cardTitle: { fontSize: 18, fontWeight: '600', color: '#C88D7A' },
-  editBtn: { backgroundColor: '#eee', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10 },
+  editBtn: { backgroundColor: '#eee', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999 },
   editBtnText: { fontSize: 12, color: '#555' },
   noData: { color: '#999', fontStyle: 'italic', marginTop: 10 },
-  appointmentCard: { flexDirection: 'row', justifyContent: 'space-between', borderBottomWidth: 1, borderBottomColor: '#eee', paddingVertical: 10 },
+  appointmentCard: { flexDirection: 'row', justifyContent: 'space-between', borderBottomWidth: 1, borderBottomColor: '#eee', paddingVertical: 14 },
   appName: { fontSize: 16, fontWeight: 'bold' },
   appTime: { fontSize: 14, color: '#777' },
   appStatus: { fontSize: 12, marginTop: 5, fontWeight: 'bold' },

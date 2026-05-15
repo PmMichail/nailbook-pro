@@ -146,7 +146,7 @@ export const AdminMastersScreen = () => {
                 style={styles.searchInput}
                 value={query}
                 onChangeText={setQuery}
-                placeholder="Пошук: ім'я, телефон, місто, PRO..."
+                placeholder="Пошук: ім'я, телефон, місто, адреса, PRO..."
                 placeholderTextColor="#64748B"
             />
             <TouchableOpacity style={styles.refreshBtn} onPress={loadMasters}>
@@ -274,8 +274,8 @@ const styles = StyleSheet.create({
     badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 4, borderWidth: 1, borderColor: 'transparent' },
     badgeText: { fontWeight: '900', fontSize: 10, letterSpacing: 1 },
     
-    actions: { flexDirection: 'row', marginTop: 20, justifyContent: 'flex-start', flexWrap: 'wrap' },
-    btn: { backgroundColor: 'transparent', paddingVertical: 6, paddingHorizontal: 10, borderRadius: 6, borderWidth: 1 },
+    actions: { flexDirection: 'row', marginTop: 20, justifyContent: 'flex-start', flexWrap: 'wrap', gap: 8 },
+    btn: { backgroundColor: 'transparent', paddingVertical: 8, paddingHorizontal: 10, borderRadius: 8, borderWidth: 1, marginBottom: 8 },
     btnText: { fontWeight: 'bold', fontSize: 10, letterSpacing: 1 },
 
     // Modal Styles

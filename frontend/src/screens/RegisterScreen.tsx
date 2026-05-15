@@ -94,7 +94,11 @@ export const RegisterScreen = ({ navigation }: any) => {
       style={[styles.container, { backgroundColor: colors.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <Text style={[styles.title, { color: colors.text }]}>{t('register_title')}</Text>
+      <View style={[styles.heroCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+        <Text style={styles.kicker}>JOIN NAILSBOOK</Text>
+        <Text style={[styles.title, { color: colors.text }]}>{t('register_title')}</Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Створіть профіль клієнта або майстра за хвилину.</Text>
+      </View>
       
       <View style={styles.roleContainer}>
         <TouchableOpacity 
@@ -192,18 +196,37 @@ export const RegisterScreen = ({ navigation }: any) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
+    padding: 22,
+  },
+  heroCard: {
+    width: '100%',
+    borderRadius: 28,
+    borderWidth: 1,
+    padding: 22,
+    marginBottom: 18,
+    shadowColor: '#C88D7A',
+    shadowOffset: { width: 0, height: 14 },
+    shadowOpacity: 0.12,
+    shadowRadius: 24,
+    elevation: 4,
+  },
+  kicker: {
+    color: '#C88D7A',
+    fontSize: 12,
+    fontWeight: '900',
+    letterSpacing: 2,
+    marginBottom: 10,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 30,
+    fontSize: 31,
+    lineHeight: 37,
+    fontWeight: '900',
+    marginBottom: 8,
     color: '#333',
-    textAlign: 'center',
   },
+  subtitle: { fontSize: 15, lineHeight: 22 },
   roleContainer: {
     flexDirection: 'row',
     marginBottom: 20,
@@ -237,17 +260,17 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: '#fff',
-    borderRadius: 15,
-    padding: 15,
-    marginBottom: 15,
+    borderRadius: 18,
+    padding: 16,
+    marginBottom: 14,
     fontSize: 16,
     borderWidth: 1,
     borderColor: '#eee',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.06,
+    shadowRadius: 16,
+    elevation: 3,
   },
   primaryButton: {
     backgroundColor: '#C88D7A',
@@ -256,10 +279,10 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: 'center',
     shadowColor: '#C88D7A',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.24,
+    shadowRadius: 18,
+    elevation: 8,
     marginBottom: 15,
   },
   primaryButtonText: {

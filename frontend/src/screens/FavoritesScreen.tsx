@@ -1,50 +1,91 @@
-import React from 'react';
-import { View, Text, StyleSheet, FlatList, Image } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, FlatList, Image, ActivityIndicator, TouchableOpacity, Dimensions, Alert } from 'react-native';
+import api from '../api/client';
+import { useTheme } from '../context/ThemeContext';
+
+const { width } = Dimensions.get('window');
 
 export const FavoritesScreen = () => {
-  const dummyData = [
-    { id: '1', url: 'https://via.placeholder.com/300x300.png', likes: 12, isFav: true },
-    { id: '4', url: 'https://via.placeholder.com/300x300.png', likes: 88, isFav: true },
-  ];
+  const { colors } = useTheme();
+  const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadFavorites();
+  }, []);
+
+  const loadFavorites = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/api/gallery/favorites');
+      setItems(res.data || []);
+    } catch (e) {
+      Alert.alert('Помилка', 'Не вдалося завантажити обране');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const removeFavorite = async (id: string) => {
+    try {
+      await api.delete(`/api/gallery/${id}/like`);
+      setItems(prev => prev.filter(x => x.id !== id));
+    } catch (e) {
+      Alert.alert('Помилка', 'Не вдалося видалити з обраного');
+    }
+  };
 
   const renderItem = ({ item }: { item: any }) => (
-    <View style={styles.imageContainer}>
-      <Image source={{ uri: item.url }} style={styles.image} />
+    <View style={[styles.imageContainer, { backgroundColor: colors.card, borderColor: colors.border }]}>
+      <Image source={{ uri: item.imageUrl || item.url }} style={styles.image} />
       <View style={styles.overlay}>
         <View style={styles.actionBtn}>
           <Text style={{ fontSize: 16 }}>❤️</Text>
-          <Text style={styles.actionText}>{item.likes}</Text>
+          <Text style={styles.actionText}>{item.likesNum || item.likes || 0}</Text>
         </View>
-        <View style={styles.actionBtn}>
-          <Text style={{ fontSize: 16 }}>⭐</Text>
-        </View>
+        <TouchableOpacity style={styles.actionBtn} onPress={() => removeFavorite(item.id)}>
+          <Text style={{ fontSize: 16 }}>✕</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.headerTitle}>Збережене</Text>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.heroCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+        <Text style={styles.kicker}>SAVED IDEAS</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Збережене</Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Ваші улюблені дизайни для наступного візиту.</Text>
+      </View>
 
-      <FlatList 
-        data={dummyData}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        numColumns={2}
-        columnWrapperStyle={styles.row}
-        contentContainerStyle={{ paddingBottom: 100 }}
-      />
+      {loading ? (
+        <ActivityIndicator color={colors.primary} size="large" style={{ marginTop: 40 }} />
+      ) : (
+        <FlatList 
+          data={items}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          numColumns={2}
+          columnWrapperStyle={styles.row}
+          contentContainerStyle={{ paddingBottom: 100 }}
+          ListEmptyComponent={<Text style={[styles.emptyText, { color: colors.textSecondary }]}>В обраному поки немає фото</Text>}
+        />
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, },
-  headerTitle: { fontSize: 28, fontWeight: 'bold', color: '#333', padding: 20, paddingTop: 60, paddingBottom: 10, backgroundColor: '#fff' },
-  row: { justifyContent: 'space-between', paddingHorizontal: 15, marginBottom: 15 },
-  imageContainer: { width: '48%', aspectRatio: 1, borderRadius: 12, overflow: 'hidden', backgroundColor: '#eee', shadowColor: '#000', shadowOffset: {width: 0, height: 1}, shadowOpacity: 0.2, shadowRadius: 2, elevation: 2 },
+  container: { flex: 1, padding: 12 },
+  heroCard: { marginTop: 50, borderRadius: 28, borderWidth: 1, padding: 22, marginBottom: 16, shadowColor: '#C88D7A', shadowOffset: {width: 0, height: 12}, shadowOpacity: 0.1, shadowRadius: 22, elevation: 4 },
+  kicker: { color: '#C88D7A', fontSize: 12, fontWeight: '900', letterSpacing: 2, marginBottom: 8 },
+  headerTitle: { fontSize: 32, fontWeight: '900', marginBottom: 8 },
+  subtitle: { fontSize: 14, lineHeight: 21 },
+  row: { justifyContent: 'space-between', marginBottom: 15 },
+  imageContainer: { width: (width / 2) - 18, aspectRatio: 1, borderRadius: 22, overflow: 'hidden', borderWidth: 1, shadowColor: '#000', shadowOffset: {width: 0, height: 8}, shadowOpacity: 0.07, shadowRadius: 18, elevation: 4 },
   image: { width: '100%', height: '100%', resizeMode: 'cover' },
   overlay: { position: 'absolute', bottom: 0, left: 0, right: 0, flexDirection: 'row', justifyContent: 'space-between', padding: 10, backgroundColor: 'rgba(0,0,0,0.3)' },
   actionBtn: { flexDirection: 'row', alignItems: 'center' },
-  actionText: { color: '#fff', marginLeft: 5, fontWeight: 'bold' }
+  actionText: { color: '#fff', marginLeft: 5, fontWeight: 'bold' },
+  emptyText: { textAlign: 'center', marginTop: 40, fontSize: 15 }
 });

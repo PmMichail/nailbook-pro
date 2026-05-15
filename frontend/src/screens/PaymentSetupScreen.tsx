@@ -57,11 +57,14 @@ export const PaymentSetupScreen = () => {
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={{flexDirection: 'row', alignItems: 'center', marginTop: 40, marginBottom: 20}}>
+      <View style={[styles.heroCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={{marginRight: 10}}>
              <Text style={{fontSize: 24, fontWeight: 'bold', color: colors.primary}}>←</Text>
           </TouchableOpacity>
-          <Text style={[styles.header, { color: colors.text }]}>Налаштування Фінансів</Text>
+          <View>
+            <Text style={styles.kicker}>PAYMENTS</Text>
+            <Text style={[styles.header, { color: colors.text }]}>Налаштування Фінансів</Text>
+          </View>
       </View>
       
       {/* P2P Section */}
@@ -117,11 +120,13 @@ export const PaymentSetupScreen = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1,  padding: 15 },
-  header: { fontSize: 24, fontFamily: 'serif', fontStyle: 'italic', fontWeight: 'bold' },
+  heroCard: { flexDirection: 'row', alignItems: 'center', marginTop: 40, marginBottom: 20, borderRadius: 28, borderWidth: 1, padding: 18, shadowColor: '#C88D7A', shadowOffset: {width: 0, height: 12}, shadowOpacity: 0.1, shadowRadius: 22, elevation: 4 },
+  kicker: { color: '#C88D7A', fontSize: 12, fontWeight: '900', letterSpacing: 2, marginBottom: 4 },
+  header: { fontSize: 28, fontWeight: '900' },
   sectionTitle: { fontSize: 18, fontFamily: 'serif', fontStyle: 'italic', fontWeight: 'bold', marginBottom: 15 },
-  card: { borderRadius: 20, padding: 20, marginBottom: 20, shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.1, shadowRadius: 5, elevation: 3, borderWidth: 1 },
+  card: { borderRadius: 24, padding: 20, marginBottom: 20, shadowOffset: {width: 0, height: 8}, shadowOpacity: 0.07, shadowRadius: 18, elevation: 4, borderWidth: 1 },
   label: { fontSize: 14, marginBottom: 5 },
-  input: { borderWidth: 1, borderRadius: 10, padding: 10, marginBottom: 15, fontSize: 16 },
+  input: { borderWidth: 1, borderRadius: 18, padding: 14, marginBottom: 15, fontSize: 16 },
   btnPrimary: { borderRadius: 20, padding: 15, alignItems: 'center' },
   btnPrimaryText: { fontWeight: 'bold', fontSize: 16 }
 });

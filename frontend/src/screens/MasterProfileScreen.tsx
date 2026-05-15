@@ -178,8 +178,10 @@ export const MasterProfileScreen = ({ navigation }: any) => {
           u.lat = location.coords.latitude;
           u.lng = location.coords.longitude;
           if (addressString) u.address = addressString;
+          if (cityString) u.city = cityString;
           await AsyncStorage.setItem('user', JSON.stringify(u));
           setAddress(u.address || '');
+          setCity(u.city || '');
       }
       
       Alert.alert('Готово', `Ваша геолокація успішно збережена!\nАдреса: ${addressString || 'Координати зафіксовані'}`);
@@ -240,6 +242,14 @@ export const MasterProfileScreen = ({ navigation }: any) => {
             <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={instagram} onChangeText={setInstagram} placeholder="Instagram (наприклад: _nails_top_)" placeholderTextColor={colors.textSecondary} />
             <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={tiktok} onChangeText={setTiktok} placeholder="TikTok (наприклад: @nails_top)" placeholderTextColor={colors.textSecondary} />
             <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={facebook} onChangeText={setFacebook} placeholder="Facebook (повне посилання або нік)" placeholderTextColor={colors.textSecondary} />
+            <View style={[styles.previewCard, { borderColor: colors.border, backgroundColor: colors.background }]}>
+              <Text style={[styles.previewTitle, { color: colors.text }]}>Збережено у профілі</Text>
+              <Text style={[styles.previewText, { color: colors.textSecondary }]}>Салон: {salonName || 'назву салону ще не вказано'}</Text>
+              <Text style={[styles.previewText, { color: colors.textSecondary }]}>Адреса: {[city, address].filter(Boolean).join(', ') || 'адресу ще не вказано'}</Text>
+              <Text style={[styles.previewText, { color: colors.textSecondary }]}>Instagram: {instagram || 'не вказано'}</Text>
+              <Text style={[styles.previewText, { color: colors.textSecondary }]}>TikTok: {tiktok || 'не вказано'}</Text>
+              <Text style={[styles.previewText, { color: colors.textSecondary }]}>Facebook: {facebook || 'не вказано'}</Text>
+            </View>
             
             <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={password} onChangeText={setPassword} placeholder={t('profile.newPassword', {defaultValue: 'Новий пароль (залиште порожнім, щоб не змінювати)'})} placeholderTextColor={colors.textSecondary} secureTextEntry />
             <TouchableOpacity style={[styles.saveBtn, {backgroundColor: 'transparent', borderColor: colors.primary, borderWidth: 1, marginTop: 10, shadowColor: colors.text, elevation: 5, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.3}]} onPress={handleSaveProfile}>
@@ -356,17 +366,20 @@ export const MasterProfileScreen = ({ navigation }: any) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { padding: 30, alignItems: 'center', borderBottomWidth: 1 },
-  avatarPlaceholder: { width: 80, height: 80, borderRadius: 40, marginBottom: 5 },
-  avatarImage: { width: 80, height: 80, borderRadius: 40, marginBottom: 5 },
+  header: { margin: 16, padding: 24, alignItems: 'center', borderWidth: 1, borderRadius: 28 },
+  avatarPlaceholder: { width: 88, height: 88, borderRadius: 44, marginBottom: 5 },
+  avatarImage: { width: 88, height: 88, borderRadius: 44, marginBottom: 5 },
   editForm: { width: '100%', marginTop: 20 },
-  input: { borderWidth: 1, borderRadius: 10, padding: 12, marginBottom: 10, fontSize: 16 },
-  saveBtn: { padding: 12, borderRadius: 10, alignItems: 'center' },
+  input: { borderWidth: 1, borderRadius: 18, padding: 15, marginBottom: 12, fontSize: 16 },
+  previewCard: { borderWidth: 1, borderRadius: 18, padding: 14, marginBottom: 12 },
+  previewTitle: { fontSize: 13, fontWeight: '900', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.6 },
+  previewText: { fontSize: 13, marginTop: 3, lineHeight: 18 },
+  saveBtn: { padding: 15, borderRadius: 18, alignItems: 'center' },
   saveBtnText: { color: '#fff', fontWeight: 'bold' },
   section: { padding: 20 },
   sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#C88D7A', marginBottom: 15 },
-  settingRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 15, borderRadius: 15, marginBottom: 10 },
+  settingRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderRadius: 20, marginBottom: 12, shadowColor: '#000', shadowOffset: {width: 0, height: 6}, shadowOpacity: 0.05, shadowRadius: 14, elevation: 2 },
   settingText: { fontSize: 16 },
-  logoutButton: { margin: 20, backgroundColor: '#e0c0b4', padding: 15, borderRadius: 20, alignItems: 'center' },
+  logoutButton: { margin: 20, backgroundColor: '#e0c0b4', padding: 16, borderRadius: 20, alignItems: 'center' },
   logoutButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' }
 });

@@ -77,7 +77,7 @@ export const GalleryScreen = () => {
           await api.delete(`/api/gallery/${id}/like`);
       } else {
           // Default post to like
-          res: await api.post(`/api/gallery/${id}/like`, {});
+          await api.post(`/api/gallery/${id}/like`, {});
           Alert.alert('Успіх', t('gallery.addedToFav', {defaultValue: 'Додано в обране ❤️'}));
       }
       fetchGallery();
@@ -194,7 +194,11 @@ export const GalleryScreen = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Text style={[styles.header, { color: colors.text }]}>{t('gallery.galleryTitle', {defaultValue: 'Галерея'})}</Text>
+      <View style={[styles.heroCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+        <Text style={styles.kicker}>NAIL ART</Text>
+        <Text style={[styles.header, { color: colors.text }]}>{t('gallery.galleryTitle', {defaultValue: 'Галерея'})}</Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Портфоліо робіт, ідеї для клієнтів і обране.</Text>
+      </View>
 
       <View style={styles.tabContainer}>
         <TouchableOpacity style={[styles.tab, activeTab === 'ALL' && styles.tabActive]} onPress={() => setActiveTab('ALL')}>
@@ -282,14 +286,17 @@ export const GalleryScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 10 },
-  header: { fontSize: 24, fontWeight: 'bold', marginBottom: 15, paddingHorizontal: 5 },
-  tabContainer: { flexDirection: 'row', marginBottom: 15, paddingHorizontal: 5 },
-  tab: { flex: 1, paddingVertical: 10, alignItems: 'center', borderBottomWidth: 2, borderBottomColor: 'transparent' },
-  tabActive: { borderBottomColor: '#C88D7A' },
+  container: { flex: 1, padding: 12 },
+  heroCard: { borderRadius: 28, borderWidth: 1, padding: 22, marginBottom: 16, shadowColor: '#C88D7A', shadowOffset: {width: 0, height: 12}, shadowOpacity: 0.1, shadowRadius: 22, elevation: 4 },
+  kicker: { color: '#C88D7A', fontSize: 12, fontWeight: '900', letterSpacing: 2, marginBottom: 8 },
+  header: { fontSize: 32, fontWeight: '900', marginBottom: 8 },
+  subtitle: { fontSize: 14, lineHeight: 21 },
+  tabContainer: { flexDirection: 'row', marginBottom: 15, paddingHorizontal: 5, gap: 8 },
+  tab: { flex: 1, paddingVertical: 11, alignItems: 'center', borderRadius: 999, borderWidth: 1, borderColor: 'transparent' },
+  tabActive: { borderColor: '#C88D7A', backgroundColor: '#F3E7E2' },
   tabText: { fontSize: 16, fontWeight: 'bold' },
   tabTextActive: { },
-  imageCard: { width: (width / 2) - 15, marginHorizontal: 5, marginBottom: 15, borderRadius: 15, overflow: 'hidden', shadowColor: '#000', shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.1, shadowRadius: 3, elevation: 2, borderWidth: 1 },
+  imageCard: { width: (width / 2) - 17, marginHorizontal: 5, marginBottom: 15, borderRadius: 22, overflow: 'hidden', shadowColor: '#000', shadowOffset: {width: 0, height: 8}, shadowOpacity: 0.07, shadowRadius: 18, elevation: 4, borderWidth: 1 },
   image: { width: '100%', height: 180, resizeMode: 'cover' },
   imageFooter: { padding: 10, alignItems: 'flex-start' },
   likes: { color: '#C88D7A', fontWeight: 'bold', marginBottom: 5 },

@@ -196,16 +196,16 @@ export const ChatScreen = ({ route }: any) => {
 };
 
 const styles = StyleSheet.create({
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 15, borderBottomWidth: 1 },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', margin: 12, padding: 14, borderWidth: 1, borderRadius: 24, shadowColor: '#000', shadowOffset: {width: 0, height: 8}, shadowOpacity: 0.06, shadowRadius: 18, elevation: 3 },
   backBtn: { padding: 5 },
   msgWrapper: { marginBottom: 15, width: '100%' },
   myMsgWrapper: {},
   theirMsgWrapper: {},
-  bubble: { width: '100%', padding: 15, borderRadius: 10, shadowColor: '#000', shadowOffset: {width: 0, height: 1}, shadowOpacity: 0.1, shadowRadius: 1, elevation: 1 },
-  chatImage: { width: 220, height: 220, borderRadius: 10, marginBottom: 5 },
+  bubble: { width: '100%', padding: 15, borderRadius: 18, shadowColor: '#000', shadowOffset: {width: 0, height: 6}, shadowOpacity: 0.06, shadowRadius: 14, elevation: 2 },
+  chatImage: { width: 220, height: 220, borderRadius: 16, marginBottom: 5 },
   msgFooter: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: 5, alignItems: 'center' },
-  inputContainer: { flexDirection: 'row', alignItems: 'center', padding: 10, borderTopWidth: 1 },
+  inputContainer: { flexDirection: 'row', alignItems: 'center', margin: 12, padding: 10, borderWidth: 1, borderRadius: 24 },
   attachBtn: { padding: 10 },
   input: { flex: 1, borderRadius: 20, paddingHorizontal: 15, paddingTop: 12, paddingBottom: 12, fontSize: 16, maxHeight: 100 },
-  sendBtn: { width: 45, height: 45, borderRadius: 22.5, justifyContent: 'center', alignItems: 'center', marginLeft: 10 },
+  sendBtn: { width: 45, height: 45, borderRadius: 22.5, justifyContent: 'center', alignItems: 'center', marginLeft: 10, shadowColor: '#C88D7A', shadowOffset: {width: 0, height: 8}, shadowOpacity: 0.18, shadowRadius: 14, elevation: 4 },
 });

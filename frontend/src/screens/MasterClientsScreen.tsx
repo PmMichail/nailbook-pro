@@ -80,7 +80,11 @@ export const MasterClientsScreen = () => {
 
     return (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
-            <Text style={[styles.title, { color: colors.text }]}>Мої Клієнти</Text>
+            <View style={[styles.heroCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                <Text style={styles.kicker}>CLIENT BASE</Text>
+                <Text style={[styles.title, { color: colors.text }]}>Мої Клієнти</Text>
+                <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Клієнти, історія записів і швидкий перехід у чат.</Text>
+            </View>
             {loading ? (
                 <ActivityIndicator color={colors.primary} size="large" style={{marginTop: 50}} />
             ) : clients.length === 0 ? (
@@ -98,11 +102,14 @@ export const MasterClientsScreen = () => {
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, padding: 15 },
-    title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
-    clientCard: { borderRadius: 15, padding: 15, marginBottom: 15, borderWidth: 1, elevation: 3, shadowColor: '#000', shadowOffset: {width: 0,height: 2}, shadowOpacity: 0.1, shadowRadius: 5 },
+    container: { flex: 1, padding: 16 },
+    heroCard: { borderRadius: 28, borderWidth: 1, padding: 22, marginBottom: 18, shadowColor: '#C88D7A', shadowOffset: {width: 0, height: 12}, shadowOpacity: 0.1, shadowRadius: 22, elevation: 4 },
+    kicker: { color: '#C88D7A', fontSize: 12, fontWeight: '900', letterSpacing: 2, marginBottom: 8 },
+    title: { fontSize: 32, fontWeight: '900', marginBottom: 8 },
+    subtitle: { fontSize: 14, lineHeight: 21 },
+    clientCard: { borderRadius: 24, padding: 18, marginBottom: 15, borderWidth: 1, elevation: 4, shadowColor: '#000', shadowOffset: {width: 0,height: 8}, shadowOpacity: 0.07, shadowRadius: 18 },
     header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     info: { flex: 1 },
     name: { fontSize: 18, fontWeight: 'bold' },
-    historySection: { marginTop: 15, borderTopWidth: 1, borderTopColor: '#444', paddingTop: 10 }
+    historySection: { marginTop: 15, borderTopWidth: 1, borderTopColor: '#E7DAD4', paddingTop: 12 }
 });

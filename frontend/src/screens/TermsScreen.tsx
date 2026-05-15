@@ -9,7 +9,7 @@ export const TermsScreen = () => {
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={{marginRight: 15}}>
            <Text style={{fontSize: 24, fontWeight: 'bold', color: colors.primary}}>←</Text>
         </TouchableOpacity>
@@ -48,8 +48,8 @@ export const TermsScreen = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20 },
-  header: { flexDirection: 'row', alignItems: 'center', marginBottom: 20, marginTop: 40 },
-  title: { fontSize: 24, fontWeight: 'bold' },
-  card: { padding: 20, borderRadius: 15, borderWidth: 1 },
+  header: { flexDirection: 'row', alignItems: 'center', marginBottom: 20, marginTop: 40, borderRadius: 28, borderWidth: 1, padding: 18, shadowColor: '#C88D7A', shadowOffset: {width: 0, height: 12}, shadowOpacity: 0.1, shadowRadius: 22, elevation: 4 },
+  title: { fontSize: 28, fontWeight: '900' },
+  card: { padding: 20, borderRadius: 24, borderWidth: 1 },
   text: { fontSize: 14, lineHeight: 22 }
 });

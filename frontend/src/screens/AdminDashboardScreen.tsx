@@ -88,7 +88,7 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
                     </View>
                 </View>
                 <TouchableOpacity onPress={handleLogout} style={styles.logoutBtn}>
-                    <Text style={styles.logoutTxt}>ВІДКЛЮЧИТИ</Text>
+                    <Text style={styles.logoutTxt}>ВИЙТИ</Text>
                 </TouchableOpacity>
             </View>
 
@@ -197,9 +197,9 @@ export const AdminDashboardScreen = ({ navigation }: any) => {
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#020617', paddingHorizontal: 20, paddingTop: 10 },
     center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#020617' },
-    headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 20, marginTop: 50 },
+    headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 20, marginTop: 50, gap: 12 },
     headerTitleContainer: { flexDirection: 'column' },
-    header: { fontSize: 26, fontWeight: '900', color: '#F8FAFC', letterSpacing: 2 },
+    header: { fontSize: 24, fontWeight: '900', color: '#F8FAFC', letterSpacing: 1.4 },
     liveStatus: { flexDirection: 'row', alignItems: 'center', marginTop: 4 },
     pulseDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#00FFAA', marginRight: 8, shadowColor: '#00FFAA', shadowOpacity: 1, shadowRadius: 5, shadowOffset: {width: 0, height: 0} },
     liveText: { color: '#00FFAA', fontSize: 12, fontWeight: 'bold', letterSpacing: 1 },

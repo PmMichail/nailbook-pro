@@ -54,7 +54,7 @@ export const ChatsListScreen = () => {
                 id: chat.id,
                 roomId: chat.roomId,
                 userName: otherUser.name || otherUser.salonName || otherUser.phone || fallbackName,
-                avatar: otherUser.avatarUrl || 'https://via.placeholder.com/100x100.png',
+                avatar: otherUser.avatarUrl || '',
                 lastMessage: lastMsg,
                 time: displayTime,
                 unreadCount: 0 
@@ -100,7 +100,13 @@ export const ChatsListScreen = () => {
       onPress={() => navigation.navigate('ChatScreen', { roomId: item.roomId, receiverName: item.userName })}
       onLongPress={() => deleteChat(item.id, item.userName)}
     >
-      <Image source={{ uri: item.avatar }} style={[styles.avatar, { borderColor: colors.border, borderWidth: 1 }]} />
+      {item.avatar ? (
+        <Image source={{ uri: item.avatar }} style={[styles.avatar, { borderColor: colors.border, borderWidth: 1 }]} />
+      ) : (
+        <View style={[styles.avatar, styles.avatarFallback, { borderColor: colors.border, backgroundColor: colors.background }]}>
+          <Text style={{ color: colors.primary, fontWeight: '900' }}>NB</Text>
+        </View>
+      )}
       
       <View style={styles.chatInfo}>
         <View style={styles.chatHeader}>
@@ -120,14 +126,18 @@ export const ChatsListScreen = () => {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.card }]}>
-      <Text style={[styles.headerTitle, { backgroundColor: colors.card, color: colors.text, borderBottomColor: colors.border, borderBottomWidth: 1 }]}>{t('chats.messages', {defaultValue: 'Повідомлення'})}</Text>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.heroCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+        <Text style={styles.kicker}>MESSAGES</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>{t('chats.messages', {defaultValue: 'Повідомлення'})}</Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Ваші діалоги з клієнтами та майстрами.</Text>
+      </View>
       
       <FlatList 
         data={chats}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
-        contentContainerStyle={{ padding: 15 }}
+        contentContainerStyle={{ padding: 15, paddingTop: 0 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
         style={{ backgroundColor: colors.background }}
         ListEmptyComponent={
@@ -140,9 +150,13 @@ export const ChatsListScreen = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  headerTitle: { fontSize: 26, fontFamily: 'serif', fontStyle: 'italic', padding: 20, paddingTop: 60, paddingBottom: 15 },
-  chatListItem: { flexDirection: 'row', padding: 15, borderRadius: 16, marginBottom: 12, alignItems: 'center', shadowColor: '#000', shadowOffset: {width: 0, height: 1}, shadowOpacity: 0.05, shadowRadius: 3, elevation: 2, borderWidth: 1 },
+  heroCard: { margin: 15, marginTop: 55, borderRadius: 28, borderWidth: 1, padding: 22, shadowColor: '#C88D7A', shadowOffset: {width: 0, height: 12}, shadowOpacity: 0.1, shadowRadius: 22, elevation: 4 },
+  kicker: { color: '#C88D7A', fontSize: 12, fontWeight: '900', letterSpacing: 2, marginBottom: 8 },
+  headerTitle: { fontSize: 32, fontWeight: '900', marginBottom: 8 },
+  subtitle: { fontSize: 14, lineHeight: 21 },
+  chatListItem: { flexDirection: 'row', padding: 16, borderRadius: 24, marginBottom: 12, alignItems: 'center', shadowColor: '#000', shadowOffset: {width: 0, height: 8}, shadowOpacity: 0.07, shadowRadius: 18, elevation: 4, borderWidth: 1 },
   avatar: { width: 60, height: 60, borderRadius: 30, marginRight: 15 },
+  avatarFallback: { borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
   chatInfo: { flex: 1 },
   chatHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8, alignItems: 'center' },
   userName: { fontSize: 18, fontFamily: 'serif', fontWeight: 'bold' },

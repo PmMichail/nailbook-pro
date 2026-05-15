@@ -33,11 +33,14 @@ export const StatisticsScreen = () => {
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={{flexDirection: 'row', alignItems: 'center', marginTop: 40, marginBottom: 20}}>
+      <View style={[styles.heroCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={{marginRight: 10}}>
              <Text style={{fontSize: 24, fontWeight: 'bold', color: colors.primary}}>←</Text>
           </TouchableOpacity>
-          <Text style={[styles.header, { color: colors.text }]}>Статистика</Text>
+          <View>
+            <Text style={styles.kicker}>ANALYTICS</Text>
+            <Text style={[styles.header, { color: colors.text }]}>Статистика</Text>
+          </View>
       </View>
 
       <View style={[styles.segmentControl, { backgroundColor: isDark ? '#333' : '#e0e0e0' }]}>
@@ -105,17 +108,19 @@ export const StatisticsScreen = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, paddingHorizontal: 20 },
-  header: { fontSize: 28, fontFamily: 'serif', fontStyle: 'italic', fontWeight: 'bold' },
-  segmentControl: { flexDirection: 'row', borderRadius: 8, padding: 4, marginBottom: 20 },
-  segmentBtn: { flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 6 },
+  heroCard: { flexDirection: 'row', alignItems: 'center', marginTop: 40, marginBottom: 20, borderRadius: 28, borderWidth: 1, padding: 18, shadowColor: '#C88D7A', shadowOffset: {width: 0, height: 12}, shadowOpacity: 0.1, shadowRadius: 22, elevation: 4 },
+  kicker: { color: '#C88D7A', fontSize: 12, fontWeight: '900', letterSpacing: 2, marginBottom: 4 },
+  header: { fontSize: 32, fontWeight: '900' },
+  segmentControl: { flexDirection: 'row', borderRadius: 999, padding: 4, marginBottom: 20 },
+  segmentBtn: { flex: 1, paddingVertical: 9, alignItems: 'center', borderRadius: 999 },
   segmentText: { fontSize: 12, fontWeight: 'bold' },
   content: { paddingBottom: 40 },
-  card: { padding: 20, borderRadius: 15, marginBottom: 15, alignItems: 'center', borderWidth: 1 },
+  card: { padding: 20, borderRadius: 24, marginBottom: 15, alignItems: 'center', borderWidth: 1, shadowColor: '#000', shadowOffset: {width: 0, height: 8}, shadowOpacity: 0.07, shadowRadius: 18, elevation: 4 },
   row: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 15 },
-  cardHalf: { padding: 20, borderRadius: 15, width: '48%', alignItems: 'center', borderWidth: 1 },
+  cardHalf: { padding: 20, borderRadius: 24, width: '48%', alignItems: 'center', borderWidth: 1 },
   cardTitle: { fontSize: 14, marginBottom: 5 },
   cardValue: { fontSize: 32, fontWeight: 'bold' },
-  listCard: { padding: 20, borderRadius: 15, marginBottom: 15, borderWidth: 1 },
+  listCard: { padding: 20, borderRadius: 24, marginBottom: 15, borderWidth: 1 },
   listTitle: { fontSize: 18, fontFamily: 'serif', fontStyle: 'italic', fontWeight: 'bold', marginBottom: 15 },
   listItem: { flexDirection: 'row', justifyContent: 'space-between', borderBottomWidth: 1, paddingVertical: 10 },
   listLabel: { fontSize: 16 },

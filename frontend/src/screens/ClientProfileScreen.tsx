@@ -349,20 +349,20 @@ export const ClientProfileScreen = ({ navigation }: any) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { padding: 30, alignItems: 'center', borderBottomWidth: 1 },
-  avatarPlaceholder: { width: 80, height: 80, borderRadius: 40, marginBottom: 5 },
-  avatarImage: { width: 80, height: 80, borderRadius: 40, marginBottom: 5 },
+  header: { margin: 16, padding: 24, alignItems: 'center', borderWidth: 1, borderRadius: 28 },
+  avatarPlaceholder: { width: 88, height: 88, borderRadius: 44, marginBottom: 5 },
+  avatarImage: { width: 88, height: 88, borderRadius: 44, marginBottom: 5 },
   editForm: { width: '100%', marginTop: 20 },
-  input: { borderWidth: 1, borderRadius: 10, padding: 12, marginBottom: 10, fontSize: 16 },
-  saveBtn: { padding: 15, borderRadius: 12, alignItems: 'center', marginTop: 5 },
+  input: { borderWidth: 1, borderRadius: 18, padding: 15, marginBottom: 12, fontSize: 16 },
+  saveBtn: { padding: 16, borderRadius: 18, alignItems: 'center', marginTop: 5 },
   saveBtnText: { fontWeight: 'bold' },
   section: { padding: 20, paddingBottom: 0 },
   sectionTitle: { fontSize: 22, fontFamily: 'serif', fontStyle: 'italic', marginBottom: 15 },
-  card: { padding: 20, borderRadius: 16, marginBottom: 10, borderWidth: 1 },
+  card: { padding: 20, borderRadius: 22, marginBottom: 12, borderWidth: 1, shadowColor: '#000', shadowOffset: {width: 0, height: 8}, shadowOpacity: 0.06, shadowRadius: 18, elevation: 3 },
   cardTitle: { fontSize: 16, fontWeight: 'bold', marginBottom: 5 },
   actionBtn: { paddingHorizontal: 15, paddingVertical: 10, borderRadius: 20, borderWidth: 1, backgroundColor: 'transparent' },
-  settingRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 15, borderRadius: 12, marginBottom: 10, borderWidth: 1 },
+  settingRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderRadius: 18, marginBottom: 10, borderWidth: 1 },
   settingText: { fontSize: 16 },
-  logoutButton: { margin: 20, padding: 15, borderRadius: 12, alignItems: 'center' },
+  logoutButton: { margin: 20, padding: 16, borderRadius: 18, alignItems: 'center' },
   logoutButtonText: { fontSize: 14, fontWeight: 'bold' }
 });

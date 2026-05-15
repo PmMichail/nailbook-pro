@@ -140,6 +140,21 @@ export const ClientCalendarScreen = ({ navigation }: any) => {
     }
   };
 
+  const normalizeSocialUrl = (value: string, platform: 'instagram' | 'tiktok' | 'facebook') => {
+    const clean = value.trim();
+    if (!clean) return null;
+    if (clean.startsWith('http://') || clean.startsWith('https://')) return clean;
+    const handle = clean.replace(/^@/, '').replace(/^\/+/, '');
+    if (platform === 'instagram') return `https://instagram.com/${handle}`;
+    if (platform === 'tiktok') return `https://tiktok.com/@${handle}`;
+    return `https://facebook.com/${handle}`;
+  };
+
+  const openSocial = (value: string, platform: 'instagram' | 'tiktok' | 'facebook') => {
+    const url = normalizeSocialUrl(value, platform);
+    if (url) Linking.openURL(url);
+  };
+
   const markedDates: any = {};
   if (selectedDay) {
     markedDates[selectedDay] = { selected: true, selectedColor: colors.primary, selectedTextColor: '#fff' };
@@ -173,20 +188,20 @@ export const ClientCalendarScreen = ({ navigation }: any) => {
             <Text style={[styles.overTitle, { color: colors.primary }]}>{masterType === 'salon' ? t('clientCalendar.salonPrefix', {defaultValue: 'САЛОН '}) : (masterType === 'master' ? t('clientCalendar.masterPrefix', {defaultValue: 'МАЙСТЕР '}) : '')}{masterName}</Text>
             
             {(socialLinks.instagram || socialLinks.tiktok || socialLinks.facebook) ? (
-              <View style={{flexDirection: 'row', gap: 15, marginBottom: 15}}>
+              <View style={styles.socialRow}>
                 {!!socialLinks.instagram && (
-                  <TouchableOpacity onPress={() => Linking.openURL(`https://instagram.com/${socialLinks.instagram}`)}>
-                     <Text style={{fontSize: 20}}>📷</Text>
+                  <TouchableOpacity style={styles.socialBtn} onPress={() => openSocial(socialLinks.instagram, 'instagram')}>
+                     <Text style={styles.socialText}>Instagram</Text>
                   </TouchableOpacity>
                 )}
                 {!!socialLinks.tiktok && (
-                  <TouchableOpacity onPress={() => Linking.openURL(`https://tiktok.com/@${socialLinks.tiktok}`)}>
-                     <Text style={{fontSize: 20}}>🎵</Text>
+                  <TouchableOpacity style={styles.socialBtn} onPress={() => openSocial(socialLinks.tiktok, 'tiktok')}>
+                     <Text style={styles.socialText}>TikTok</Text>
                   </TouchableOpacity>
                 )}
                 {!!socialLinks.facebook && (
-                  <TouchableOpacity onPress={() => Linking.openURL(`https://facebook.com/${socialLinks.facebook}`)}>
-                     <Text style={{fontSize: 20}}>📘</Text>
+                  <TouchableOpacity style={styles.socialBtn} onPress={() => openSocial(socialLinks.facebook, 'facebook')}>
+                     <Text style={styles.socialText}>Facebook</Text>
                   </TouchableOpacity>
                 )}
               </View>
@@ -241,17 +256,6 @@ export const ClientCalendarScreen = ({ navigation }: any) => {
                 key={isDark ? 'dark' : 'light'}
                 current={new Date().toISOString().split('T')[0]}
                 minDate={new Date().toISOString().split('T')[0]}
-                theme={{
-                  calendarBackground: colors.card,
-                  textSectionTitleColor: colors.textSecondary,
-                  selectedDayBackgroundColor: colors.primary,
-                  selectedDayTextColor: '#ffffff',
-                  todayTextColor: colors.primary,
-                  dayTextColor: colors.text,
-                  textDisabledColor: isDark ? '#444444' : '#d9e1e8',
-                  monthTextColor: colors.text,
-                  arrowColor: colors.primary,
-                }}
                 onDayPress={(day: any) => {
                     setSelectedDay(day.dateString);
                     setSelectedSlot(null);
@@ -346,6 +350,9 @@ const styles = StyleSheet.create({
   overTitle: { fontSize: 10, letterSpacing: 3, marginBottom: 15, fontWeight: 'bold' },
   heroTitle: { fontSize: 40, fontFamily: 'serif', fontStyle: 'italic', lineHeight: 46 },
   heroDesc: { fontSize: 13, marginTop: 20, lineHeight: 22, borderLeftWidth: 2, paddingLeft: 15 },
+  socialRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 15 },
+  socialBtn: { backgroundColor: '#F3E7E2', borderWidth: 1, borderColor: '#E0C0B4', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999 },
+  socialText: { color: '#7A3E2F', fontSize: 12, fontWeight: '900' },
 
   serviceWrapper: { borderRadius: 12, marginBottom: 16, borderWidth: 1 },
   gradientBg: { minHeight: 140, borderRadius: 12, overflow: 'hidden' },

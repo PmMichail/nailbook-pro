@@ -46,6 +46,7 @@ export const SearchMastersScreen = () => {
 
     const renderMaster = ({ item }: { item: any }) => {
         const isCurrentMaster = currentUser?.masterId === item.id;
+        const hasAddress = !![item.city, item.address].filter(Boolean).length;
         
         return (
             <TouchableOpacity 
@@ -76,11 +77,16 @@ export const SearchMastersScreen = () => {
                     </View>
                     <View style={styles.info}>
                         <Text style={[styles.name, { color: colors.text }]}>{item.salonName || item.name}</Text>
-                        <View style={{flexDirection: 'row', alignItems: 'center', marginTop: 6}}>
+                        <View style={{flexDirection: 'row', alignItems: 'flex-start', marginTop: 8}}>
                             <Text style={{fontSize: 14, marginRight: 4}}>📍</Text>
-                            <Text style={[styles.city, {flex: 1, color: colors.textSecondary}]}>
-                               {[item.city, item.address].filter(Boolean).join(', ') || 'Адресу салону не вказано'}
-                            </Text>
+                            <View style={{flex: 1}}>
+                                <Text style={[styles.city, { color: hasAddress ? colors.text : colors.textSecondary }]}>
+                                   {item.city || 'Місто не вказано'}
+                                </Text>
+                                <Text style={[styles.address, { color: hasAddress ? colors.textSecondary : '#D92D20' }]}>
+                                   {item.address || 'Майстер ще не вказав адресу салону'}
+                                </Text>
+                            </View>
                         </View>
                         {item.distance !== undefined && item.distance !== null && (
                             <Text style={{fontSize: 12, color: colors.primary, marginTop: 4, fontWeight: '600'}}>
@@ -163,5 +169,6 @@ const styles = StyleSheet.create({
     avatarPlaceholder: { width: 50, height: 50, borderRadius: 25, backgroundColor: '#C88D7A', justifyContent: 'center', alignItems: 'center', marginRight: 15 },
     info: { flex: 1 },
     name: { fontSize: 18, fontWeight: 'bold' },
-    city: { fontSize: 14, color: '#888', marginTop: 4 }
+    city: { fontSize: 14, color: '#888', fontWeight: '700' },
+    address: { fontSize: 13, marginTop: 3, lineHeight: 18 }
 });

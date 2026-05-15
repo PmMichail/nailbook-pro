@@ -78,6 +78,21 @@ export const PublicMasterGalleryScreen = () => {
       }
   };
 
+  const normalizeSocialUrl = (value: string, platform: 'instagram' | 'tiktok' | 'facebook') => {
+    const clean = value.trim();
+    if (!clean) return null;
+    if (clean.startsWith('http://') || clean.startsWith('https://')) return clean;
+    const handle = clean.replace(/^@/, '').replace(/^\/+/, '');
+    if (platform === 'instagram') return `https://instagram.com/${handle}`;
+    if (platform === 'tiktok') return `https://tiktok.com/@${handle}`;
+    return `https://facebook.com/${handle}`;
+  };
+
+  const openSocial = (value: string, platform: 'instagram' | 'tiktok' | 'facebook') => {
+    const url = normalizeSocialUrl(value, platform);
+    if (url) Linking.openURL(url);
+  };
+
   const renderItem = ({ item }: any) => (
     <View style={[styles.imageCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
       <TouchableOpacity 
@@ -114,20 +129,20 @@ export const PublicMasterGalleryScreen = () => {
       )}
       
       {masterInfo && (masterInfo.instagram || masterInfo.tiktok || masterInfo.facebook) ? (
-        <View style={{flexDirection: 'row', gap: 15, marginBottom: 15, paddingHorizontal: 5}}>
+        <View style={styles.socialRow}>
           {!!masterInfo.instagram && (
-            <TouchableOpacity onPress={() => Linking.openURL(`https://instagram.com/${masterInfo.instagram}`)}>
-               <Text style={{fontSize: 24}}>📷</Text>
+            <TouchableOpacity style={styles.socialBtn} onPress={() => openSocial(masterInfo.instagram, 'instagram')}>
+               <Text style={styles.socialText}>Instagram</Text>
             </TouchableOpacity>
           )}
           {!!masterInfo.tiktok && (
-            <TouchableOpacity onPress={() => Linking.openURL(`https://tiktok.com/@${masterInfo.tiktok}`)}>
-               <Text style={{fontSize: 24}}>🎵</Text>
+            <TouchableOpacity style={styles.socialBtn} onPress={() => openSocial(masterInfo.tiktok, 'tiktok')}>
+               <Text style={styles.socialText}>TikTok</Text>
             </TouchableOpacity>
           )}
           {!!masterInfo.facebook && (
-            <TouchableOpacity onPress={() => Linking.openURL(`https://facebook.com/${masterInfo.facebook}`)}>
-               <Text style={{fontSize: 24}}>📘</Text>
+            <TouchableOpacity style={styles.socialBtn} onPress={() => openSocial(masterInfo.facebook, 'facebook')}>
+               <Text style={styles.socialText}>Facebook</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -171,6 +186,9 @@ const styles = StyleSheet.create({
   header: { fontSize: 20, fontWeight: 'bold', marginBottom: 15, paddingHorizontal: 5 },
   imageCard: { width: (width / 2) - 15, marginHorizontal: 5, marginBottom: 15, borderRadius: 15, overflow: 'hidden', shadowColor: '#000', shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.1, shadowRadius: 3, elevation: 2, borderWidth: 1 },
   image: { width: '100%', height: 180, resizeMode: 'cover' },
+  socialRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 15, paddingHorizontal: 5 },
+  socialBtn: { backgroundColor: '#F3E7E2', borderWidth: 1, borderColor: '#E0C0B4', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999 },
+  socialText: { color: '#7A3E2F', fontSize: 13, fontWeight: '800' },
   imageFooter: { padding: 10, alignItems: 'flex-start' },
   tagsContainer: { flexDirection: 'row', flexWrap: 'wrap' },
   tagText: { color: '#fff', backgroundColor: '#e0c0b4', fontSize: 10, paddingHorizontal: 5, paddingVertical: 2, borderRadius: 5, marginRight: 3, marginBottom: 3, overflow: 'hidden' },

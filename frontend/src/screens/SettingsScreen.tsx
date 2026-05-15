@@ -46,7 +46,10 @@ export const SettingsScreen = () => {
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
-      <Text style={[styles.header, { color: colors.text }]}>{t('settings')}</Text>
+      <View style={[styles.heroCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+        <Text style={styles.kicker}>APP SETTINGS</Text>
+        <Text style={[styles.header, { color: colors.text }]}>{t('settings')}</Text>
+      </View>
 
       <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('settings')}</Text>
@@ -79,8 +82,8 @@ export const SettingsScreen = () => {
 
       <View style={styles.footer}>
         <Text style={styles.footerText}>NailsBook Pro v{Constants.expoConfig?.version || '1.0.1'}</Text>
-        <TouchableOpacity onPress={() => Linking.openURL('https://www.abrikos.dp.ua/privacy')}><Text style={styles.footerLink}>{t('privacyPolicy', {defaultValue: 'Політика конфіденційності'})}</Text></TouchableOpacity>
-        <TouchableOpacity onPress={() => Linking.openURL('https://telegra.ph/Umovi-vikoristannya-NailsBook-Pro-05-02')}><Text style={styles.footerLink}>{t('termsOfUse', {defaultValue: 'Умови використання'})}</Text></TouchableOpacity>
+        <TouchableOpacity onPress={() => Linking.openURL('https://grandprestig.dp.ua/info/privacy.html')}><Text style={styles.footerLink}>{t('privacyPolicy', {defaultValue: 'Privacy Policy'})}</Text></TouchableOpacity>
+        <TouchableOpacity onPress={() => Linking.openURL('https://grandprestig.dp.ua/info/terms.html')}><Text style={styles.footerLink}>{t('termsOfUse', {defaultValue: 'Terms of Use'})}</Text></TouchableOpacity>
         <TouchableOpacity onPress={() => Linking.openURL('https://www.abrikos.dp.ua/support.html')}><Text style={styles.footerLink}>{t('support', {defaultValue: 'Підтримка'})}</Text></TouchableOpacity>
       </View>
     </ScrollView>
@@ -88,9 +91,11 @@ export const SettingsScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1,  paddingHorizontal: 15 },
-  header: { fontSize: 28, fontWeight: 'bold', color: '#333', marginTop: 50, marginBottom: 20, paddingHorizontal: 5 },
-  section: { backgroundColor: '#fff', borderRadius: 20, marginBottom: 20, padding: 5, shadowColor: '#000', shadowOffset: {width: 0, height: 1}, shadowOpacity: 0.1, shadowRadius: 2, elevation: 2 },
+  container: { flex: 1, paddingHorizontal: 15 },
+  heroCard: { marginTop: 50, borderRadius: 28, borderWidth: 1, padding: 22, marginBottom: 18, shadowColor: '#C88D7A', shadowOffset: {width: 0, height: 12}, shadowOpacity: 0.1, shadowRadius: 22, elevation: 4 },
+  kicker: { color: '#C88D7A', fontSize: 12, fontWeight: '900', letterSpacing: 2, marginBottom: 8 },
+  header: { fontSize: 32, fontWeight: '900', color: '#333' },
+  section: { backgroundColor: '#fff', borderRadius: 24, marginBottom: 20, padding: 5, shadowColor: '#000', shadowOffset: {width: 0, height: 8}, shadowOpacity: 0.07, shadowRadius: 18, elevation: 4 },
   sectionTitle: { fontSize: 13, fontWeight: 'bold', color: '#999', textTransform: 'uppercase', paddingHorizontal: 15, paddingTop: 10, paddingBottom: 5 },
   menuItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 15, paddingHorizontal: 15, borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
   menuText: { fontSize: 16, color: '#333' },

@@ -9,8 +9,8 @@ import { useTheme } from '../context/ThemeContext';
 
 const API_KEY_IOS = "appl_DhQYpxSPNdHufxhMEhLdzmltNlV";
 const API_KEY_ANDROID = "goog_zwzVaWsrqGBNEpPxFoHxsUUBFdu";
-const PRIVACY_URL = 'https://www.abrikos.dp.ua/privacy';
-const TERMS_URL = 'https://telegra.ph/Umovi-vikoristannya-NailsBook-Pro-05-02';
+const PRIVACY_URL = 'https://grandprestig.dp.ua/info/privacy.html';
+const TERMS_URL = 'https://grandprestig.dp.ua/info/terms.html';
 
 export const SubscriptionScreen = ({ navigation }: any) => {
   const { t } = useTranslation();
@@ -168,7 +168,7 @@ export const SubscriptionScreen = ({ navigation }: any) => {
         <Text style={[styles.legalText, { color: colors.textSecondary }]}>NailsBook Pro — {priceText}. Підписка поновлюється автоматично, доки її не скасовано щонайменше за 24 години до завершення поточного періоду.</Text>
         <View style={styles.legalLinksRow}>
           <TouchableOpacity hitSlop={12} onPress={() => openLegalLink(PRIVACY_URL)}><Text style={styles.legalLink}>Privacy Policy</Text></TouchableOpacity>
-          <TouchableOpacity hitSlop={12} onPress={() => openLegalLink(TERMS_URL)}><Text style={styles.legalLink}>Terms of Use (EULA)</Text></TouchableOpacity>
+          <TouchableOpacity hitSlop={12} onPress={() => openLegalLink(TERMS_URL)}><Text style={styles.legalLink}>Terms of Use</Text></TouchableOpacity>
         </View>
       </View>
 

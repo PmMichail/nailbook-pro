@@ -97,8 +97,10 @@ export const ClientAppointmentsScreen = () => {
       style={[styles.container, { backgroundColor: colors.background }]}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
     >
-      <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20}}>
+      <View style={[styles.heroCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+        <Text style={styles.kicker}>MY VISITS</Text>
         <Text style={[styles.header, { color: colors.text }]}>{t('clientAppointments.title', {defaultValue: 'Мої Записи'})}</Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Всі майбутні та минулі записи з оплатою і статусами.</Text>
       </View>
       
       {appointments.length === 0 ? (
@@ -202,16 +204,19 @@ export const ClientAppointmentsScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1,  padding: 15 },
-  header: { fontSize: 24, fontFamily: 'serif', fontStyle: 'italic', marginBottom: 20 },
+  container: { flex: 1, padding: 16 },
+  heroCard: { borderRadius: 28, borderWidth: 1, padding: 22, marginBottom: 18, shadowColor: '#C88D7A', shadowOffset: {width: 0, height: 12}, shadowOpacity: 0.1, shadowRadius: 22, elevation: 4 },
+  kicker: { color: '#C88D7A', fontSize: 12, fontWeight: '900', letterSpacing: 2, marginBottom: 8 },
+  header: { fontSize: 32, fontWeight: '900', marginBottom: 8 },
+  subtitle: { fontSize: 14, lineHeight: 21 },
   emptyText: { textAlign: 'center', marginTop: 40, fontSize: 16 },
-  card: { borderRadius: 16, padding: 20, marginBottom: 15, borderWidth: 1, shadowColor: '#000', shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.1, shadowRadius: 5, elevation: 3 },
+  card: { borderRadius: 24, padding: 20, marginBottom: 15, borderWidth: 1, shadowColor: '#000', shadowOffset: {width: 0, height: 8}, shadowOpacity: 0.07, shadowRadius: 18, elevation: 4 },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 },
   dateText: { fontSize: 18, fontFamily: 'serif', fontWeight: 'bold' },
-  statusBadge: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10, fontSize: 10, fontWeight: 'bold', overflow: 'hidden' },
+  statusBadge: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999, fontSize: 10, fontWeight: 'bold', overflow: 'hidden' },
   masterText: { fontSize: 14, marginBottom: 10 },
   priceText: { fontSize: 16, fontWeight: '600', marginBottom: 20 },
-  cancelBtn: { padding: 15, borderRadius: 12, alignItems: 'center' },
+  cancelBtn: { padding: 15, borderRadius: 18, alignItems: 'center' },
   cancelBtnText: { fontWeight: 'bold', fontSize: 14 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'center', padding: 20 },
   modalContent: { borderRadius: 20, padding: 24, elevation: 5 },
