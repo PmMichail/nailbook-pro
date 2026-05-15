@@ -39,7 +39,7 @@ export const SettingsScreen = () => {
         'Для безпечного видалення акаунта напишіть у підтримку. Ми підтвердимо особу та видалимо дані згідно з політикою конфіденційності.',
         [
           { text: t('cancel'), style: 'cancel' },
-          { text: t('support', {defaultValue: 'Підтримка'}), onPress: () => Linking.openURL('https://t.me/nailbook_support') }
+          { text: t('support', {defaultValue: 'Підтримка'}), onPress: () => Linking.openURL('https://www.abrikos.dp.ua/support.html') }
         ]
       );
   };
@@ -79,9 +79,9 @@ export const SettingsScreen = () => {
 
       <View style={styles.footer}>
         <Text style={styles.footerText}>NailsBook Pro v{Constants.expoConfig?.version || '1.0.1'}</Text>
-        <TouchableOpacity onPress={() => Linking.openURL('https://telegra.ph/Poltika-konfdencijnost-NailsBook-Pro-05-02')}><Text style={styles.footerLink}>{t('privacyPolicy', {defaultValue: 'Політика конфіденційності'})}</Text></TouchableOpacity>
+        <TouchableOpacity onPress={() => Linking.openURL('https://www.abrikos.dp.ua/privacy')}><Text style={styles.footerLink}>{t('privacyPolicy', {defaultValue: 'Політика конфіденційності'})}</Text></TouchableOpacity>
         <TouchableOpacity onPress={() => Linking.openURL('https://telegra.ph/Umovi-vikoristannya-NailsBook-Pro-05-02')}><Text style={styles.footerLink}>{t('termsOfUse', {defaultValue: 'Умови використання'})}</Text></TouchableOpacity>
-        <TouchableOpacity onPress={() => Linking.openURL('https://t.me/nailbook_support')}><Text style={styles.footerLink}>{t('support', {defaultValue: 'Підтримка (Telegram)'})}</Text></TouchableOpacity>
+        <TouchableOpacity onPress={() => Linking.openURL('https://www.abrikos.dp.ua/support.html')}><Text style={styles.footerLink}>{t('support', {defaultValue: 'Підтримка'})}</Text></TouchableOpacity>
       </View>
     </ScrollView>
   );

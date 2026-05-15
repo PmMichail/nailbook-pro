@@ -9,7 +9,7 @@ import { useTheme } from '../context/ThemeContext';
 
 const API_KEY_IOS = "appl_DhQYpxSPNdHufxhMEhLdzmltNlV";
 const API_KEY_ANDROID = "goog_zwzVaWsrqGBNEpPxFoHxsUUBFdu";
-const PRIVACY_URL = 'https://telegra.ph/Poltika-konfdencijnost-NailsBook-Pro-05-02';
+const PRIVACY_URL = 'https://www.abrikos.dp.ua/privacy';
 const TERMS_URL = 'https://telegra.ph/Umovi-vikoristannya-NailsBook-Pro-05-02';
 
 export const SubscriptionScreen = ({ navigation }: any) => {
