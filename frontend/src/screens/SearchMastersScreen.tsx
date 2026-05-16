@@ -46,13 +46,6 @@ export const SearchMastersScreen = () => {
 
     const renderMaster = ({ item }: { item: any }) => {
         const isCurrentMaster = currentUser?.masterId === item.id;
-        const locationText = [item.city, item.address].filter(Boolean).join(', ');
-        const hasAddress = !!locationText;
-        const socials = [
-            item.instagram ? { label: 'Instagram', value: item.instagram } : null,
-            item.tiktok ? { label: 'TikTok', value: item.tiktok } : null,
-            item.facebook ? { label: 'Facebook', value: item.facebook } : null
-        ].filter(Boolean) as any[];
         
         return (
             <TouchableOpacity 
@@ -83,32 +76,14 @@ export const SearchMastersScreen = () => {
                     </View>
                     <View style={styles.info}>
                         <Text style={[styles.name, { color: colors.text }]}>{item.salonName || item.name}</Text>
-                        <View style={[styles.contactBlock, { backgroundColor: colors.background, borderColor: colors.border }]}>
-                            <Text style={styles.contactLabel}>АДРЕСА САЛОНУ</Text>
-                            <Text style={[styles.address, { color: hasAddress ? colors.text : '#D92D20' }]}>
-                               📍 {hasAddress ? locationText : 'Майстер ще не вказав адресу салону'}
-                            </Text>
-                        </View>
                         {item.distance !== undefined && item.distance !== null && (
                             <Text style={{fontSize: 12, color: colors.primary, marginTop: 4, fontWeight: '600'}}>
                                 Відстань: ~{item.distance.toFixed(1)} км від вас
                             </Text>
                         )}
-                        <View style={[styles.contactBlock, { backgroundColor: colors.background, borderColor: colors.border }]}>
-                            <Text style={styles.contactLabel}>СОЦМЕРЕЖІ</Text>
-                            {socials.length > 0 ? (
-                                <View style={styles.socialRow}>
-                                    {socials.map((social) => (
-                                        <Text key={social.label} style={styles.socialChip}>{social.label}</Text>
-                                    ))}
-                                </View>
-                            ) : (
-                                <Text style={[styles.noSocialText, { color: colors.textSecondary }]}>Майстер ще не додав соцмережі</Text>
-                            )}
-                        </View>
                     </View>
                 </View>
-                <Text style={[styles.openHint, { color: colors.primary }]}>Відкрити портфоліо, адресу та соцмережі →</Text>
+                <Text style={[styles.openHint, { color: colors.primary }]}>Переглянути портфоліо →</Text>
             </TouchableOpacity>
         );
     };
@@ -195,10 +170,5 @@ const styles = StyleSheet.create({
     name: { fontSize: 20, fontWeight: '900' },
     city: { fontSize: 14, color: '#888', fontWeight: '700' },
     address: { fontSize: 13, marginTop: 3, lineHeight: 18 },
-    contactBlock: { borderWidth: 1, borderRadius: 18, padding: 12, marginTop: 10 },
-    contactLabel: { color: '#C88D7A', fontSize: 10, fontWeight: '900', letterSpacing: 1.4, marginBottom: 6 },
-    socialRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 10 },
-    socialChip: { color: '#7A3E2F', backgroundColor: '#F7E9E3', borderColor: '#E3C4B8', borderWidth: 1, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, fontSize: 11, fontWeight: '900', overflow: 'hidden' },
-    noSocialText: { fontSize: 12, fontStyle: 'italic' },
     openHint: { marginTop: 14, fontSize: 13, fontWeight: '800', textAlign: 'right' }
 });

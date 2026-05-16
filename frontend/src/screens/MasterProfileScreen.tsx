@@ -140,16 +140,13 @@ export const MasterProfileScreen = ({ navigation }: any) => {
           'Content-Type': 'multipart/form-data'
         }
       });
-      const res = { data: fetchResponse.data };
       
-      const newUStr = await AsyncStorage.getItem('user') || '{}';
-      const parsedU = JSON.parse(newUStr);
-      const combinedProfile = { ...parsedU, ...res.data };
-      await AsyncStorage.setItem('user', JSON.stringify(combinedProfile));
-      applyProfile(combinedProfile);
+      const freshProfile = fetchResponse.data;
+      await AsyncStorage.setItem('user', JSON.stringify(freshProfile));
+      applyProfile(freshProfile);
       Alert.alert('Успіх', 'Профіль оновлено');
       setPassword('');
-      loadProfile();
+      await loadProfile();
     } catch(e) {
       Alert.alert('Помилка', 'Не вдалося зберегти профіль');
     }
@@ -164,10 +161,9 @@ export const MasterProfileScreen = ({ navigation }: any) => {
       const res = await api.put('/api/user/profile', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      const uStr = await AsyncStorage.getItem('user') || '{}';
-      const combinedProfile = { ...JSON.parse(uStr), ...res.data };
-      await AsyncStorage.setItem('user', JSON.stringify(combinedProfile));
-      applyProfile(combinedProfile);
+      const freshProfile = res.data;
+      await AsyncStorage.setItem('user', JSON.stringify(freshProfile));
+      applyProfile(freshProfile);
     } catch(e) {
       setReferralEnabled(previous);
       Alert.alert('Помилка', 'Не вдалося зберегти стан реферальної програми');
