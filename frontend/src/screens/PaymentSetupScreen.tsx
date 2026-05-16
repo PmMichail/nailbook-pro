@@ -103,10 +103,10 @@ export const PaymentSetupScreen = () => {
         <Text style={[styles.sectionTitle, { color: colors.primary }]}>🏦 Інтеграція LiqPay (ФОП)</Text>
         
         <Text style={[styles.label, { color: colors.textSecondary }]}>Public Key:</Text>
-        <TextInput style={[styles.input, { borderColor: colors.border, color: colors.text, backgroundColor: colors.background }]} placeholder="sandbox_pub..." placeholderTextColor={colors.textSecondary} value={liqpayPublicKey} onChangeText={setLiqpayPublicKey} />
+        <TextInput style={[styles.input, { borderColor: colors.border, color: colors.text, backgroundColor: colors.background }]} placeholder="production public key" placeholderTextColor={colors.textSecondary} value={liqpayPublicKey} onChangeText={setLiqpayPublicKey} />
         
         <Text style={[styles.label, { color: colors.textSecondary }]}>Private Key:</Text>
-        <TextInput style={[styles.input, { borderColor: colors.border, color: colors.text, backgroundColor: colors.background }]} placeholder="sandbox_priv..." placeholderTextColor={colors.textSecondary} secureTextEntry value={liqpayPrivateKey} onChangeText={setLiqpayPrivateKey} />
+        <TextInput style={[styles.input, { borderColor: colors.border, color: colors.text, backgroundColor: colors.background }]} placeholder="production private key" placeholderTextColor={colors.textSecondary} secureTextEntry value={liqpayPrivateKey} onChangeText={setLiqpayPrivateKey} />
         
       </View>
 

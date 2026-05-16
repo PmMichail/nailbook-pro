@@ -74,7 +74,7 @@ router.post('/liqpay', async (req, res) => {
     
     console.log(`[LIQPAY WEBHOOK] Status: ${decoded.status}, Order: ${decoded.order_id}`);
 
-    if (decoded.status === 'success' || decoded.status === 'sandbox') {
+    if (decoded.status === 'success') {
         const orderId = decoded.order_id; // e.g. "sub_masterId_1231231"
         const parts = orderId.split('_');
         const masterId = parts[1]; // extracted master ID

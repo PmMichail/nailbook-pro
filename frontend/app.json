@@ -2,7 +2,7 @@
   "expo": {
     "name": "NailsBook Pro",
     "slug": "nailbook-pro",
-    "version": "1.1.2",
+    "version": "1.1.1",
     "scheme": "nailbookpro",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -14,7 +14,7 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "buildNumber": "4",
+      "buildNumber": "5",
       "supportsTablet": true,
       "bundleIdentifier": "com.nailbook.pro",
       "infoPlist": {
@@ -32,7 +32,7 @@
       },
       "edgeToEdgeEnabled": false,
       "predictiveBackGestureEnabled": false,
-      "versionCode": 1
+      "versionCode": 59
     },
     "web": {
       "favicon": "./assets/favicon.png",
