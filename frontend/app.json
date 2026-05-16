@@ -2,7 +2,7 @@
   "expo": {
     "name": "NailsBook Pro",
     "slug": "nailbook-pro",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "scheme": "nailbookpro",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -32,7 +32,7 @@
       },
       "edgeToEdgeEnabled": false,
       "predictiveBackGestureEnabled": false,
-      "versionCode": 3
+      "versionCode": 1
     },
     "web": {
       "favicon": "./assets/favicon.png",
