@@ -59,13 +59,18 @@ export const ClientAppointmentsScreen = () => {
   }, []);
 
   const clearAppointment = async (id: string) => {
-    try {
-      await api.delete(`/api/client/appointments/${id}`);
-      Alert.alert('Успіх', 'Запис скасовано');
-      fetchAppointments();
-    } catch(e) {
-      Alert.alert('Помилка');
-    }
+    Alert.alert('Скасувати запис?', 'Ви точно хочете скасувати це бронювання?', [
+      { text: 'Ні', style: 'cancel' },
+      { text: 'Так, скасувати', style: 'destructive', onPress: async () => {
+        try {
+          await api.delete(`/api/client/appointments/${id}`);
+          Alert.alert('Успіх', 'Запис скасовано');
+          fetchAppointments();
+        } catch(e) {
+          Alert.alert('Помилка');
+        }
+      }}
+    ]);
   };
 
   const deleteFromHistory = (id: string) => {
@@ -98,9 +103,9 @@ export const ClientAppointmentsScreen = () => {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
     >
       <View style={[styles.heroCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-        <Text style={styles.kicker}>MY VISITS</Text>
-        <Text style={[styles.header, { color: colors.text }]}>{t('clientAppointments.title', {defaultValue: 'Мої Записи'})}</Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Всі майбутні та минулі записи з оплатою і статусами.</Text>
+        <Text style={styles.kicker}>BOOKINGS & HISTORY</Text>
+        <Text style={[styles.header, { color: colors.text }]}>{t('clientAppointments.title', {defaultValue: 'Мої бронювання'})}</Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Майбутні записи, аванси, реквізити на оплату та історія відвідувань.</Text>
       </View>
       
       {appointments.length === 0 ? (

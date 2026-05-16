@@ -255,20 +255,60 @@ router.get('/masters/:id/analytics', async (req, res) => {
         const masterId = req.params.id;
         const totalClients = await prisma.user.count({ where: { role: 'CLIENT', masterId } });
         const totalAppointments = await prisma.appointment.count({ where: { masterId } });
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const weekStart = new Date(today);
+        weekStart.setDate(today.getDate() - ((today.getDay() || 7) - 1));
         
         const completedAppointments = await prisma.appointment.count({ where: { masterId, status: 'COMPLETED' } });
         const cancelledAppointments = await prisma.appointment.count({ where: { masterId, status: 'CANCELLED' } });
         const pendingAppointments = await prisma.appointment.count({ where: { masterId, status: 'PENDING' } });
         const confirmedAppointments = await prisma.appointment.count({ where: { masterId, status: 'CONFIRMED' } });
+        const awaitingPrepaymentAppointments = await prisma.appointment.count({ where: { masterId, status: 'AWAITING_PREPAYMENT' } });
+        const todayAppointments = await prisma.appointment.count({ where: { masterId, date: { gte: today } } });
+        const weekAppointments = await prisma.appointment.count({ where: { masterId, date: { gte: weekStart } } });
+        const master = await prisma.user.findUnique({
+            where: { id: masterId },
+            select: { city: true, address: true, instagram: true, tiktok: true, facebook: true, referralEnabled: true, salonName: true, name: true }
+        });
+        const recentAppointments = await prisma.appointment.findMany({
+            where: { masterId },
+            orderBy: { date: 'desc' },
+            take: 5,
+            include: { client: { select: { name: true, phone: true } } }
+        });
+        const paidAppointments = await prisma.appointment.findMany({
+            where: { masterId, status: { in: ['CONFIRMED', 'COMPLETED'] } },
+            select: { finalPrice: true, originalPrice: true, price: true }
+        });
+        const totalIncome = paidAppointments.reduce((sum, app) => sum + (app.finalPrice || app.originalPrice || app.price || 0), 0);
         
         res.json({
             totalClients,
             totalAppointments,
+            todayAppointments,
+            weekAppointments,
+            totalIncome,
+            averageCheck: paidAppointments.length > 0 ? Math.round(totalIncome / paidAppointments.length) : 0,
+            profileCompleteness: {
+                hasAddress: Boolean(master?.city || master?.address),
+                hasSocials: Boolean(master?.instagram || master?.tiktok || master?.facebook),
+                referralEnabled: master?.referralEnabled !== false,
+                salonName: master?.salonName || master?.name || ''
+            },
+            recentAppointments: recentAppointments.map(app => ({
+                id: app.id,
+                date: app.date,
+                time: app.time,
+                status: app.status,
+                clientName: app.client?.name || app.client?.phone || 'Клієнт'
+            })),
             chartData: [
-                { name: 'Completed', count: completedAppointments },
-                { name: 'Cancelled', count: cancelledAppointments },
-                { name: 'Confirmed', count: confirmedAppointments },
-                { name: 'Pending', count: pendingAppointments }
+                { name: 'Виконано', count: completedAppointments },
+                { name: 'Скасовано', count: cancelledAppointments },
+                { name: 'Підтв.', count: confirmedAppointments },
+                { name: 'Очікує', count: pendingAppointments },
+                { name: 'Аванс', count: awaitingPrepaymentAppointments }
             ]
         });
     } catch(e) {

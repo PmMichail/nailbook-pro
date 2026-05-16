@@ -1,6 +1,7 @@
 import React from 'react';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { Platform } from 'react-native';
 
 import { MasterDashboardScreen } from '../screens/MasterDashboardScreen';
 import { MasterClientsScreen } from '../screens/MasterClientsScreen';
@@ -19,6 +20,45 @@ import { FavoritesScreen } from '../screens/FavoritesScreen';
 
 const Tab = createMaterialTopTabNavigator();
 const Stack = createNativeStackNavigator();
+
+const premiumTabOptions = (colors: any) => ({
+  tabBarActiveTintColor: '#FFFFFF',
+  tabBarInactiveTintColor: colors.textSecondary,
+  tabBarStyle: {
+    backgroundColor: colors.card,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    height: Platform.OS === 'ios' ? 86 : 72,
+    paddingHorizontal: 8,
+    paddingTop: 8,
+    paddingBottom: Platform.OS === 'ios' ? 22 : 10,
+    shadowColor: '#C88D7A',
+    shadowOffset: { width: 0, height: -8 },
+    shadowOpacity: 0.08,
+    shadowRadius: 18,
+    elevation: 12
+  },
+  tabBarItemStyle: {
+    borderRadius: 999,
+    marginHorizontal: 3,
+    height: 44
+  },
+  tabBarContentContainerStyle: {
+    alignItems: 'center' as const
+  },
+  tabBarIndicatorStyle: {
+    height: 44,
+    borderRadius: 999,
+    backgroundColor: colors.primary,
+    bottom: Platform.OS === 'ios' ? 22 : 10
+  },
+  tabBarLabelStyle: {
+    textTransform: 'none' as const,
+    fontSize: 10,
+    fontWeight: '900' as const
+  },
+  swipeEnabled: true
+});
 
 const ChatStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -74,14 +114,7 @@ export const MasterTabs = () => {
     <GlobalHeader />
     <Tab.Navigator 
       tabBarPosition="bottom"
-      screenOptions={{ 
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textSecondary,
-        tabBarStyle: { backgroundColor: colors.card, borderTopWidth: 1, borderTopColor: colors.border },
-        tabBarIndicatorStyle: { backgroundColor: 'transparent' },
-        tabBarLabelStyle: { textTransform: 'none', fontSize: 10, fontFamily: 'sans-serif' },
-        swipeEnabled: true
-    }}>
+      screenOptions={premiumTabOptions(colors)}>
       <Tab.Screen name="Dashboard" component={MasterDashboardStack} options={{ tabBarLabel: t('tabs.dashboard', {defaultValue: 'Кабінет'}), title: '📋' }} />
       <Tab.Screen name="ClientsList" component={ClientsListScreen} options={{ tabBarLabel: t('tabs.clients', {defaultValue: 'Клієнти'}), title: '👥' }} />
       <Tab.Screen name="ChatsListNav" component={ChatStack} options={{ tabBarLabel: t('tabs.chats', {defaultValue: 'Чати'}), title: '💬' }} />
@@ -100,16 +133,9 @@ export const ClientTabs = () => {
     <GlobalHeader />
     <Tab.Navigator 
       tabBarPosition="bottom"
-      screenOptions={{ 
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textSecondary,
-        tabBarStyle: { backgroundColor: colors.card, borderTopWidth: 1, borderTopColor: colors.border },
-        tabBarIndicatorStyle: { height: 2, backgroundColor: colors.primary, top: 0 },
-        tabBarLabelStyle: { textTransform: 'none', fontSize: 10, fontFamily: 'sans-serif' },
-        swipeEnabled: true
-    }}>
+      screenOptions={premiumTabOptions(colors)}>
       <Tab.Screen name="Calendar" component={ClientCalendarScreen} options={{ tabBarLabel: t('tabs.dashboard', {defaultValue: 'Календар'}), title: '📅' }} />
-      <Tab.Screen name="Appointments" component={ClientAppointmentsScreen} options={{ tabBarLabel: t('tabs.clients', {defaultValue: 'Мої записи'}), title: '📝' }} />
+      <Tab.Screen name="Appointments" component={ClientAppointmentsScreen} options={{ tabBarLabel: t('tabs.appointments', {defaultValue: 'Записи'}), title: '📝' }} />
       <Tab.Screen name="ChatsListNav" component={ChatStack} options={{ tabBarLabel: t('tabs.chats', {defaultValue: 'Чати'}), title: '💬' }} />
       <Tab.Screen name="Gallery" component={GalleryScreen} options={{ tabBarLabel: t('tabs.gallery', {defaultValue: 'Галерея'}), title: '🖼' }} />
       <Tab.Screen name="Profile" component={ClientProfileStack} options={{ tabBarLabel: t('tabs.profile', {defaultValue: 'Профіль'}), title: '👤' }} />
@@ -130,14 +156,7 @@ export const AdminTabs = () => {
   return (
     <Tab.Navigator 
       tabBarPosition="bottom"
-      screenOptions={{ 
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textSecondary,
-        tabBarStyle: { backgroundColor: colors.card, borderTopWidth: 1, borderTopColor: colors.border },
-        tabBarIndicatorStyle: { height: 2, backgroundColor: colors.primary, top: 0 },
-        tabBarLabelStyle: { textTransform: 'none', fontSize: 10, fontFamily: 'sans-serif' },
-        swipeEnabled: true
-    }}>
+      screenOptions={premiumTabOptions(colors)}>
       <Tab.Screen name="Dashboard" component={AdminDashboardScreen} options={{ tabBarLabel: t('tabs.dashboard', {defaultValue: 'Головна'}), title: '📊' }} />
       <Tab.Screen name="Masters" component={AdminMastersScreen} options={{ tabBarLabel: t('tabs.clients', {defaultValue: 'Майстри'}), title: '👥' }} />
     </Tab.Navigator>

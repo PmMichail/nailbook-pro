@@ -32,34 +32,46 @@ export const MasterProfileScreen = ({ navigation }: any) => {
   const [activeClients, setActiveClients] = useState(0);
   const [generatedCode, setGeneratedCode] = useState<string | null>(null);
 
+  const applyProfile = (u: any) => {
+    setUserId(u.id || '');
+    setName(u.name || '');
+    setPhone(u.phone || '');
+    setSalonName(u.salonName || '');
+    setCity(u.city || '');
+    setAddress(u.address || '');
+    setInstagram(u.instagram || '');
+    setTiktok(u.tiktok || '');
+    setFacebook(u.facebook || '');
+    if (u.referralEnabled !== undefined) setReferralEnabled(u.referralEnabled);
+    
+    if (u.avatarUrl) {
+      const formattedUrl = u.avatarUrl.startsWith('http') ? u.avatarUrl : `${api.defaults.baseURL}/${u.avatarUrl}`;
+      setAvatar(formattedUrl);
+    } else {
+      setAvatar(null);
+    }
+    if (u.salonLogo) {
+      const formattedLogo = u.salonLogo.startsWith('http') ? u.salonLogo : `${api.defaults.baseURL}/${u.salonLogo}`;
+      setSalonLogo(formattedLogo);
+    } else {
+      setSalonLogo(null);
+    }
+  };
+
   useEffect(() => {
     loadProfile();
   }, []);
 
   const loadProfile = async () => {
     try {
+      const profileRes = await api.get('/api/user/profile');
+      applyProfile(profileRes.data);
+      await AsyncStorage.setItem('user', JSON.stringify(profileRes.data));
+      
       const uStr = await AsyncStorage.getItem('user');
-      if (uStr) {
+      if (uStr && !profileRes.data) {
         const u = JSON.parse(uStr);
-        setUserId(u.id || '');
-        setName(u.name || '');
-        setPhone(u.phone || '');
-        setSalonName(u.salonName || '');
-        setCity(u.city || '');
-        setAddress(u.address || '');
-        setInstagram(u.instagram || '');
-        setTiktok(u.tiktok || '');
-        setFacebook(u.facebook || '');
-        if (u.referralEnabled !== undefined) setReferralEnabled(u.referralEnabled);
-        
-        if (u.avatarUrl) {
-          const formattedUrl = u.avatarUrl.startsWith('http') ? u.avatarUrl : `${api.defaults.baseURL}/${u.avatarUrl}`;
-          setAvatar(formattedUrl);
-        }
-        if (u.salonLogo) {
-          const formattedLogo = u.salonLogo.startsWith('http') ? u.salonLogo : `${api.defaults.baseURL}/${u.salonLogo}`;
-          setSalonLogo(formattedLogo);
-        }
+        applyProfile(u);
       }
       
       const subRes = await api.get('/api/master/subscription');
@@ -67,7 +79,10 @@ export const MasterProfileScreen = ({ navigation }: any) => {
         setSubData(subRes.data.subscription);
         setActiveClients(subRes.data.activeClientsCount);
       }
-    } catch(e) {}
+    } catch(e) {
+      const uStr = await AsyncStorage.getItem('user');
+      if (uStr) applyProfile(JSON.parse(uStr));
+    }
   };
 
   const handlePickAvatar = async () => {
@@ -107,6 +122,9 @@ export const MasterProfileScreen = ({ navigation }: any) => {
       formData.append('instagram', instagram);
       formData.append('tiktok', tiktok);
       formData.append('facebook', facebook);
+      formData.append('salonName', salonName);
+      formData.append('city', city);
+      formData.append('address', address);
       formData.append('referralEnabled', referralEnabled ? 'true' : 'false');
       
       if (avatar && !avatar.startsWith('http')) {
@@ -123,22 +141,36 @@ export const MasterProfileScreen = ({ navigation }: any) => {
         }
       });
       const res = { data: fetchResponse.data };
-
-      // Social networks are saved via salon-info route separately or we can just send them together 
-      // Wait, /api/master/salon-info is where we put instagram, tiktok, facebook
-      await api.put('/api/master/salon-info', {
-         salonName, instagram, tiktok, facebook, city, address
-      });
       
       const newUStr = await AsyncStorage.getItem('user') || '{}';
       const parsedU = JSON.parse(newUStr);
-      const combinedProfile = { ...parsedU, ...res.data, salonName, instagram, tiktok, facebook, city, address };
+      const combinedProfile = { ...parsedU, ...res.data };
       await AsyncStorage.setItem('user', JSON.stringify(combinedProfile));
+      applyProfile(combinedProfile);
       Alert.alert('Успіх', 'Профіль оновлено');
       setPassword('');
       loadProfile();
     } catch(e) {
       Alert.alert('Помилка', 'Не вдалося зберегти профіль');
+    }
+  };
+
+  const handleReferralToggle = async (value: boolean) => {
+    const previous = referralEnabled;
+    setReferralEnabled(value);
+    try {
+      const formData = new FormData();
+      formData.append('referralEnabled', value ? 'true' : 'false');
+      const res = await api.put('/api/user/profile', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      const uStr = await AsyncStorage.getItem('user') || '{}';
+      const combinedProfile = { ...JSON.parse(uStr), ...res.data };
+      await AsyncStorage.setItem('user', JSON.stringify(combinedProfile));
+      applyProfile(combinedProfile);
+    } catch(e) {
+      setReferralEnabled(previous);
+      Alert.alert('Помилка', 'Не вдалося зберегти стан реферальної програми');
     }
   };
 
@@ -312,7 +344,7 @@ export const MasterProfileScreen = ({ navigation }: any) => {
         </View>
         <View style={[styles.settingRow, { backgroundColor: colors.card }]}>
           <Text style={[styles.settingText, { color: colors.text }]}>{t('profile.referralProgram', {defaultValue: 'Реферальна програма'})}</Text>
-          <Switch value={referralEnabled} onValueChange={setReferralEnabled} trackColor={{true: colors.primary}} />
+          <Switch value={referralEnabled} onValueChange={handleReferralToggle} trackColor={{true: colors.primary}} />
         </View>
         <View style={[styles.settingRow, { backgroundColor: colors.card, flexDirection: 'column', alignItems: 'flex-start' }]}>
           <Text style={[styles.settingText, { color: colors.text, fontWeight: 'bold' }]}>{t('profile.telegramNotifications', {defaultValue: 'Сповіщення Telegram'})}</Text>

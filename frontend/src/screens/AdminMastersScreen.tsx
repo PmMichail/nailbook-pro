@@ -232,12 +232,30 @@ export const AdminMastersScreen = () => {
                                         <Text style={styles.statBoxLabel}>Записи</Text>
                                     </View>
                                 </View>
+                                <View style={{flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20}}>
+                                    <View style={styles.statBox}>
+                                        <Text style={styles.statBoxVal}>{analyticsData.weekAppointments || 0}</Text>
+                                        <Text style={styles.statBoxLabel}>За тиждень</Text>
+                                    </View>
+                                    <View style={styles.statBox}>
+                                        <Text style={styles.statBoxVal}>{analyticsData.averageCheck || 0}</Text>
+                                        <Text style={styles.statBoxLabel}>Сер. чек</Text>
+                                    </View>
+                                </View>
+
+                                <View style={styles.profileHealth}>
+                                    <Text style={styles.modalSubHeader}>Профіль майстра</Text>
+                                    <Text style={styles.healthText}>Салон: {analyticsData.profileCompleteness?.salonName || 'не вказано'}</Text>
+                                    <Text style={styles.healthText}>Адреса: {analyticsData.profileCompleteness?.hasAddress ? 'заповнена' : 'не вказана'}</Text>
+                                    <Text style={styles.healthText}>Соцмережі: {analyticsData.profileCompleteness?.hasSocials ? 'додані' : 'не додані'}</Text>
+                                    <Text style={styles.healthText}>Реферальна програма: {analyticsData.profileCompleteness?.referralEnabled ? 'увімкнена' : 'вимкнена'}</Text>
+                                </View>
 
                                 <Text style={styles.modalSubHeader}>Статуси записів</Text>
                                 <BarChart
                                     data={{
                                         labels: analyticsData.chartData.map((d: any) => d.name),
-                                        datasets: [{ data: analyticsData.chartData.some((d: any) => d.count > 0) ? analyticsData.chartData.map((d: any) => d.count) : [0,0,0,0] }]
+                                        datasets: [{ data: analyticsData.chartData.some((d: any) => d.count > 0) ? analyticsData.chartData.map((d: any) => d.count) : [0,0,0,0,0] }]
                                     }}
                                     width={screenWidth - 80}
                                     height={220}
@@ -246,6 +264,18 @@ export const AdminMastersScreen = () => {
                                     chartConfig={chartConfig}
                                     style={{borderRadius: 12, marginVertical: 8}}
                                 />
+
+                                <Text style={styles.modalSubHeader}>Останні записи</Text>
+                                {(analyticsData.recentAppointments || []).length === 0 ? (
+                                    <Text style={styles.healthText}>Записів поки немає</Text>
+                                ) : (
+                                    analyticsData.recentAppointments.map((app: any) => (
+                                        <View key={app.id} style={styles.recentRow}>
+                                            <Text style={styles.recentName}>{app.clientName}</Text>
+                                            <Text style={styles.recentMeta}>{new Date(app.date).toLocaleDateString()} • {app.time} • {app.status}</Text>
+                                        </View>
+                                    ))
+                                )}
                             </ScrollView>
                         ) : null}
                     </View>
@@ -287,6 +317,11 @@ const styles = StyleSheet.create({
     closeBtnTxt: { fontSize: 12, color: '#74645E', fontWeight: '900' },
     modalHeader: { fontSize: 18, fontWeight: '900', color: '#2A1D19', marginBottom: 20 },
     modalSubHeader: { fontSize: 13, fontWeight: '900', color: '#74645E', marginBottom: 10 },
+    profileHealth: { backgroundColor: '#FFF8F5', borderColor: '#F0D4C8', borderWidth: 1, borderRadius: 20, padding: 14, marginBottom: 20 },
+    healthText: { color: '#74645E', fontSize: 13, marginBottom: 5, fontWeight: '700' },
+    recentRow: { backgroundColor: '#FFF8F5', borderColor: '#F0D4C8', borderWidth: 1, borderRadius: 16, padding: 12, marginBottom: 8 },
+    recentName: { color: '#2A1D19', fontSize: 14, fontWeight: '900' },
+    recentMeta: { color: '#74645E', fontSize: 12, marginTop: 4 },
     
     statBox: { flex: 1, backgroundColor: '#FFF8F5', marginHorizontal: 5, padding: 15, borderRadius: 20, alignItems: 'center', borderWidth: 1, borderColor: '#F0D4C8' },
     statBoxVal: { fontSize: 28, fontWeight: '900', color: '#B87460' },

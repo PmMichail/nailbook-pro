@@ -240,17 +240,17 @@ export const ClientsListScreen = () => {
                <TextInput style={[styles.modalInputSingle, { borderColor: colors.border, color: colors.text, backgroundColor: colors.background }]} placeholder="Телефон" placeholderTextColor={colors.textSecondary} value={editPhone} onChangeText={setEditPhone} />
                <TextInput style={[styles.modalInput, { borderColor: colors.border, color: colors.text, backgroundColor: colors.background }]} multiline numberOfLines={3} placeholder="Нотатки (лише для вас)" placeholderTextColor={colors.textSecondary} value={editNotes} onChangeText={setEditNotes} />
                
-               <View style={styles.modalActions}>
-                  <TouchableOpacity style={styles.cancelBtn} onPress={() => setSelectedClient(null)}>
-                     <Text style={{color: colors.textSecondary}}>{t('clients.close', {defaultValue: 'Закрити'})}</Text>
+               <View style={styles.detailActions}>
+                  <TouchableOpacity style={[styles.actionPill, { borderColor: colors.border }]} onPress={() => setSelectedClient(null)}>
+                     <Text style={{color: colors.textSecondary, fontWeight: '800'}}>{t('clients.close', {defaultValue: '← Назад'})}</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={[styles.saveBtn, {backgroundColor: '#e0c0b4', marginRight: 10}]} onPress={handleChat}>
+                  <TouchableOpacity style={[styles.actionPill, {backgroundColor: '#e0c0b4'}]} onPress={handleChat}>
                      <Text style={{color: '#000', fontWeight: 'bold'}}>{t('clients.write', {defaultValue: '💬 Написати'})}</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={[styles.saveBtn, {backgroundColor: '#FF3B30', marginRight: 10}]} onPress={handleDeleteClient}>
+                  <TouchableOpacity style={[styles.actionPill, {backgroundColor: '#FF3B30'}]} onPress={handleDeleteClient}>
                      <Text style={{color: '#fff', fontWeight: 'bold'}}>{t('clients.delete', {defaultValue: 'Видалити'})}</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={[styles.saveBtn, { backgroundColor: colors.primary }]} onPress={handleSaveClient}>
+                  <TouchableOpacity style={[styles.actionPill, { backgroundColor: colors.primary }]} onPress={handleSaveClient}>
                      <Text style={{color: isDark ? '#000' : '#fff', fontWeight: 'bold'}}>{t('clients.save', {defaultValue: 'Зберегти'})}</Text>
                   </TouchableOpacity>
                </View>
@@ -282,6 +282,8 @@ const styles = StyleSheet.create({
   modalInput: { borderWidth: 1, borderRadius: 10, padding: 12, height: 100, textAlignVertical: 'top', marginTop: 10, marginBottom: 10 },
   modalInputSingle: { borderWidth: 1, borderRadius: 10, padding: 12, marginBottom: 10 },
   modalActions: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: 10 },
+  detailActions: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10 },
   cancelBtn: { padding: 10, marginRight: 10 },
-  saveBtn: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 10 }
+  saveBtn: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 10 },
+  actionPill: { minWidth: '47%', flexGrow: 1, alignItems: 'center', paddingHorizontal: 14, paddingVertical: 12, borderRadius: 14, borderWidth: 1 }
 });

@@ -23,11 +23,44 @@ const authenticate = (req: any, res: any, next: any) => {
 
 router.use(authenticate);
 
+router.get('/profile', async (req: any, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+        email: true,
+        avatarUrl: true,
+        role: true,
+        city: true,
+        address: true,
+        lat: true,
+        lng: true,
+        linkSlug: true,
+        salonName: true,
+        salonLogo: true,
+        referralEnabled: true,
+        instagram: true,
+        tiktok: true,
+        facebook: true,
+        masterId: true,
+        isActiveClient: true
+      }
+    });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: 'Помилка завантаження профілю' });
+  }
+});
+
 // PUT /api/user/profile
 router.put('/profile', uploadCloud.fields([{ name: 'avatar', maxCount: 1 }, { name: 'salonLogo', maxCount: 1 }]), async (req: any, res) => {
   try {
     const userId = req.user.id;
-    const { name, phone, password, salonName, referralEnabled, instagram, tiktok, facebook } = req.body;
+    const { name, phone, password, salonName, referralEnabled, instagram, tiktok, facebook, city, address } = req.body;
     
     let avatarUrl = undefined;
     let salonLogo = undefined;
@@ -48,6 +81,8 @@ router.put('/profile', uploadCloud.fields([{ name: 'avatar', maxCount: 1 }, { na
     
     if (salonName !== undefined) dataToUpdate.salonName = salonName;
     if (salonLogo) dataToUpdate.salonLogo = salonLogo;
+    if (city !== undefined) dataToUpdate.city = city;
+    if (address !== undefined) dataToUpdate.address = address;
     if (referralEnabled !== undefined) dataToUpdate.referralEnabled = referralEnabled === 'true' || referralEnabled === true;
     if (instagram !== undefined) dataToUpdate.instagram = instagram;
     if (tiktok !== undefined) dataToUpdate.tiktok = tiktok;
@@ -68,6 +103,9 @@ router.put('/profile', uploadCloud.fields([{ name: 'avatar', maxCount: 1 }, { na
           avatarUrl: true,
           role: true,
           city: true,
+          address: true,
+          lat: true,
+          lng: true,
           linkSlug: true,
           salonName: true,
           salonLogo: true,

@@ -70,7 +70,7 @@ router.put('/settings', async (req: any, res) => {
     await prisma.masterWeeklySettings.deleteMany({ where: { masterId } });
     const formattedData = weeklySettings.map((s: any) => ({
       masterId,
-      dayOfWeek: Number(s.dayOfWeek),
+      dayOfWeek: Number(s.dayOfWeek) === 0 ? 7 : Number(s.dayOfWeek),
       workStart: s.workStart,
       workEnd: s.workEnd,
       timePerClient: Number(s.timePerClient),
@@ -345,6 +345,45 @@ router.put('/appointments/:id/cancel', async (req: any, res) => {
       );
   }
   res.json(app);
+});
+
+router.put('/appointments/:id/reschedule', async (req: any, res) => {
+  try {
+    const { date, time } = req.body;
+    if (!date || !time) return res.status(400).json({ error: 'date and time are required' });
+    
+    const targetDate = new Date(date);
+    const existing = await prisma.appointment.findFirst({
+      where: {
+        masterId: req.user.id,
+        date: targetDate,
+        time,
+        status: { not: 'CANCELLED' },
+        id: { not: req.params.id }
+      }
+    });
+    if (existing) return res.status(409).json({ error: 'Цей час вже зайнятий' });
+
+    const blocked = await prisma.blockedSlot.findFirst({
+      where: { masterId: req.user.id, date: targetDate, time }
+    });
+    if (blocked) return res.status(409).json({ error: 'Цей час заблокований' });
+
+    const app = await prisma.appointment.update({
+      where: { id: req.params.id },
+      data: { date: targetDate, time },
+      include: { client: { include: { pushToken: true } }, master: true }
+    });
+
+    const message = `Ваш запис перенесено на ${app.date.toISOString().split('T')[0]} о ${app.time}.`;
+    sendTelegramMessage(app.clientId, message);
+    if (app.client?.pushToken?.token) {
+      await sendPushNotification(app.client.pushToken.token, 'Запис перенесено', message);
+    }
+    res.json(app);
+  } catch(e) {
+    res.status(500).json({ error: 'Не вдалося перенести запис' });
+  }
 });
 
 // PUT /appointments/:id/complete

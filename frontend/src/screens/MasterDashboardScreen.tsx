@@ -58,6 +58,8 @@ export const MasterDashboardScreen = () => {
   const [qrModalVisible, setQrModalVisible] = useState(false);
   const [masterProfile, setMasterProfile] = useState<any>(null);
   const [selectedClient, setSelectedClient] = useState<any>(null);
+  const [rescheduleDate, setRescheduleDate] = useState('');
+  const [rescheduleTime, setRescheduleTime] = useState('');
   const [prices, setPrices] = useState<any[]>([]);
 
   const [priceModalVisible, setPriceModalVisible] = useState(false);
@@ -118,11 +120,15 @@ export const MasterDashboardScreen = () => {
 
   const fetchProfile = async () => {
     try {
+      const res = await api.get('/api/user/profile');
+      setMasterProfile(res.data);
+      await AsyncStorage.setItem('user', JSON.stringify(res.data));
+    } catch(e) {
       const uStr = await AsyncStorage.getItem('user');
       if (uStr) {
         setMasterProfile(JSON.parse(uStr));
       }
-    } catch(e) {}
+    }
   };
 
   const fetchSettings = async () => {
@@ -221,7 +227,8 @@ export const MasterDashboardScreen = () => {
       workEnd: currentDayConfig.workEnd,
       timePerClient: currentDayConfig.timePerClient,
       breakStart: currentDayConfig.breakStart,
-      breakEnd: currentDayConfig.breakEnd
+      breakEnd: currentDayConfig.breakEnd,
+      isWorking: currentDayConfig.isWorking
     })));
     Alert.alert('Копіювання', 'Налаштування скопійовано на всі дні.');
   };
@@ -255,6 +262,7 @@ export const MasterDashboardScreen = () => {
     try {
       if (action === 'cancel') {
          await api.put(`/api/master/appointments/${id}/cancel`);
+         Alert.alert('Скасовано', 'Запис скасовано');
          fetchAppointments();
       } else if (action === 'complete') {
          await api.put(`/api/master/appointments/${id}/complete`);
@@ -266,6 +274,59 @@ export const MasterDashboardScreen = () => {
          fetchAppointments();
       }
     } catch(e) {}
+  };
+
+  const confirmUpdateAppStatus = (id: string, action: 'cancel' | 'complete' | 'confirm_prepayment') => {
+    const config: any = {
+      cancel: {
+        title: 'Скасувати запис?',
+        message: 'Цю дію побачить клієнт. Ви точно хочете скасувати запис?',
+        button: 'Так, скасувати',
+        style: 'destructive'
+      },
+      complete: {
+        title: 'Завершити запис?',
+        message: 'Позначити запис як виконаний?',
+        button: 'Так, завершити'
+      },
+      confirm_prepayment: {
+        title: 'Підтвердити аванс?',
+        message: 'Підтвердити отримання передоплати від клієнта?',
+        button: 'Так, підтвердити'
+      }
+    };
+    const item = config[action];
+    Alert.alert(item.title, item.message, [
+      { text: 'Ні', style: 'cancel' },
+      { text: item.button, style: item.style, onPress: () => updateAppStatus(id, action) }
+    ]);
+  };
+
+  const openAppointmentDetails = (app: any) => {
+    setSelectedClient(app);
+    setRescheduleDate(new Date(app.date).toISOString().split('T')[0]);
+    setRescheduleTime(app.time || '');
+  };
+
+  const submitReschedule = () => {
+    if (!selectedClient?.id || !rescheduleDate || !rescheduleTime) {
+      Alert.alert('Помилка', 'Вкажіть дату і час переносу');
+      return;
+    }
+    Alert.alert('Перенести запис?', `Новий час: ${rescheduleDate} о ${rescheduleTime}`, [
+      { text: 'Ні', style: 'cancel' },
+      { text: 'Так, перенести', onPress: async () => {
+        try {
+          await api.put(`/api/master/appointments/${selectedClient.id}/reschedule`, { date: rescheduleDate, time: rescheduleTime });
+          Alert.alert('Готово', 'Запис перенесено');
+          setSelectedClient(null);
+          fetchAppointments();
+          fetchSlots();
+        } catch(e: any) {
+          Alert.alert('Помилка', e?.response?.data?.error || 'Не вдалося перенести запис');
+        }
+      }}
+    ]);
   };
 
   const submitConfirm = async () => {
@@ -287,6 +348,7 @@ export const MasterDashboardScreen = () => {
   // savePaymentDetails is moved to PaymentSetupScreen
 
   const currentDayAppoints = appointments.filter((a: any) => String(a.date).includes(selectedCalendarDay));
+  const actionRequiredAppoints = appointments.filter((a: any) => ['PENDING', 'AWAITING_PREPAYMENT'].includes(a.status));
   const activeDaySetting = weeklySettings.find(s => s.dayOfWeek === activeEditDay) || weeklySettings[0];
   const inviteLink = `https://nailbook.pro/m/${masterProfile?.linkSlug || masterProfile?.id || 'demo'}`;
 
@@ -474,9 +536,9 @@ export const MasterDashboardScreen = () => {
 
       {/* Appointments */}
       <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-        <Text style={[styles.cardTitle, { color: colors.text }]}>{t('dashboard.pendingRequestsTitle', {defaultValue: '⚠️ Запити на підтвердження'})}</Text>
-        {appointments.filter((a: any) => a.status === 'PENDING').length === 0 && <Text style={[styles.subtext, {color: colors.textSecondary}]}>Немає нових запитів</Text>}
-        {appointments.filter((a: any) => a.status === 'PENDING').map((app: any) => (
+        <Text style={[styles.cardTitle, { color: colors.text }]}>{t('dashboard.pendingRequestsTitle', {defaultValue: '⚠️ Потребують уваги'})}</Text>
+        {actionRequiredAppoints.length === 0 && <Text style={[styles.subtext, {color: colors.textSecondary}]}>Немає записів, які очікують підтвердження або авансу</Text>}
+        {actionRequiredAppoints.map((app: any) => (
             <View key={'pend-'+app.id} style={[styles.appointmentItem, {borderBottomColor: colors.border, backgroundColor: isDark ? 'rgba(224, 192, 180, 0.1)' : 'rgba(224, 192, 180, 0.2)', padding: 15, borderRadius: 12}]}>
                 <View style={styles.appInfo}>
                     <TouchableOpacity onPress={() => setSelectedClient(app)}>
@@ -487,9 +549,12 @@ export const MasterDashboardScreen = () => {
                     <Text style={[{color: colors.textSecondary, fontSize: 12, marginVertical: 3}]}>
                       Дата: {new Date(app.date).toISOString().split('T')[0]} о {app.time}
                     </Text>
+                    <Text style={[styles.appStatus, {color: app.status === 'AWAITING_PREPAYMENT' ? '#ff8c00' : colors.primary}]}>
+                      {statusMap[app.status] || app.status}
+                    </Text>
                 </View>
                 <View style={styles.appActions}>
-                    <TouchableOpacity style={[styles.actionBtn, {borderColor: '#2e8b57', borderWidth: 1}]} onPress={() => {
+                    {app.status === 'PENDING' && <TouchableOpacity style={[styles.actionBtn, {borderColor: '#2e8b57', borderWidth: 1}]} onPress={() => {
                         setConfirmApp(app);
                         setConfirmPrice(app.price ? app.price.toString() : '');
                         setConfirmNote('');
@@ -497,8 +562,11 @@ export const MasterDashboardScreen = () => {
                         setConfirmModalVisible(true);
                     }}>
                         <Text style={[styles.actionIcon, { color: '#2e8b57' }]}>✓</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={[styles.actionBtn, {borderColor: '#8b0000', borderWidth: 1}]} onPress={() => updateAppStatus(app.id, 'cancel')}>
+                    </TouchableOpacity>}
+                    {app.status === 'AWAITING_PREPAYMENT' && <TouchableOpacity style={[styles.actionBtn, {borderColor: '#ff8c00', borderWidth: 1}]} onPress={() => confirmUpdateAppStatus(app.id, 'confirm_prepayment')}>
+                        <Text style={[styles.actionIcon, { color: '#ff8c00', fontSize: 14 }]}>💰</Text>
+                    </TouchableOpacity>}
+                    <TouchableOpacity style={[styles.actionBtn, {borderColor: '#8b0000', borderWidth: 1}]} onPress={() => confirmUpdateAppStatus(app.id, 'cancel')}>
                         <Text style={[styles.actionIcon, { color: '#8b0000' }]}>✗</Text>
                     </TouchableOpacity>
                 </View>
@@ -518,7 +586,7 @@ export const MasterDashboardScreen = () => {
                 {currentDayAppoints.filter((a: any) => a.status !== 'PENDING').map((app: any) => (
                     <View key={app.id} style={[styles.appointmentItem, {borderBottomColor: colors.border}]}>
                         <View style={styles.appInfo}>
-                            <TouchableOpacity onPress={() => setSelectedClient(app)}>
+                            <TouchableOpacity onPress={() => openAppointmentDetails(app)}>
                               <Text style={[styles.appName, {color: colors.text, fontWeight: 'bold', fontFamily: 'serif'}]}>
                                 Клієнт: {app.client?.name || app.client?.phone || app.clientId.substring(0,6)}
                               </Text>
@@ -532,7 +600,7 @@ export const MasterDashboardScreen = () => {
                         </View>
                 <View style={styles.appActions}>
                     {app.status === 'CONFIRMED' && (
-                        <TouchableOpacity style={[styles.actionBtn, {borderColor: colors.primary, borderWidth: 1, backgroundColor: colors.primary}]} onPress={() => updateAppStatus(app.id, 'complete')}>
+                        <TouchableOpacity style={[styles.actionBtn, {borderColor: colors.primary, borderWidth: 1, backgroundColor: colors.primary}]} onPress={() => confirmUpdateAppStatus(app.id, 'complete')}>
                             <Text style={[styles.actionIcon, { color: isDark ? '#000' : '#fff' }]}>✓</Text>
                         </TouchableOpacity>
                     )}
@@ -540,14 +608,14 @@ export const MasterDashboardScreen = () => {
                         <TouchableOpacity style={[styles.actionBtn, {borderColor: '#ff8c00', borderWidth: 1, backgroundColor: isDark ? 'rgba(255, 140, 0, 0.2)' : '#fff8dc'}]} onPress={() => {
                             Alert.alert('Аванс', 'Підтвердити отримання передоплати?', [
                                 {text: 'Ні', style: 'cancel'},
-                                {text: 'Так', onPress: () => updateAppStatus(app.id, 'confirm_prepayment')}
+                                {text: 'Так', onPress: () => confirmUpdateAppStatus(app.id, 'confirm_prepayment')}
                             ]);
                         }}>
                             <Text style={[styles.actionIcon, { color: '#ff8c00', fontSize: 14 }]}>💰</Text>
                         </TouchableOpacity>
                     )}
                     {app.status !== 'CANCELLED' && app.status !== 'COMPLETED' && (
-                        <TouchableOpacity style={[styles.actionBtn, {borderColor: '#8b0000', borderWidth: 1}]} onPress={() => updateAppStatus(app.id, 'cancel')}>
+                        <TouchableOpacity style={[styles.actionBtn, {borderColor: '#8b0000', borderWidth: 1}]} onPress={() => confirmUpdateAppStatus(app.id, 'cancel')}>
                             <Text style={[styles.actionIcon, { color: '#8b0000' }]}>✗</Text>
                         </TouchableOpacity>
                     )}
@@ -610,6 +678,12 @@ export const MasterDashboardScreen = () => {
             <Text style={{color: colors.text, marginBottom: 5}}>Телефон: {selectedClient?.client?.phone || 'Приховано'}</Text>
             <Text style={{color: colors.text, marginBottom: 5}}>Послуга: {selectedClient?.service || 'Не вказано'}</Text>
             <Text style={{color: colors.text, marginBottom: 15}}>Ціна: {selectedClient?.price ? selectedClient.price + ' грн' : 'Не вказано'}</Text>
+            <Text style={[styles.label, {color: colors.textSecondary}]}>Перенести запис</Text>
+            <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border, width: '100%'}]} placeholder="YYYY-MM-DD" placeholderTextColor={colors.textSecondary} value={rescheduleDate} onChangeText={setRescheduleDate} />
+            <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border, width: '100%'}]} placeholder="HH:mm" placeholderTextColor={colors.textSecondary} value={rescheduleTime} onChangeText={setRescheduleTime} />
+            <TouchableOpacity style={[styles.btnSecondary, { width: '100%', borderColor: colors.primary, marginBottom: 10 }]} onPress={submitReschedule}>
+              <Text style={{color: colors.primary, fontWeight: 'bold'}}>Перенести на новий час</Text>
+            </TouchableOpacity>
             <TouchableOpacity style={[styles.btnPrimary, { backgroundColor: colors.primary }]} onPress={() => setSelectedClient(null)}>
               <Text style={[styles.btnPrimaryText, { color: isDark ? '#000' : '#fff' }]}>{t('dashboard.close', {defaultValue: 'Закрити'})}</Text>
             </TouchableOpacity>
