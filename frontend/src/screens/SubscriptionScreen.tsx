@@ -8,7 +8,6 @@ import Purchases from 'react-native-purchases';
 import { useTheme } from '../context/ThemeContext';
 
 const API_KEY_IOS = "appl_DhQYpxSPNdHufxhMEhLdzmltNlV";
-const API_KEY_ANDROID = "goog_zwzVaWsrqGBNEpPxFoHxsUUBFdu";
 const PRIVACY_URL = 'https://grandprestig.dp.ua/info/privacy.html';
 const TERMS_URL = 'https://grandprestig.dp.ua/info/terms.html';
 
@@ -29,7 +28,7 @@ export const SubscriptionScreen = ({ navigation }: any) => {
 
   const setupPurchases = async () => {
      try {
-         Purchases.configure({ apiKey: Platform.OS === 'ios' ? API_KEY_IOS : API_KEY_ANDROID });
+         Purchases.configure({ apiKey: API_KEY_IOS });
          const offerings = await Purchases.getOfferings();
          if (offerings.current !== null && offerings.current.availablePackages.length !== 0) {
             setPackages(offerings.current.availablePackages);
