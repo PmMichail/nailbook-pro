@@ -39,23 +39,26 @@ const premiumTabOptions = (colors: any) => ({
     elevation: 12
   },
   tabBarItemStyle: {
-    borderRadius: 999,
+    borderRadius: 20,
     marginHorizontal: 3,
-    height: 44
+    height: 44,
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const
   },
   tabBarContentContainerStyle: {
     alignItems: 'center' as const
   },
   tabBarIndicatorStyle: {
     height: 44,
-    borderRadius: 999,
+    borderRadius: 20,
     backgroundColor: colors.primary,
     bottom: Platform.OS === 'ios' ? 22 : 10
   },
   tabBarLabelStyle: {
     textTransform: 'none' as const,
-    fontSize: 10,
-    fontWeight: '900' as const
+    fontSize: 11,
+    fontWeight: 'bold' as const,
+    textAlign: 'center' as const
   },
   swipeEnabled: true
 });

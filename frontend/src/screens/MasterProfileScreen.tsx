@@ -127,6 +127,8 @@ export const MasterProfileScreen = ({ navigation }: any) => {
       formData.append('address', address);
       formData.append('referralEnabled', referralEnabled ? 'true' : 'false');
       
+      console.log('Saving profile:', { instagram, tiktok, facebook, city, address });
+      
       if (avatar && !avatar.startsWith('http')) {
         formData.append('avatar', {
           uri: avatar,
@@ -141,6 +143,8 @@ export const MasterProfileScreen = ({ navigation }: any) => {
         }
       });
       
+      console.log('Profile saved successfully:', fetchResponse.data);
+      
       const freshProfile = fetchResponse.data;
       await AsyncStorage.setItem('user', JSON.stringify(freshProfile));
       applyProfile(freshProfile);
@@ -148,6 +152,7 @@ export const MasterProfileScreen = ({ navigation }: any) => {
       setPassword('');
       await loadProfile();
     } catch(e) {
+      console.error('Error saving profile:', e);
       Alert.alert('Помилка', 'Не вдалося зберегти профіль');
     }
   };
