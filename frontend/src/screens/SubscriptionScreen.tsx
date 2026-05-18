@@ -148,10 +148,24 @@ export const SubscriptionScreen = ({ navigation }: any) => {
 
       {!isPro || sub?.status === 'TRIAL' ? (
          <View style={styles.purchaseBlock}>
-            <TouchableOpacity activeOpacity={0.85} disabled={purchasing || !selectedPackage} style={[styles.proButton, (purchasing || !selectedPackage) && styles.disabledButton]} onPress={handleUpgradeToPro}>
+            <TouchableOpacity 
+              activeOpacity={0.85} 
+              disabled={purchasing || !selectedPackage} 
+              style={[styles.proButton, (purchasing || !selectedPackage) && styles.disabledButton]} 
+              onPress={handleUpgradeToPro}
+              pointerEvents="auto"
+              hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+            >
               {purchasing ? <ActivityIndicator color="#fff" /> : <Text style={styles.proButtonText}>Оновити до PRO</Text>}
             </TouchableOpacity>
-            <TouchableOpacity activeOpacity={0.8} disabled={purchasing} style={[styles.restoreButton, { borderColor: colors.border }]} onPress={handleRestorePurchases}>
+            <TouchableOpacity 
+              activeOpacity={0.8} 
+              disabled={purchasing} 
+              style={[styles.restoreButton, { borderColor: colors.border }]} 
+              onPress={handleRestorePurchases}
+              pointerEvents="auto"
+              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+            >
               <Text style={[styles.restoreButtonText, { color: colors.text }]}>Відновити покупки</Text>
             </TouchableOpacity>
          </View>
@@ -198,10 +212,10 @@ const styles = StyleSheet.create({
   featureIcon: { width: 26, height: 26, borderRadius: 13, textAlign: 'center', lineHeight: 26, overflow: 'hidden', backgroundColor: '#EAD7CF', color: '#7A3E2F', fontWeight: '900', marginRight: 12 },
   featureText: { fontSize: 16, fontWeight: '700', flex: 1 },
   purchaseBlock: { marginTop: 6 },
-  proButton: { minHeight: 56, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: '#111827', shadowColor: '#111827', shadowOffset: {width: 0, height: 10}, shadowOpacity: 0.22, shadowRadius: 18, elevation: 8 },
+  proButton: { minHeight: 56, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: '#111827', shadowColor: '#111827', shadowOffset: {width: 0, height: 10}, shadowOpacity: 0.22, shadowRadius: 18, elevation: 8, zIndex: 10 },
   disabledButton: { opacity: 0.55 },
   proButtonText: { color: '#fff', fontWeight: '900', fontSize: 17, letterSpacing: 0.3 },
-  restoreButton: { minHeight: 50, borderRadius: 16, borderWidth: 1, alignItems: 'center', justifyContent: 'center', marginTop: 12 },
+  restoreButton: { minHeight: 50, borderRadius: 16, borderWidth: 1, alignItems: 'center', justifyContent: 'center', marginTop: 12, zIndex: 10 },
   restoreButtonText: { fontWeight: '800', fontSize: 15 },
   successCard: { marginTop: 8, padding: 22, borderRadius: 24, borderWidth: 1, alignItems: 'center' },
   successIcon: { fontSize: 34, color: '#C88D7A', marginBottom: 8 },
