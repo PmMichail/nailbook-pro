@@ -33,16 +33,24 @@ export const RegisterScreen = ({ navigation }: any) => {
          if (referralCode) payload.referralCode = referralCode.trim();
       }
 
+      // Add timeout to fetch request
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+      
       const response = await fetch(`${API_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
 
       const data = await response.json();
       
       if (!response.ok) {
         Alert.alert(t('error'), data.error || t('auth.genericError'));
+        setIsSubmitting(false);
         return;
       }
 
@@ -56,14 +64,20 @@ export const RegisterScreen = ({ navigation }: any) => {
          if (pushToken) {
            try {
              console.log('[PUSH] 7. Sending token to server...');
+             const pushController = new AbortController();
+             const pushTimeoutId = setTimeout(() => pushController.abort(), 10000); // 10 second timeout
+             
              const pushResponse = await fetch(`${API_URL}/api/client/push-token`, {
                method: 'POST',
                headers: { 
                  'Content-Type': 'application/json',
                  'Authorization': `Bearer ${data.token}`
                },
-               body: JSON.stringify({ token: pushToken, os: Platform.OS })
+               body: JSON.stringify({ token: pushToken, os: Platform.OS }),
+               signal: pushController.signal
              });
+             
+             clearTimeout(pushTimeoutId);
              const pushJson = await pushResponse.json();
              console.log('[PUSH] 8. Server response:', pushJson);
            } catch(e) {
@@ -81,9 +95,13 @@ export const RegisterScreen = ({ navigation }: any) => {
              }
         }}
       ]);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      Alert.alert(t('error'), t('auth.connectionError'));
+      if (error.name === 'AbortError') {
+        Alert.alert(t('error'), t('auth.connectionError') + ' (timeout)');
+      } else {
+        Alert.alert(t('error'), t('auth.connectionError'));
+      }
     } finally {
       setIsSubmitting(false);
     }

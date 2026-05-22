@@ -60,11 +60,19 @@ export const LoginScreen = ({ navigation }: any) => {
     try {
       setIsAuthenticating(true);
       const API_URL = api.defaults.baseURL;
+      
+      // Add timeout to fetch request
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+      
       const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: phoneToUse, password: passToUse }),
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
 
       const data = await response.json();
 
@@ -91,14 +99,20 @@ export const LoginScreen = ({ navigation }: any) => {
          if (pushToken) {
            try {
              console.log('[PUSH] 7. Sending token to server...');
+             const pushController = new AbortController();
+             const pushTimeoutId = setTimeout(() => pushController.abort(), 10000); // 10 second timeout
+             
              await fetch(`${API_URL}/api/client/push-token`, {
                method: 'POST',
                headers: { 
                  'Content-Type': 'application/json',
                  'Authorization': `Bearer ${data.token}`
                },
-               body: JSON.stringify({ token: pushToken, os: Platform.OS })
+               body: JSON.stringify({ token: pushToken, os: Platform.OS }),
+               signal: pushController.signal
              });
+             
+             clearTimeout(pushTimeoutId);
            } catch(e) {
              console.error('[PUSH] 8b. Server Error:', e);
            }
@@ -115,9 +129,13 @@ export const LoginScreen = ({ navigation }: any) => {
         navigation.replace('ClientTabs');
       }
       
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      Alert.alert(t('error'), t('auth.connectionError'));
+      if (error.name === 'AbortError') {
+        Alert.alert(t('error'), t('auth.connectionError') + ' (timeout)');
+      } else {
+        Alert.alert(t('error'), t('auth.connectionError'));
+      }
       setIsAuthenticating(false);
     }
   };
