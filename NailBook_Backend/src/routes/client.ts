@@ -90,7 +90,7 @@ router.get('/masters/search', async (req: any, res) => {
      
      const masters = await prisma.user.findMany({
         where: whereClause,
-        select: { id: true, name: true, city: true, address: true, salonName: true, salonLogo: true, avatarUrl: true, lat: true, lng: true }
+        select: { id: true, name: true, city: true, address: true, salonName: true, salonLogo: true, avatarUrl: true, lat: true, lng: true, instagram: true, tiktok: true, facebook: true }
      });
      
      let filteredMasters = masters;
@@ -113,6 +113,7 @@ router.get('/masters/search', async (req: any, res) => {
            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
            const distance = R * c;
            
+           (m as any).distance = distance;
            return distance <= 10; // Within 10km
         });
      }

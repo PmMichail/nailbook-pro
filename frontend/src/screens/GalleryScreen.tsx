@@ -195,7 +195,7 @@ export const GalleryScreen = () => {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.heroCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-        <Text style={styles.kicker}>NAIL ART</Text>
+        <Text style={styles.kicker}>NAILS</Text>
         <Text style={[styles.header, { color: colors.text }]}>{t('gallery.galleryTitle', {defaultValue: 'Галерея'})}</Text>
         <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Портфоліо робіт, ідеї для клієнтів і обране.</Text>
       </View>
@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
   header: { fontSize: 32, fontWeight: '900', marginBottom: 8 },
   subtitle: { fontSize: 14, lineHeight: 21 },
   tabContainer: { flexDirection: 'row', marginBottom: 15, paddingHorizontal: 5, gap: 8 },
-  tab: { flex: 1, paddingVertical: 11, alignItems: 'center', borderRadius: 999, borderWidth: 1, borderColor: 'transparent' },
+  tab: { flex: 1, paddingVertical: 11, alignItems: 'center', borderWidth: 1, borderColor: 'transparent' },
   tabActive: { borderColor: '#C88D7A', backgroundColor: '#F3E7E2' },
   tabText: { fontSize: 16, fontWeight: 'bold' },
   tabTextActive: { },
