@@ -23,6 +23,8 @@ export const MasterProfileScreen = ({ navigation }: any) => {
   const [instagram, setInstagram] = useState('');
   const [tiktok, setTiktok] = useState('');
   const [facebook, setFacebook] = useState('');
+  const [lat, setLat] = useState<number | null>(null);
+  const [lng, setLng] = useState<number | null>(null);
   
   const [pushEnabled, setPushEnabled] = useState(true);
   const [telegramEnabled, setTelegramEnabled] = useState(false);
@@ -42,6 +44,8 @@ export const MasterProfileScreen = ({ navigation }: any) => {
     setInstagram(u.instagram || '');
     setTiktok(u.tiktok || '');
     setFacebook(u.facebook || '');
+    setLat(u.lat || null);
+    setLng(u.lng || null);
     if (u.referralEnabled !== undefined) setReferralEnabled(u.referralEnabled);
     
     if (u.avatarUrl) {
@@ -282,6 +286,7 @@ export const MasterProfileScreen = ({ navigation }: any) => {
               <Text style={[styles.previewText, { color: colors.textSecondary }]}>Instagram: {instagram || 'не вказано'}</Text>
               <Text style={[styles.previewText, { color: colors.textSecondary }]}>TikTok: {tiktok || 'не вказано'}</Text>
               <Text style={[styles.previewText, { color: colors.textSecondary }]}>Facebook: {facebook || 'не вказано'}</Text>
+              <Text style={[styles.previewText, { color: colors.textSecondary }]}>Геолокація: {lat && lng ? `Встановлена (${lat.toFixed(4)}, ${lng.toFixed(4)})` : 'не встановлена'}</Text>
             </View>
             
             <TextInput style={[styles.input, {color: colors.text, borderColor: colors.border}]} value={password} onChangeText={setPassword} placeholder={t('profile.newPassword', {defaultValue: 'Новий пароль (залиште порожнім, щоб не змінювати)'})} placeholderTextColor={colors.textSecondary} secureTextEntry />
