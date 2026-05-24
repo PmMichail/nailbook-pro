@@ -56,11 +56,40 @@ export const LoginScreen = ({ navigation }: any) => {
     executeLogin(phone, password);
   };
 
-  const executeLogin = async (phoneToUse: string, passToUse: string, retryCount: number = 0) => {
+  const wakeUpServer = async (): Promise<boolean> => {
+    try {
+      const API_URL = api.defaults.baseURL;
+      
+      // Запрос без таймаута
+      await fetch(`${API_URL}/api/auth/login`, { 
+        method: 'HEAD',
+        headers: { 'Cache-Control': 'no-cache' }
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const executeLogin = async (phoneToUse: string, passToUse: string) => {
     try {
       setIsAuthenticating(true);
-      
       const API_URL = api.defaults.baseURL;
+      
+      // ШАГ 1: Будим сервер (ждем сколько нужно)
+      console.log('[WAKEUP] Waking up server...');
+      await wakeUpServer();
+      
+      // ШАГ 2: Ждем 5 секунд пока сервер точно проснется
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      
+      // ШАГ 3: Еще один короткий ping для проверки
+      try {
+        await fetch(`${API_URL}/api/auth/login`, { method: 'HEAD' });
+      } catch(e) {}
+      
+      // ШАГ 4: Настоящий логин
+      console.log('[LOGIN] Sending login request...');
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 20000); // 20 секунд таймаут
       
@@ -90,13 +119,6 @@ export const LoginScreen = ({ navigation }: any) => {
           case 502:
           case 503:
           case 504:
-            // Сервер спал - пробуем еще раз
-            if (retryCount < 2) {
-              console.log(`Server waking up (${response.status}), retry in 3 seconds...`);
-              setIsAuthenticating(false);
-              await new Promise(resolve => setTimeout(resolve, 3000));
-              return executeLogin(phoneToUse, passToUse, retryCount + 1);
-            }
             userMessage = 'Server is waking up. Please try again.';
             break;
           case 500:
@@ -155,15 +177,6 @@ export const LoginScreen = ({ navigation }: any) => {
     } catch (error: any) {
       console.error('Login exception:', error);
       
-      // Таймаут или сетевой сбой - повторяем попытку
-      if ((error.name === 'AbortError' || error.message?.includes('timeout')) && retryCount < 2) {
-        console.log(`Request timeout (attempt ${retryCount + 1}), retrying...`);
-        setIsAuthenticating(false);
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        return executeLogin(phoneToUse, passToUse, retryCount + 1);
-      }
-      
-      // Если повторные попытки не помогли
       if (error.name === 'AbortError') {
         Alert.alert(t('error'), 'Connection timeout. Please try again.');
       } else {

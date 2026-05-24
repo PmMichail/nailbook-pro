@@ -38,22 +38,6 @@ const premiumTabOptions = (colors: any) => ({
     shadowRadius: 18,
     elevation: 12
   },
-  tabBarItemStyle: {
-    borderRadius: 20,
-    marginHorizontal: 3,
-    height: 44,
-    justifyContent: 'center' as const,
-    alignItems: 'center' as const
-  },
-  tabBarContentContainerStyle: {
-    alignItems: 'center' as const
-  },
-  tabBarIndicatorStyle: {
-    height: 44,
-    borderRadius: 20,
-    backgroundColor: colors.primary,
-    bottom: Platform.OS === 'ios' ? 22 : 10
-  },
   tabBarLabelStyle: {
     textTransform: 'none' as const,
     fontSize: 11,
@@ -102,7 +86,7 @@ const ClientProfileStack = () => (
   </Stack.Navigator>
 );
 
-import { GlobalHeader } from '../components/GlobalHeader';
+import { GlobalHeaderPremium } from '../components/GlobalHeaderPremium';
 import { ClientsListScreen } from '../screens/ClientsListScreen';
 import { MastersListScreen } from '../screens/MastersListScreen';
 import { SearchMastersScreen } from '../screens/SearchMastersScreen';
@@ -114,7 +98,7 @@ export const MasterTabs = () => {
   const { t } = useTranslation();
   return (
     <>
-    <GlobalHeader />
+    <GlobalHeaderPremium mode="master" />
     <Tab.Navigator 
       tabBarPosition="bottom"
       screenOptions={premiumTabOptions(colors)}>
@@ -133,7 +117,7 @@ export const ClientTabs = () => {
   const { t } = useTranslation();
   return (
     <>
-    <GlobalHeader />
+    <GlobalHeaderPremium mode="client" />
     <Tab.Navigator 
       tabBarPosition="bottom"
       screenOptions={premiumTabOptions(colors)}>

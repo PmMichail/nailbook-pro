@@ -94,7 +94,7 @@ router.post('/register', async (req, res) => {
                      ]
                  } 
              });
-             if (clientCount >= 10) {
+             if (clientCount >= 5) {
                  return res.status(403).json({ error: 'Ваш майстер досягнув ліміту клієнтів. Зв\'яжіться з ним безпосередньо.' });
              }
          }

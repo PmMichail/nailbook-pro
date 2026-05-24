@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, Alert, ActivityIndicator, TextInput } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, Alert, ActivityIndicator, TextInput, Linking } from 'react-native';
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../api/client';
@@ -76,6 +76,13 @@ export const SearchMastersScreen = () => {
                     </View>
                     <View style={styles.info}>
                         <Text style={[styles.name, { color: colors.text }]}>{item.salonName || item.name}</Text>
+                        <View style={{flexDirection: 'row', alignItems: 'center', marginTop: 6}}>
+                            <Text style={{fontSize: 14, marginRight: 4}}>📍</Text>
+                            <Text style={[styles.city, {flex: 1, color: colors.textSecondary}]}>
+                               {item.city ? `${item.city}` : 'Місто не вказано'}
+                               {item.address ? ` • ${item.address}` : ''}
+                            </Text>
+                        </View>
                         {item.distance !== undefined && item.distance !== null && (
                             <Text style={{fontSize: 12, color: colors.primary, marginTop: 4, fontWeight: '600'}}>
                                 Відстань: ~{item.distance.toFixed(1)} км від вас
@@ -83,6 +90,25 @@ export const SearchMastersScreen = () => {
                         )}
                     </View>
                 </View>
+                {item.instagram || item.tiktok || item.facebook ? (
+                    <View style={styles.socialRow}>
+                        {!!item.instagram && (
+                            <TouchableOpacity style={styles.socialBtn} onPress={() => openSocial(item.instagram, 'instagram')}>
+                                <Text style={styles.socialText}>Instagram</Text>
+                            </TouchableOpacity>
+                        )}
+                        {!!item.tiktok && (
+                            <TouchableOpacity style={styles.socialBtn} onPress={() => openSocial(item.tiktok, 'tiktok')}>
+                                <Text style={styles.socialText}>TikTok</Text>
+                            </TouchableOpacity>
+                        )}
+                        {!!item.facebook && (
+                            <TouchableOpacity style={styles.socialBtn} onPress={() => openSocial(item.facebook, 'facebook')}>
+                                <Text style={styles.socialText}>Facebook</Text>
+                            </TouchableOpacity>
+                        )}
+                    </View>
+                ) : null}
                 <Text style={[styles.openHint, { color: colors.primary }]}>Переглянути портфоліо →</Text>
             </TouchableOpacity>
         );
@@ -107,6 +133,21 @@ export const SearchMastersScreen = () => {
        } catch(e: any) {
           Alert.alert('Помилка', e.response?.data?.error || 'Невірний або прострочений код');
        }
+    };
+
+    const normalizeSocialUrl = (value: string, platform: 'instagram' | 'tiktok' | 'facebook') => {
+        const clean = value.trim();
+        if (!clean) return null;
+        if (clean.startsWith('http://') || clean.startsWith('https://')) return clean;
+        const handle = clean.replace(/^@/, '').replace(/^\/+/, '');
+        if (platform === 'instagram') return `https://instagram.com/${handle}`;
+        if (platform === 'tiktok') return `https://tiktok.com/@${handle}`;
+        return `https://facebook.com/${handle}`;
+    };
+
+    const openSocial = (value: string, platform: 'instagram' | 'tiktok' | 'facebook') => {
+        const url = normalizeSocialUrl(value, platform);
+        if (url) Linking.openURL(url);
     };
 
     return (
@@ -170,5 +211,8 @@ const styles = StyleSheet.create({
     name: { fontSize: 20, fontWeight: '900' },
     city: { fontSize: 14, color: '#888', fontWeight: '700' },
     address: { fontSize: 13, marginTop: 3, lineHeight: 18 },
-    openHint: { marginTop: 14, fontSize: 13, fontWeight: '800', textAlign: 'right' }
+    openHint: { marginTop: 14, fontSize: 13, fontWeight: '800', textAlign: 'right' },
+    socialRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 },
+    socialBtn: { backgroundColor: '#F3E7E2', borderWidth: 1, borderColor: '#E0C0B4', paddingHorizontal: 14, paddingVertical: 9, borderRadius: 999 },
+    socialText: { color: '#7A3E2F', fontSize: 13, fontWeight: '900' }
 });

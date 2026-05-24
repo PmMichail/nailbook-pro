@@ -17,7 +17,22 @@ export const RegisterScreen = ({ navigation }: any) => {
   const [referralCode, setReferralCode] = useState('');
   const { colors, isDark } = useTheme();
 
-  const handleRegister = async (retryCount: number = 0) => {
+  const wakeUpServer = async (): Promise<boolean> => {
+    try {
+      const API_URL = api.defaults.baseURL;
+      
+      // Запрос без таймаута
+      await fetch(`${API_URL}/api/auth/register`, { 
+        method: 'HEAD',
+        headers: { 'Cache-Control': 'no-cache' }
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const handleRegister = async () => {
     if (isSubmitting) return;
     try {
       if (!name || !phone || !password) {
@@ -32,7 +47,21 @@ export const RegisterScreen = ({ navigation }: any) => {
          if (inviteCode) payload.inviteCode = inviteCode.trim();
          if (referralCode) payload.referralCode = referralCode.trim();
       }
-
+      
+      // ШАГ 1: Будим сервер (ждем сколько нужно)
+      console.log('[WAKEUP] Waking up server...');
+      await wakeUpServer();
+      
+      // ШАГ 2: Ждем 5 секунд пока сервер точно проснется
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      
+      // ШАГ 3: Еще один короткий ping для проверки
+      try {
+        await fetch(`${API_URL}/api/auth/register`, { method: 'HEAD' });
+      } catch(e) {}
+      
+      // ШАГ 4: Настоящая регистрация
+      console.log('[REGISTER] Sending register request...');
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 20000); // 20 секунд таймаут
       
@@ -65,13 +94,6 @@ export const RegisterScreen = ({ navigation }: any) => {
           case 502:
           case 503:
           case 504:
-            // Сервер спал - пробуем еще раз
-            if (retryCount < 2) {
-              console.log(`Server waking up (${response.status}), retry in 3 seconds...`);
-              setIsSubmitting(false);
-              await new Promise(resolve => setTimeout(resolve, 3000));
-              return handleRegister(retryCount + 1);
-            }
             userMessage = 'Server is waking up. Please try again.';
             break;
           case 500:
@@ -124,15 +146,6 @@ export const RegisterScreen = ({ navigation }: any) => {
     } catch (error: any) {
       console.error('Register exception:', error);
       
-      // Таймаут или сетевой сбой - повторяем попытку
-      if ((error.name === 'AbortError' || error.message?.includes('timeout')) && retryCount < 2) {
-        console.log(`Request timeout (attempt ${retryCount + 1}), retrying...`);
-        setIsSubmitting(false);
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        return handleRegister(retryCount + 1);
-      }
-      
-      // Если повторные попытки не помогли
       if (error.name === 'AbortError') {
         Alert.alert(t('error'), 'Connection timeout. Please try again.');
       } else {

@@ -130,12 +130,12 @@ export const SubscriptionScreen = ({ navigation }: any) => {
          )}
          
          <Text style={[styles.metaText, { color: colors.textSecondary }]}>
-           Клієнтів у базі: <Text style={{fontWeight: 'bold', color: !isPro && clientCount >= 10 ? '#ff4444' : colors.text}}>
-             {clientCount} {(!isPro) && '/ 10'}
+           Клієнтів у базі: <Text style={{fontWeight: 'bold', color: !isPro && clientCount >= 5 ? '#ff4444' : colors.text}}>
+             {clientCount} {(!isPro) && '/ 5'}
            </Text>
          </Text>
 
-         {!isPro && clientCount >= 10 && (
+         {!isPro && clientCount >= 5 && (
              <Text style={styles.warningText}>Ліміт клієнтів досягнуто. Нові реєстрації призупинено.</Text>
          )}
       </View>

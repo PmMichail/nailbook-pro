@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { LoginScreen } from './src/screens/LoginScreen';
@@ -11,6 +11,7 @@ import { UnreadProvider } from './src/context/UnreadContext';
 import { DefaultTheme, DarkTheme as NavDarkTheme } from '@react-navigation/native';
 import './src/i18n';
 import * as Notifications from 'expo-notifications';
+import api from './src/api/client';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -55,6 +56,21 @@ const AppNavigator = () => {
 };
 
 export default function App() {
+  // Prewake server on app start
+  useEffect(() => {
+    const prewake = async () => {
+      try {
+        const API_URL = api.defaults.baseURL;
+        console.log('[PREWAKE] Waking up server on app start...');
+        await fetch(`${API_URL}/api/auth/login`, { method: 'HEAD' });
+        console.log('[PREWAKE] Server prewaked');
+      } catch(e) {
+        console.log('[PREWAKE] Prewake attempt finished (server may be waking up)');
+      }
+    };
+    prewake();
+  }, []);
+
   return (
     <ThemeProvider>
         <UnreadProvider>
