@@ -56,42 +56,13 @@ export const LoginScreen = ({ navigation }: any) => {
     executeLogin(phone, password);
   };
 
-  const wakeUpServer = async (): Promise<void> => {
-    try {
-      console.log('[WAKEUP] Waking up server...');
-      const API_URL = api.defaults.baseURL;
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 сек на пробуждение
-      
-      // Отправляем легкий HEAD запрос для пробуждения сервера
-      await fetch(`${API_URL}/api/auth/login`, { 
-        method: 'HEAD',
-        signal: controller.signal
-      });
-      
-      clearTimeout(timeoutId);
-      console.log('[WAKEUP] Server is awake');
-    } catch (error) {
-      // Даже если ошибка — игнорируем, главное что сервер проснулся
-      console.log('[WAKEUP] Wakeup attempt finished (server may be waking up)');
-    }
-    
-    // Небольшая задержка, чтобы сервер точно проснулся
-    await new Promise(resolve => setTimeout(resolve, 2000));
-  };
-
-  const executeLogin = async (phoneToUse: string, passToUse: string) => {
+  const executeLogin = async (phoneToUse: string, passToUse: string, retryCount: number = 0) => {
     try {
       setIsAuthenticating(true);
       
-      // Первый запрос — будим сервер
-      await wakeUpServer();
-      
       const API_URL = api.defaults.baseURL;
-      
-      // Add timeout to fetch request
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 20000); // 20 секунд таймаут
       
       const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
@@ -101,14 +72,13 @@ export const LoginScreen = ({ navigation }: any) => {
       });
       
       clearTimeout(timeoutId);
-
+      
       const data = await response.json();
-
+      
       if (!response.ok) {
-        // Log technical error for debugging
-        console.error('Login server error:', response.status, data.error);
+        // Логируем ошибку сервера
+        console.error('Login error:', response.status, data.error);
         
-        // Show user-friendly message based on HTTP status
         let userMessage = '';
         switch (response.status) {
           case 401:
@@ -117,14 +87,19 @@ export const LoginScreen = ({ navigation }: any) => {
           case 403:
             userMessage = 'Account blocked. Contact support.';
             break;
-          case 404:
-            userMessage = 'Service unavailable. Please try again later.';
-            break;
-          case 500:
           case 502:
           case 503:
-            userMessage = 'Server error. Please try again later.';
+          case 504:
+            // Сервер спал - пробуем еще раз
+            if (retryCount < 2) {
+              console.log(`Server waking up (${response.status}), retry in 3 seconds...`);
+              setIsAuthenticating(false);
+              await new Promise(resolve => setTimeout(resolve, 3000));
+              return executeLogin(phoneToUse, passToUse, retryCount + 1);
+            }
+            userMessage = 'Server is waking up. Please try again.';
             break;
+          case 500:
           default:
             userMessage = 'Unable to login. Please try again.';
         }
@@ -133,46 +108,42 @@ export const LoginScreen = ({ navigation }: any) => {
         setIsAuthenticating(false);
         return;
       }
-
+      
+      // Успешный вход
       console.log('Login successfully:', data.user.id);
       
-      // Save credentials for next biometric login
       if (Platform.OS !== 'web') {
         await SecureStore.setItemAsync('user_phone', phoneToUse);
         await SecureStore.setItemAsync('user_pass', passToUse);
       }
-
+      
       const AsyncStorage = await import('@react-native-async-storage/async-storage').then(m => m.default);
       await AsyncStorage.setItem('token', data.token);
       await AsyncStorage.setItem('user', JSON.stringify(data.user));
-
-      // Attempt to register push notifications
+      
       registerForPushNotificationsAsync().then(async (pushToken) => {
-         if (pushToken) {
-           try {
-             console.log('[PUSH] 7. Sending token to server...');
-             const pushController = new AbortController();
-             const pushTimeoutId = setTimeout(() => pushController.abort(), 10000); // 10 second timeout
-             
-             await fetch(`${API_URL}/api/client/push-token`, {
-               method: 'POST',
-               headers: { 
-                 'Content-Type': 'application/json',
-                 'Authorization': `Bearer ${data.token}`
-               },
-               body: JSON.stringify({ token: pushToken, os: Platform.OS }),
-               signal: pushController.signal
-             });
-             
-             clearTimeout(pushTimeoutId);
-           } catch(e) {
-             console.error('[PUSH] 8b. Server Error:', e);
-           }
-         }
+        if (pushToken) {
+          try {
+            const pushController = new AbortController();
+            const pushTimeoutId = setTimeout(() => pushController.abort(), 10000);
+            await fetch(`${API_URL}/api/client/push-token`, {
+              method: 'POST',
+              headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${data.token}` 
+              },
+              body: JSON.stringify({ token: pushToken, os: Platform.OS }),
+              signal: pushController.signal
+            });
+            clearTimeout(pushTimeoutId);
+          } catch(e) {
+            console.error('[PUSH] Error:', e);
+          }
+        }
       });
       
       setIsAuthenticating(false);
-      // Navigate to appropriate tabs based on role
+      
       if (data.user.role === 'ADMIN') {
         navigation.replace('AdminTabs');
       } else if (data.user.role === 'MASTER') {
@@ -182,9 +153,19 @@ export const LoginScreen = ({ navigation }: any) => {
       }
       
     } catch (error: any) {
-      console.error(error);
+      console.error('Login exception:', error);
+      
+      // Таймаут или сетевой сбой - повторяем попытку
+      if ((error.name === 'AbortError' || error.message?.includes('timeout')) && retryCount < 2) {
+        console.log(`Request timeout (attempt ${retryCount + 1}), retrying...`);
+        setIsAuthenticating(false);
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        return executeLogin(phoneToUse, passToUse, retryCount + 1);
+      }
+      
+      // Если повторные попытки не помогли
       if (error.name === 'AbortError') {
-        Alert.alert(t('error'), t('auth.connectionError') + ' (timeout)');
+        Alert.alert(t('error'), 'Connection timeout. Please try again.');
       } else {
         Alert.alert(t('error'), t('auth.connectionError'));
       }
