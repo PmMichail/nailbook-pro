@@ -56,9 +56,37 @@ export const LoginScreen = ({ navigation }: any) => {
     executeLogin(phone, password);
   };
 
+  const wakeUpServer = async (): Promise<void> => {
+    try {
+      console.log('[WAKEUP] Waking up server...');
+      const API_URL = api.defaults.baseURL;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 сек на пробуждение
+      
+      // Отправляем легкий HEAD запрос для пробуждения сервера
+      await fetch(`${API_URL}/api/auth/login`, { 
+        method: 'HEAD',
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      console.log('[WAKEUP] Server is awake');
+    } catch (error) {
+      // Даже если ошибка — игнорируем, главное что сервер проснулся
+      console.log('[WAKEUP] Wakeup attempt finished (server may be waking up)');
+    }
+    
+    // Небольшая задержка, чтобы сервер точно проснулся
+    await new Promise(resolve => setTimeout(resolve, 2000));
+  };
+
   const executeLogin = async (phoneToUse: string, passToUse: string) => {
     try {
       setIsAuthenticating(true);
+      
+      // Первый запрос — будим сервер
+      await wakeUpServer();
+      
       const API_URL = api.defaults.baseURL;
       
       // Add timeout to fetch request
@@ -77,7 +105,31 @@ export const LoginScreen = ({ navigation }: any) => {
       const data = await response.json();
 
       if (!response.ok) {
-        Alert.alert(t('error'), data.error || t('auth.genericError'));
+        // Log technical error for debugging
+        console.error('Login server error:', response.status, data.error);
+        
+        // Show user-friendly message based on HTTP status
+        let userMessage = '';
+        switch (response.status) {
+          case 401:
+            userMessage = 'Invalid phone number or password';
+            break;
+          case 403:
+            userMessage = 'Account blocked. Contact support.';
+            break;
+          case 404:
+            userMessage = 'Service unavailable. Please try again later.';
+            break;
+          case 500:
+          case 502:
+          case 503:
+            userMessage = 'Server error. Please try again later.';
+            break;
+          default:
+            userMessage = 'Unable to login. Please try again.';
+        }
+        
+        Alert.alert(t('error'), userMessage);
         setIsAuthenticating(false);
         return;
       }
