@@ -14,7 +14,7 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "buildNumber": "18",
+      "buildNumber": "20",
       "supportsTablet": true,
       "bundleIdentifier": "com.nailbook.pro",
       "infoPlist": {
@@ -32,7 +32,7 @@
       },
       "edgeToEdgeEnabled": false,
       "predictiveBackGestureEnabled": false,
-      "versionCode": 67
+      "versionCode": 68
     },
     "web": {
       "favicon": "./assets/favicon.png",

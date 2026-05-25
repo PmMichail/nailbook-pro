@@ -9,7 +9,7 @@ export const lightTheme = {
   textSecondary: '#8B756E',
   primary: '#B87460',
   border: '#EADAD2',
-  fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto'
+  fontFamily: 'Poppins-Regular'
 };
 
 export const darkTheme = {
@@ -19,7 +19,7 @@ export const darkTheme = {
   textSecondary: '#D7C2B9',
   primary: '#E8B9A7',
   border: '#44312C',
-  fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto'
+  fontFamily: 'Poppins-Regular'
 };
 
 type ThemeContextType = {

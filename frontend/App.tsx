@@ -11,6 +11,8 @@ import { UnreadProvider } from './src/context/UnreadContext';
 import { DefaultTheme, DarkTheme as NavDarkTheme } from '@react-navigation/native';
 import './src/i18n';
 import * as Notifications from 'expo-notifications';
+import { useFonts } from 'expo-font';
+import { Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import api from './src/api/client';
 
 Notifications.setNotificationHandler({
@@ -56,6 +58,13 @@ const AppNavigator = () => {
 };
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    'Poppins-Regular': Poppins_400Regular,
+    'Poppins-Medium': Poppins_500Medium,
+    'Poppins-SemiBold': Poppins_600SemiBold,
+    'Poppins-Bold': Poppins_700Bold,
+  });
+
   // Prewake server on app start
   useEffect(() => {
     const prewake = async () => {
@@ -70,6 +79,10 @@ export default function App() {
     };
     prewake();
   }, []);
+
+  if (!fontsLoaded) {
+    return null;
+  }
 
   return (
     <ThemeProvider>

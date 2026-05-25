@@ -57,7 +57,7 @@ router.get('/master/:id', async (req: any, res) => {
   try {
      const master = await prisma.user.findUnique({
        where: { id: req.params.id },
-       select: { id: true, name: true, phone: true, avatarUrl: true, salonName: true }
+       select: { id: true, name: true, phone: true, avatarUrl: true, salonName: true, city: true, address: true, instagram: true, tiktok: true, facebook: true }
      });
      if (!master) return res.status(404).json({ error: 'Not found' });
      res.json(master);
