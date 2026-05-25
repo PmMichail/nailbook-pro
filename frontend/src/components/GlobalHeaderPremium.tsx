@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
   closeText: { fontSize: 26, color: '#173B3F', marginTop: -2 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   cardWrap: { width: '48%' },
-  menuCard: { height: 118, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.86)', alignItems: 'center', justifyContent: 'center', shadowColor: '#173B3F', shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.14, shadowRadius: 18, elevation: 6 },
+  menuCard: { height: 118, borderRadius: 20, backgroundColor: 'transparent', alignItems: 'center', justifyContent: 'center' },
   iconBubble: { width: 54, height: 54, borderRadius: 18, alignItems: 'center', justifyContent: 'center', marginBottom: 10 },
   cardText: { color: '#173B3F', fontSize: 14, fontWeight: '900', textAlign: 'center' }
 });

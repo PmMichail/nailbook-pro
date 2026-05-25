@@ -48,6 +48,12 @@ router.put('/profile', uploadCloud.fields([{ name: 'avatar', maxCount: 1 }, { na
     if (salonName !== undefined) dataToUpdate.salonName = salonName;
     if (salonLogo) dataToUpdate.salonLogo = salonLogo;
     
+    if (req.body.city !== undefined) dataToUpdate.city = req.body.city;
+    if (req.body.address !== undefined) dataToUpdate.address = req.body.address;
+    if (req.body.instagram !== undefined) dataToUpdate.instagram = req.body.instagram;
+    if (req.body.tiktok !== undefined) dataToUpdate.tiktok = req.body.tiktok;
+    if (req.body.facebook !== undefined) dataToUpdate.facebook = req.body.facebook;
+    
     if (password && password.trim().length > 0) {
       const bcrypt = require('bcrypt');
       dataToUpdate.password = await bcrypt.hash(password, 10);
@@ -63,6 +69,12 @@ router.put('/profile', uploadCloud.fields([{ name: 'avatar', maxCount: 1 }, { na
           avatarUrl: true,
           role: true,
           city: true,
+          address: true,
+          instagram: true,
+          tiktok: true,
+          facebook: true,
+          lat: true,
+          lng: true,
           linkSlug: true,
           salonName: true,
           salonLogo: true
