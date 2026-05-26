@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, Alert, ActivityIndicator, useWindowDimensions } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { registerForPushNotificationsAsync } from '../utils/notifications';
 import * as LocalAuthentication from 'expo-local-authentication';
@@ -13,6 +13,8 @@ export const LoginScreen = ({ navigation }: any) => {
   const [password, setPassword] = useState('');
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const { colors, isDark } = useTheme();
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
 
   useEffect(() => {
     checkBiometricsAndAutoLogin();
@@ -191,42 +193,44 @@ export const LoginScreen = ({ navigation }: any) => {
       style={[styles.container, { backgroundColor: colors.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <View style={[styles.heroCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-        <Text style={styles.kicker}>NAILSBOOK PRO</Text>
-        <Text style={[styles.title, { color: colors.text }]}>{t('login_title')}</Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Ваш beauty-кабінет для записів, клієнтів і преміум-сервісу.</Text>
-      </View>
-      
-      <View style={styles.inputContainer}>
-        <TextInput 
-          style={[styles.input, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border }]}
-          placeholder={t('phone')}
-          placeholderTextColor={colors.textSecondary}
-          value={phone}
-          onChangeText={setPhone}
-          keyboardType="phone-pad"
-        />
-        <TextInput 
-          style={[styles.input, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border }]}
-          placeholder={t('password')}
-          placeholderTextColor={colors.textSecondary}
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-      </View>
+      <View style={[styles.contentWrapper, isTablet && styles.tabletWrapper]}>
+        <View style={[styles.heroCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <Text style={styles.kicker}>NAILSBOOK PRO</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{t('login_title')}</Text>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Ваш beauty-кабінет для записів, клієнтів і преміум-сервісу.</Text>
+        </View>
+        
+        <View style={styles.inputContainer}>
+          <TextInput 
+            style={[styles.input, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border }]}
+            placeholder={t('phone')}
+            placeholderTextColor={colors.textSecondary}
+            value={phone}
+            onChangeText={setPhone}
+            keyboardType="phone-pad"
+          />
+          <TextInput 
+            style={[styles.input, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border }]}
+            placeholder={t('password')}
+            placeholderTextColor={colors.textSecondary}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
+        </View>
 
-      <TouchableOpacity style={[styles.primaryButton, { backgroundColor: colors.primary, shadowColor: colors.primary }]} onPress={handleLogin} disabled={isAuthenticating}>
-        {isAuthenticating ? (
-           <ActivityIndicator color="#fff" />
-        ) : (
-           <Text style={styles.primaryButtonText}>{t('login_btn')}</Text>
-        )}
-      </TouchableOpacity>
-      
-      <TouchableOpacity style={styles.secondaryButton} onPress={() => navigation.navigate('Register')}>
-        <Text style={[styles.secondaryButtonText, { color: colors.primary }]}>{t('register_btn')}</Text>
-      </TouchableOpacity>
+        <TouchableOpacity style={[styles.primaryButton, { backgroundColor: colors.primary, shadowColor: colors.primary }]} onPress={handleLogin} disabled={isAuthenticating}>
+          {isAuthenticating ? (
+             <ActivityIndicator color="#fff" />
+          ) : (
+             <Text style={styles.primaryButtonText}>{t('login_btn')}</Text>
+          )}
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={styles.secondaryButton} onPress={() => navigation.navigate('Register')}>
+          <Text style={[styles.secondaryButtonText, { color: colors.primary }]}>{t('register_btn')}</Text>
+        </TouchableOpacity>
+      </View>
     </KeyboardAvoidingView>
   );
 };
@@ -237,6 +241,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 22,
+  },
+  contentWrapper: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  tabletWrapper: {
+    maxWidth: 600,
+    paddingHorizontal: 40,
   },
   heroCard: {
     width: '100%',

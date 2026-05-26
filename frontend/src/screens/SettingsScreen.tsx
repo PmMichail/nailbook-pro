@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Switch, Linking } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Switch, Linking, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import Constants from 'expo-constants';
+import api from '../api/client';
 
 export const SettingsScreen = () => {
   const navigation = useNavigation<any>();
@@ -12,6 +13,7 @@ export const SettingsScreen = () => {
   const { t, i18n } = useTranslation();
   const { colors, isDark, toggleTheme } = useTheme();
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   React.useEffect(() => {
     AsyncStorage.getItem('user').then(uStr => {
@@ -36,10 +38,25 @@ export const SettingsScreen = () => {
   const handleDeleteAccount = () => {
       Alert.alert(
         t('deleteAccount'),
-        'Для безпечного видалення акаунта напишіть у підтримку. Ми підтвердимо особу та видалимо дані згідно з політикою конфіденційності.',
+        'Ви впевнені, що хочете видалити свій акаунт? Ця дія незворотна. Всі ваші дані будуть назавжди видалені.',
         [
           { text: t('cancel'), style: 'cancel' },
-          { text: t('support', {defaultValue: 'Підтримка'}), onPress: () => Linking.openURL('https://www.abrikos.dp.ua/support.html') }
+          { 
+            text: 'Видалити акаунт', 
+            style: 'destructive',
+            onPress: async () => {
+              setIsDeleting(true);
+              try {
+                await api.delete('/api/user/profile');
+                await AsyncStorage.clear();
+                navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+              } catch(e) {
+                Alert.alert('Помилка', 'Не вдалося видалити акаунт. Спробуйте пізніше або зверніться до підтримки.');
+              } finally {
+                setIsDeleting(false);
+              }
+            }
+          }
         ]
       );
   };
@@ -75,8 +92,12 @@ export const SettingsScreen = () => {
       <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('profile.dataSecurity', {defaultValue: 'Дані та Безпека'})}</Text>
         
-        <TouchableOpacity style={[styles.menuItem, { borderBottomWidth: 0 }]} onPress={handleDeleteAccount}>
-          <Text style={[styles.menuText, { color: 'red' }]}>{t('deleteAccount')}</Text>
+        <TouchableOpacity style={[styles.menuItem, { borderBottomWidth: 0 }]} onPress={handleDeleteAccount} disabled={isDeleting}>
+          {isDeleting ? (
+            <ActivityIndicator color="red" />
+          ) : (
+            <Text style={[styles.menuText, { color: 'red' }]}>{t('deleteAccount')}</Text>
+          )}
         </TouchableOpacity>
       </View>
 

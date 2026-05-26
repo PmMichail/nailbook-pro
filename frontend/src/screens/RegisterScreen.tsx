@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, Alert, useWindowDimensions } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { registerForPushNotificationsAsync } from '../utils/notifications';
 import { useTheme } from '../context/ThemeContext';
@@ -16,6 +16,8 @@ export const RegisterScreen = ({ navigation }: any) => {
   const [inviteCode, setInviteCode] = useState('');
   const [referralCode, setReferralCode] = useState('');
   const { colors, isDark } = useTheme();
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
 
   const wakeUpServer = async (): Promise<boolean> => {
     try {
@@ -161,40 +163,41 @@ export const RegisterScreen = ({ navigation }: any) => {
       style={[styles.container, { backgroundColor: colors.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <View style={[styles.heroCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-        <Text style={styles.kicker}>JOIN NAILSBOOK</Text>
-        <Text style={[styles.title, { color: colors.text }]}>{t('register_title')}</Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Створіть профіль клієнта або майстра за хвилину.</Text>
-      </View>
-      
-      <View style={styles.roleContainer}>
-        <TouchableOpacity 
-          style={[styles.roleButton, { backgroundColor: colors.card, borderColor: colors.border }, role === 'CLIENT' && styles.roleButtonActive]} 
-          onPress={() => setRole('CLIENT')}
-        >
-          <Text style={[styles.roleText, role === 'CLIENT' && styles.roleTextActive]}>{t('role_client')}</Text>
-        </TouchableOpacity>
+      <View style={[styles.contentWrapper, isTablet && styles.tabletWrapper]}>
+        <View style={[styles.heroCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <Text style={styles.kicker}>JOIN NAILSBOOK</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{t('register_title')}</Text>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Створіть профіль клієнта або майстра за хвилину.</Text>
+        </View>
+        
+        <View style={styles.roleContainer}>
+          <TouchableOpacity 
+            style={[styles.roleButton, { backgroundColor: colors.card, borderColor: colors.border }, role === 'CLIENT' && styles.roleButtonActive]} 
+            onPress={() => setRole('CLIENT')}
+          >
+            <Text style={[styles.roleText, role === 'CLIENT' && styles.roleTextActive]}>{t('role_client')}</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity 
-          style={[styles.roleButton, { backgroundColor: colors.card, borderColor: colors.border }, role === 'MASTER' && styles.roleButtonActive]} 
-          onPress={() => setRole('MASTER')}
-        >
-          <Text style={[styles.roleText, role === 'MASTER' && styles.roleTextActive]}>{t('role_master')}</Text>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity 
+            style={[styles.roleButton, { backgroundColor: colors.card, borderColor: colors.border }, role === 'MASTER' && styles.roleButtonActive]} 
+            onPress={() => setRole('MASTER')}
+          >
+            <Text style={[styles.roleText, role === 'MASTER' && styles.roleTextActive]}>{t('role_master')}</Text>
+          </TouchableOpacity>
+        </View>
 
-      <View style={styles.inputContainer}>
-        <TextInput 
-          style={[styles.input, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border }]}
-          placeholder={t('name')}
-          placeholderTextColor={colors.textSecondary}
-          value={name}
-          onChangeText={setName}
-        />
-        <TextInput 
-          style={[styles.input, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border }]}
-          placeholder={t('phone')}
-          placeholderTextColor={colors.textSecondary}
+        <View style={styles.inputContainer}>
+          <TextInput 
+            style={[styles.input, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border }]}
+            placeholder={t('name')}
+            placeholderTextColor={colors.textSecondary}
+            value={name}
+            onChangeText={setName}
+          />
+          <TextInput 
+            style={[styles.input, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border }]}
+            placeholder={t('phone')}
+            placeholderTextColor={colors.textSecondary}
           value={phone}
           onChangeText={(text) => {
             let cleaned = text;
@@ -256,6 +259,7 @@ export const RegisterScreen = ({ navigation }: any) => {
       <TouchableOpacity style={styles.secondaryButton} onPress={() => navigation.navigate('Login')}>
         <Text style={styles.secondaryButtonText}>{t('login_btn')}</Text>
       </TouchableOpacity>
+      </View>
     </KeyboardAvoidingView>
   );
 };
@@ -266,6 +270,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 22,
+  },
+  contentWrapper: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  tabletWrapper: {
+    maxWidth: 600,
+    paddingHorizontal: 40,
   },
   heroCard: {
     width: '100%',
