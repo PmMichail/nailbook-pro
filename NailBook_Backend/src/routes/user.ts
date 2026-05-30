@@ -125,20 +125,38 @@ router.get('/unread-count', async (req: any, res) => {
 router.delete('/profile', async (req: any, res) => {
   try {
     const userId = req.user.id;
+    console.log('[DELETE ACCOUNT] User ID:', userId);
+    
     // Delete prices, settings, etc cascaded or manually if needed
     await prisma.masterWeeklySettings.deleteMany({ where: { masterId: userId } });
+    console.log('[DELETE ACCOUNT] Deleted masterWeeklySettings');
+    
     await prisma.priceList.deleteMany({ where: { masterId: userId } });
+    console.log('[DELETE ACCOUNT] Deleted priceList');
+    
     await prisma.appointment.deleteMany({ where: { OR: [{ masterId: userId }, { clientId: userId }] } });
+    console.log('[DELETE ACCOUNT] Deleted appointments');
+    
     await prisma.chatMessage.deleteMany({ where: { senderId: userId } });
+    console.log('[DELETE ACCOUNT] Deleted chatMessages from sender');
+    
     // chats with roomId matching
     const userChats = await prisma.chat.findMany({ where: { roomId: { contains: userId } }});
+    console.log('[DELETE ACCOUNT] Found user chats:', userChats.length);
+    
     await prisma.chatMessage.deleteMany({ where: { chatId: { in: userChats.map(c => c.id) } }});
+    console.log('[DELETE ACCOUNT] Deleted chatMessages from chats');
+    
     await prisma.chat.deleteMany({ where: { roomId: { contains: userId } } });
+    console.log('[DELETE ACCOUNT] Deleted chats');
     
     await prisma.user.delete({ where: { id: userId } });
+    console.log('[DELETE ACCOUNT] Deleted user');
+    
     res.json({ success: true });
-  } catch(e) {
-    res.status(500).json({ error: 'Помилка видалення акаунта' });
+  } catch(e: any) {
+    console.error('[DELETE ACCOUNT] Error:', e);
+    res.status(500).json({ error: 'Помилка видалення акаунта: ' + (e.message || 'Невідома помилка') });
   }
 });
 

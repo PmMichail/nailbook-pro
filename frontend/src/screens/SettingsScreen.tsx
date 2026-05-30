@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Switch, Linking, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Switch, Linking, ActivityIndicator, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
@@ -47,11 +48,22 @@ export const SettingsScreen = () => {
             onPress: async () => {
               setIsDeleting(true);
               try {
+                console.log('[DELETE ACCOUNT] Starting deletion...');
                 await api.delete('/api/user/profile');
+                console.log('[DELETE ACCOUNT] API call successful');
                 await AsyncStorage.clear();
+                console.log('[DELETE ACCOUNT] AsyncStorage cleared');
+                if (Platform.OS !== 'web') {
+                  await SecureStore.deleteItemAsync('user_phone');
+                  await SecureStore.deleteItemAsync('user_pass');
+                  console.log('[DELETE ACCOUNT] SecureStore cleared');
+                }
                 navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
-              } catch(e) {
-                Alert.alert('Помилка', 'Не вдалося видалити акаунт. Спробуйте пізніше або зверніться до підтримки.');
+                console.log('[DELETE ACCOUNT] Navigation reset');
+              } catch(e: any) {
+                console.error('[DELETE ACCOUNT] Error:', e);
+                const errorMessage = e.response?.data?.error || e.message || 'Не вдалося видалити акаунт';
+                Alert.alert('Помилка', errorMessage);
               } finally {
                 setIsDeleting(false);
               }
