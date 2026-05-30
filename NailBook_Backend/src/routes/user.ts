@@ -128,30 +128,163 @@ router.delete('/profile', async (req: any, res) => {
     console.log('[DELETE ACCOUNT] User ID:', userId);
     
     // Delete prices, settings, etc cascaded or manually if needed
-    await prisma.masterWeeklySettings.deleteMany({ where: { masterId: userId } });
-    console.log('[DELETE ACCOUNT] Deleted masterWeeklySettings');
+    try {
+      await prisma.masterWeeklySettings.deleteMany({ where: { masterId: userId } });
+      console.log('[DELETE ACCOUNT] Deleted masterWeeklySettings');
+    } catch(e) {
+      console.log('[DELETE ACCOUNT] masterWeeklySettings error (may not exist for this user):', e.message);
+    }
     
-    await prisma.priceList.deleteMany({ where: { masterId: userId } });
-    console.log('[DELETE ACCOUNT] Deleted priceList');
+    try {
+      await prisma.priceList.deleteMany({ where: { masterId: userId } });
+      console.log('[DELETE ACCOUNT] Deleted priceList');
+    } catch(e) {
+      console.log('[DELETE ACCOUNT] priceList error (may not exist for this user):', e.message);
+    }
     
-    await prisma.appointment.deleteMany({ where: { OR: [{ masterId: userId }, { clientId: userId }] } });
-    console.log('[DELETE ACCOUNT] Deleted appointments');
+    try {
+      await prisma.appointment.deleteMany({ where: { OR: [{ masterId: userId }, { clientId: userId }] } });
+      console.log('[DELETE ACCOUNT] Deleted appointments');
+    } catch(e) {
+      console.log('[DELETE ACCOUNT] appointments error:', e.message);
+    }
     
-    await prisma.chatMessage.deleteMany({ where: { senderId: userId } });
-    console.log('[DELETE ACCOUNT] Deleted chatMessages from sender');
+    try {
+      await prisma.message.deleteMany({ where: { senderId: userId } });
+      console.log('[DELETE ACCOUNT] Deleted messages from sender');
+    } catch(e) {
+      console.log('[DELETE ACCOUNT] messages error:', e.message);
+    }
     
     // chats with roomId matching
-    const userChats = await prisma.chat.findMany({ where: { roomId: { contains: userId } }});
-    console.log('[DELETE ACCOUNT] Found user chats:', userChats.length);
+    try {
+      const userChats = await prisma.chat.findMany({ where: { roomId: { contains: userId } }});
+      console.log('[DELETE ACCOUNT] Found user chats:', userChats.length);
+      
+      if (userChats.length > 0) {
+        await prisma.message.deleteMany({ where: { chatId: { in: userChats.map(c => c.id) } }});
+        console.log('[DELETE ACCOUNT] Deleted messages from chats');
+        
+        await prisma.chat.deleteMany({ where: { roomId: { contains: userId } } });
+        console.log('[DELETE ACCOUNT] Deleted chats');
+      }
+    } catch(e) {
+      console.log('[DELETE ACCOUNT] chats error:', e.message);
+    }
     
-    await prisma.chatMessage.deleteMany({ where: { chatId: { in: userChats.map(c => c.id) } }});
-    console.log('[DELETE ACCOUNT] Deleted chatMessages from chats');
+    // Delete other related data
+    try {
+      await prisma.like.deleteMany({ where: { userId } });
+      console.log('[DELETE ACCOUNT] Deleted likes');
+    } catch(e) {
+      console.log('[DELETE ACCOUNT] likes error:', e.message);
+    }
     
-    await prisma.chat.deleteMany({ where: { roomId: { contains: userId } } });
-    console.log('[DELETE ACCOUNT] Deleted chats');
+    try {
+      await prisma.favorite.deleteMany({ where: { clientId: userId } });
+      console.log('[DELETE ACCOUNT] Deleted favorites');
+    } catch(e) {
+      console.log('[DELETE ACCOUNT] favorites error:', e.message);
+    }
     
-    await prisma.user.delete({ where: { id: userId } });
-    console.log('[DELETE ACCOUNT] Deleted user');
+    try {
+      await prisma.review.deleteMany({ where: { OR: [{ masterId: userId }, { clientId: userId }] } });
+      console.log('[DELETE ACCOUNT] Deleted reviews');
+    } catch(e) {
+      console.log('[DELETE ACCOUNT] reviews error:', e.message);
+    }
+    
+    try {
+      await prisma.blacklist.deleteMany({ where: { OR: [{ masterId: userId }, { clientId: userId }] } });
+      console.log('[DELETE ACCOUNT] Deleted blacklist entries');
+    } catch(e) {
+      console.log('[DELETE ACCOUNT] blacklist error:', e.message);
+    }
+    
+    try {
+      await prisma.blockedSlot.deleteMany({ where: { masterId: userId } });
+      console.log('[DELETE ACCOUNT] Deleted blocked slots');
+    } catch(e) {
+      console.log('[DELETE ACCOUNT] blocked slots error:', e.message);
+    }
+    
+    try {
+      await prisma.galleryItem.deleteMany({ where: { masterId: userId } });
+      console.log('[DELETE ACCOUNT] Deleted gallery items');
+    } catch(e) {
+      console.log('[DELETE ACCOUNT] gallery items error:', e.message);
+    }
+    
+    try {
+      await prisma.portfolio.deleteMany({ where: { masterId: userId } });
+      console.log('[DELETE ACCOUNT] Deleted portfolio items');
+    } catch(e) {
+      console.log('[DELETE ACCOUNT] portfolio error:', e.message);
+    }
+    
+    try {
+      await prisma.paymentInfo.deleteMany({ where: { masterId: userId } });
+      console.log('[DELETE ACCOUNT] Deleted payment info');
+    } catch(e) {
+      console.log('[DELETE ACCOUNT] payment info error:', e.message);
+    }
+    
+    try {
+      await prisma.pushToken.deleteMany({ where: { userId } });
+      console.log('[DELETE ACCOUNT] Deleted push tokens');
+    } catch(e) {
+      console.log('[DELETE ACCOUNT] push tokens error:', e.message);
+    }
+    
+    try {
+      await prisma.telegramLink.deleteMany({ where: { userId } });
+      console.log('[DELETE ACCOUNT] Deleted telegram links');
+    } catch(e) {
+      console.log('[DELETE ACCOUNT] telegram links error:', e.message);
+    }
+    
+    try {
+      await prisma.calendarSync.deleteMany({ where: { masterId: userId } });
+      console.log('[DELETE ACCOUNT] Deleted calendar sync');
+    } catch(e) {
+      console.log('[DELETE ACCOUNT] calendar sync error:', e.message);
+    }
+    
+    try {
+      await prisma.subscription.deleteMany({ where: { masterId: userId } });
+      console.log('[DELETE ACCOUNT] Deleted subscription');
+    } catch(e) {
+      console.log('[DELETE ACCOUNT] subscription error:', e.message);
+    }
+    
+    try {
+      await prisma.referralCode.deleteMany({ where: { clientId: userId } });
+      console.log('[DELETE ACCOUNT] Deleted referral codes');
+    } catch(e) {
+      console.log('[DELETE ACCOUNT] referral codes error:', e.message);
+    }
+    
+    try {
+      await prisma.referralUse.deleteMany({ where: { referredClientId: userId } });
+      console.log('[DELETE ACCOUNT] Deleted referral uses');
+    } catch(e) {
+      console.log('[DELETE ACCOUNT] referral uses error:', e.message);
+    }
+    
+    try {
+      await prisma.connectionCode.deleteMany({ where: { userId } });
+      console.log('[DELETE ACCOUNT] Deleted connection codes');
+    } catch(e) {
+      console.log('[DELETE ACCOUNT] connection codes error:', e.message);
+    }
+    
+    try {
+      await prisma.user.delete({ where: { id: userId } });
+      console.log('[DELETE ACCOUNT] Deleted user');
+    } catch(e) {
+      console.error('[DELETE ACCOUNT] Failed to delete user:', e);
+      throw e;
+    }
     
     res.json({ success: true });
   } catch(e: any) {
