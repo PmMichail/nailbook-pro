@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { LoginScreen } from './src/screens/LoginScreen';
@@ -11,7 +11,10 @@ import { UnreadProvider } from './src/context/UnreadContext';
 import { DefaultTheme, DarkTheme as NavDarkTheme } from '@react-navigation/native';
 import './src/i18n';
 import * as Notifications from 'expo-notifications';
+import * as SplashScreen from 'expo-splash-screen';
 import api from './src/api/client';
+
+SplashScreen.preventAutoHideAsync();
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -56,20 +59,55 @@ const AppNavigator = () => {
 };
 
 export default function App() {
-  // Prewake server on app start
+  const [appIsReady, setAppIsReady] = useState(false);
+
   useEffect(() => {
-    const prewake = async () => {
+    async function prepare() {
       try {
-        const API_URL = api.defaults.baseURL;
-        console.log('[PREWAKE] Waking up server on app start...');
-        await fetch(`${API_URL}/api/auth/login`, { method: 'HEAD' });
-        console.log('[PREWAKE] Server prewaked');
-      } catch(e) {
-        console.log('[PREWAKE] Prewake attempt finished (server may be waking up)');
+        console.log('[APP] Initializing...');
+        
+        // Initialize notifications
+        await Notifications.setNotificationHandler({
+          handleNotification: async () => ({
+            shouldShowAlert: true,
+            shouldPlaySound: true,
+            shouldSetBadge: false,
+            shouldShowBanner: true,
+            shouldShowList: true,
+          }),
+        });
+        console.log('[APP] Notifications initialized');
+        
+        // Prewake server (non-blocking, with timeout)
+        try {
+          const API_URL = api.defaults.baseURL;
+          console.log('[PREWAKE] Waking up server on app start...');
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+          await fetch(`${API_URL}/api/auth/login`, { method: 'HEAD', signal: controller.signal });
+          clearTimeout(timeoutId);
+          console.log('[PREWAKE] Server prewaked');
+        } catch(e) {
+          console.log('[PREWAKE] Prewake attempt finished (server may be waking up or timeout)');
+        }
+        
+        console.log('[APP] Initialization complete');
+      } catch (e) {
+        console.error('[APP] Initialization error:', e);
+      } finally {
+        // Always hide splash screen
+        console.log('[APP] Hiding splash screen');
+        await SplashScreen.hideAsync();
+        setAppIsReady(true);
       }
-    };
-    prewake();
+    }
+    
+    prepare();
   }, []);
+
+  if (!appIsReady) {
+    return null;
+  }
 
   return (
     <ThemeProvider>

@@ -28,9 +28,10 @@ const clientMenuItems = [
 
 type Props = {
   mode?: 'master' | 'client';
+  isGuest?: boolean;
 };
 
-export const GlobalHeaderPremium = ({ mode = 'client' }: Props) => {
+export const GlobalHeaderPremium = ({ mode = 'client', isGuest = false }: Props) => {
   const [salonName, setSalonName] = useState('NailsBook Pro');
   const [salonLogo, setSalonLogo] = useState<string | null>(null);
   const [menuVisible, setMenuVisible] = useState(false);
@@ -43,10 +44,12 @@ export const GlobalHeaderPremium = ({ mode = 'client' }: Props) => {
   const baseUrl = useMemo(() => String(api.defaults.baseURL || '').replace(/\/$/, ''), []);
 
   useEffect(() => {
-    loadInfo();
-    const interval = setInterval(loadInfo, 2000);
-    return () => clearInterval(interval);
-  }, []);
+    if (!isGuest) {
+      loadInfo();
+      const interval = setInterval(loadInfo, 2000);
+      return () => clearInterval(interval);
+    }
+  }, [isGuest]);
 
   useEffect(() => {
     if (menuVisible) {

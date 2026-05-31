@@ -45,7 +45,7 @@ export const LoginScreen = ({ navigation }: any) => {
         }
       }
     } catch(e) {
-      console.log('Biometrics failed', e);
+      console.log('[LOGIN] Biometrics failed:', e);
       setIsAuthenticating(false);
     }
   };
@@ -56,6 +56,11 @@ export const LoginScreen = ({ navigation }: any) => {
       return;
     }
     executeLogin(phone, password);
+  };
+
+  const handleGuestMode = () => {
+    // Navigate to guest mode (read-only client view)
+    navigation.replace('ClientTabs', { isGuest: true });
   };
 
   const wakeUpServer = async (): Promise<boolean> => {
@@ -230,6 +235,10 @@ export const LoginScreen = ({ navigation }: any) => {
         <TouchableOpacity style={styles.secondaryButton} onPress={() => navigation.navigate('Register')}>
           <Text style={[styles.secondaryButtonText, { color: colors.primary }]}>{t('register_btn')}</Text>
         </TouchableOpacity>
+        
+        <TouchableOpacity style={styles.guestButton} onPress={handleGuestMode}>
+          <Text style={[styles.guestButtonText, { color: colors.textSecondary }]}>Пропустити</Text>
+        </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
   );
@@ -323,5 +332,16 @@ const styles = StyleSheet.create({
     color: '#C88D7A',
     fontSize: 16,
     fontWeight: '600',
+  },
+  guestButton: {
+    width: '100%',
+    padding: 12,
+    borderRadius: 20,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  guestButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
   }
 });

@@ -1,19 +1,29 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, RefreshControl, Alert } from 'react-native';
-import { useNavigation, useIsFocused } from '@react-navigation/native';
+import { useNavigation, useIsFocused, useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import api from '../api/client';
+import { requireAuth } from '../utils/authCheck';
 
 export const ChatsListScreen = () => {
   const navigation = useNavigation<any>();
+  const route = useRoute();
   const isFocused = useIsFocused();
   const { colors, isDark } = useTheme();
   const { t } = useTranslation();
+  const isGuest = route?.params?.isGuest || false;
   
   const [chats, setChats] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Check auth for guest mode
+  useEffect(() => {
+    if (isGuest) {
+      requireAuth(navigation, 'Для перегляду чатів необхідно увійти або зареєструватися');
+    }
+  }, [isGuest]);
 
   const loadChats = async () => {
     try {

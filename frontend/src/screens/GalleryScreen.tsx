@@ -1,23 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert, Dimensions, ActivityIndicator, Modal, TextInput } from 'react-native';
+import { useRoute } from '@react-navigation/native';
 import api from '../api/client';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
+import { requireAuth } from '../utils/authCheck';
 
 const { width } = Dimensions.get('window');
 
 type TabType = 'ALL' | 'MY' | 'FAV';
 
 export const GalleryScreen = () => {
+  const route = useRoute();
   const { colors, isDark } = useTheme();
   const { t } = useTranslation();
+  const isGuest = (route.params as any)?.isGuest || false;
   const [activeTab, setActiveTab] = useState<TabType>('ALL');
   const [images, setImages] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   
   const [role, setRole] = useState<'MASTER' | 'CLIENT'>('CLIENT');
+
+  // Check auth for guest mode - only for MY and FAV tabs
+  useEffect(() => {
+    if (isGuest && (activeTab === 'MY' || activeTab === 'FAV')) {
+      requireAuth({ replace: (screen: string) => console.log('Navigate to', screen) } as any, 'Для перегляду особистої галереї необхідно увійти або зареєструватися');
+    }
+  }, [isGuest, activeTab]);
 
   // Upload modal state
   const [uploadModalVisible, setUploadModalVisible] = useState(false);

@@ -8,12 +8,16 @@ import { LinearGradient } from 'expo-linear-gradient';
 import api from '../api/client';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
+import { useRoute } from '@react-navigation/native';
+import { requireAuth } from '../utils/authCheck';
 
 const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 
 export const ClientCalendarScreen = ({ navigation }: any) => {
+  const route = useRoute();
   const { colors, isDark } = useTheme();
   const { t } = useTranslation();
+  const isGuest = route?.params?.isGuest || false;
   const [selectedDay, setSelectedDay] = useState('');
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
@@ -25,6 +29,13 @@ export const ClientCalendarScreen = ({ navigation }: any) => {
   const [prices, setPrices] = useState<any[]>([]);
   const [selectedPriceId, setSelectedPriceId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Check auth for guest mode
+  useEffect(() => {
+    if (isGuest) {
+      requireAuth(navigation, 'Для створення запису необхідно увійти або зареєструватися');
+    }
+  }, [isGuest]);
 
   // Animations
   const floatAnim = useRef(new Animated.Value(-150)).current; 

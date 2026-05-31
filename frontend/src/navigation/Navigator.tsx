@@ -112,20 +112,22 @@ export const MasterTabs = () => {
   );
 };
 
-export const ClientTabs = () => {
+export const ClientTabs = ({ route }: any) => {
   const { colors } = useTheme();
   const { t } = useTranslation();
+  const isGuest = route?.params?.isGuest || false;
+  
   return (
     <>
-    <GlobalHeaderPremium mode="client" />
+    <GlobalHeaderPremium mode="client" isGuest={isGuest} />
     <Tab.Navigator 
       tabBarPosition="bottom"
       screenOptions={premiumTabOptions(colors)}>
-      <Tab.Screen name="Calendar" component={ClientCalendarScreen} options={{ tabBarLabel: t('tabs.dashboard', {defaultValue: 'Календар'}), title: '📅' }} />
-      <Tab.Screen name="Appointments" component={ClientAppointmentsScreen} options={{ tabBarLabel: t('tabs.appointments', {defaultValue: 'Записи'}), title: '📝' }} />
+      <Tab.Screen name="Calendar" component={ClientCalendarScreen} options={{ tabBarLabel: t('tabs.dashboard', {defaultValue: 'Календар'}), title: '📅' }} initialParams={{ isGuest }} />
+      <Tab.Screen name="Appointments" component={ClientAppointmentsScreen} options={{ tabBarLabel: t('tabs.appointments', {defaultValue: 'Записи'}), title: '📝' }} initialParams={{ isGuest }} />
       <Tab.Screen name="ChatsListNav" component={ChatStack} options={{ tabBarLabel: t('tabs.chats', {defaultValue: 'Чати'}), title: '💬' }} />
-      <Tab.Screen name="Gallery" component={GalleryScreen} options={{ tabBarLabel: t('tabs.gallery', {defaultValue: 'Галерея'}), title: '🖼' }} />
-      <Tab.Screen name="Profile" component={ClientProfileStack} options={{ tabBarLabel: t('tabs.profile', {defaultValue: 'Профіль'}), title: '👤' }} />
+      <Tab.Screen name="Gallery" component={GalleryScreen} options={{ tabBarLabel: t('tabs.gallery', {defaultValue: 'Галерея'}), title: '🖼' }} initialParams={{ isGuest }} />
+      <Tab.Screen name="Profile" component={ClientProfileStack} options={{ tabBarLabel: t('tabs.profile', {defaultValue: 'Профіль'}), title: '👤' }} initialParams={{ isGuest }} />
     </Tab.Navigator>
     </>
   );

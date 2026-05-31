@@ -43,9 +43,17 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 
   const loadTheme = async () => {
     try {
+      console.log('[THEME] Loading theme...');
       const storedTheme = await AsyncStorage.getItem('theme');
-      if (storedTheme === 'dark') setIsDark(true);
-    } catch(e) {}
+      if (storedTheme === 'dark') {
+        setIsDark(true);
+        console.log('[THEME] Dark theme loaded');
+      } else {
+        console.log('[THEME] Light theme loaded');
+      }
+    } catch(e) {
+      console.error('[THEME] Error loading theme:', e);
+    }
   };
 
   const toggleTheme = async () => {

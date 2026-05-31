@@ -4,20 +4,30 @@ import * as Clipboard from 'expo-clipboard';
 import { io } from 'socket.io-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../api/client';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
+import { requireAuth } from '../utils/authCheck';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
 
 export const ClientAppointmentsScreen = () => {
   const navigation = useNavigation();
+  const route = useRoute();
   const { colors, isDark } = useTheme();
   const { t } = useTranslation();
+  const isGuest = route?.params?.isGuest || false;
   const [appointments, setAppointments] = useState<any[]>([]);
   const [paymentModalVisible, setPaymentModalVisible] = useState(false);
   const [paymentDetails, setPaymentDetails] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Check auth for guest mode
+  useEffect(() => {
+    if (isGuest) {
+      requireAuth(navigation, 'Для перегляду записів необхідно увійти або зареєструватися');
+    }
+  }, [isGuest]);
 
   const statusMap: any = {
     'PENDING': t('status.pending', {defaultValue: 'ОЧІКУЄ ПІДТВЕРДЖЕННЯ'}),
