@@ -41,9 +41,13 @@ export const SearchMastersScreen = () => {
                 return;
             }
             const location = await Location.getCurrentPositionAsync({});
+            console.log('[SEARCH MASTERS] Location:', location.coords.latitude, location.coords.longitude);
+            console.log('[SEARCH MASTERS] Is guest:', isGuest);
             const res = await api.get(`/api/client/masters/search?lat=${location.coords.latitude}&lng=${location.coords.longitude}`);
+            console.log('[SEARCH MASTERS] Response:', res.data);
             setMasters(res.data || []);
         } catch(e) {
+            console.error('[SEARCH MASTERS] Error:', e);
             Alert.alert('Помилка', 'Не вдалося завантажити список майстрів');
         }
         setLoading(false);

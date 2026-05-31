@@ -78,24 +78,18 @@ export default function App() {
         });
         console.log('[APP] Notifications initialized');
         
-        // Prewake server (non-blocking, with timeout)
-        try {
-          const API_URL = api.defaults.baseURL;
-          console.log('[PREWAKE] Waking up server on app start...');
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
-          await fetch(`${API_URL}/api/auth/login`, { method: 'HEAD', signal: controller.signal });
-          clearTimeout(timeoutId);
-          console.log('[PREWAKE] Server prewaked');
-        } catch(e) {
-          console.log('[PREWAKE] Prewake attempt finished (server may be waking up or timeout)');
-        }
+        // Prewake server in background without blocking
+        const API_URL = api.defaults.baseURL;
+        console.log('[PREWAKE] Waking up server in background...');
+        fetch(`${API_URL}/api/auth/login`, { method: 'HEAD' })
+          .then(() => console.log('[PREWAKE] Server prewaked'))
+          .catch(() => console.log('[PREWAKE] Prewake attempt finished'));
         
         console.log('[APP] Initialization complete');
       } catch (e) {
         console.error('[APP] Initialization error:', e);
       } finally {
-        // Always hide splash screen
+        // Always hide splash screen immediately
         console.log('[APP] Hiding splash screen');
         await SplashScreen.hideAsync();
         setAppIsReady(true);

@@ -37,7 +37,7 @@ export const GlobalHeaderPremium = ({ mode = 'client', isGuest = false }: Props)
   const [menuVisible, setMenuVisible] = useState(false);
   const navigation = useNavigation();
   const { unreadCount } = useUnread();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const menuItems = mode === 'master' ? masterMenuItems : clientMenuItems;
   const animations = useRef(menuItems.map(() => new Animated.Value(0))).current;
 
@@ -108,15 +108,15 @@ export const GlobalHeaderPremium = ({ mode = 'client', isGuest = false }: Props)
 
       <Modal visible={menuVisible} transparent animationType="fade" onRequestClose={() => setMenuVisible(false)}>
         <Pressable style={styles.overlay} onPress={() => setMenuVisible(false)}>
-          <BlurView intensity={38} tint="light" style={styles.blurWrap}>
-            <Pressable style={styles.panel}>
+          <BlurView intensity={38} tint={isDark ? 'dark' : 'light'} style={styles.blurWrap}>
+            <Pressable style={[styles.panel, isDark ? styles.panelDark : styles.panelLight]}>
               <View style={styles.panelHeader}>
                 <View>
-                  <Text style={styles.panelKicker}>NAILSBOOK PRO</Text>
-                  <Text style={styles.panelTitle}>{mode === 'master' ? 'Меню майстра' : 'Меню клієнта'}</Text>
+                  <Text style={[styles.panelKicker, { color: colors.primary }]}>NAILSBOOK PRO</Text>
+                  <Text style={[styles.panelTitle, { color: colors.text }]}>{mode === 'master' ? 'Меню майстра' : 'Меню клієнта'}</Text>
                 </View>
-                <TouchableOpacity style={styles.closeButton} onPress={() => setMenuVisible(false)}>
-                  <Text style={styles.closeText}>×</Text>
+                <TouchableOpacity style={[styles.closeButton, { backgroundColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.05)' }]} onPress={() => setMenuVisible(false)}>
+                  <Text style={[styles.closeText, { color: colors.text }]}>×</Text>
                 </TouchableOpacity>
               </View>
               <View style={styles.grid}>
@@ -128,7 +128,7 @@ export const GlobalHeaderPremium = ({ mode = 'client', isGuest = false }: Props)
                         <View style={[styles.iconBubble, { backgroundColor: `${item.color}22` }]}>
                           <FontAwesome name={item.icon} size={24} color={item.color} />
                         </View>
-                        <Text style={styles.cardText}>{item.label}</Text>
+                        <Text style={[styles.cardText, { color: colors.text }]}>{item.label}</Text>
                       </TouchableOpacity>
                     </Animated.View>
                   );
@@ -165,6 +165,8 @@ const styles = StyleSheet.create({
   badgeText: { color: '#fff', fontSize: 10, fontWeight: 'bold' },
   overlay: { flex: 1, backgroundColor: 'rgba(8,16,20,0.28)', justifyContent: 'flex-start' },
   blurWrap: { marginTop: 86, marginHorizontal: 14, borderRadius: 28, overflow: 'hidden' },
+  panelLight: { padding: 18, borderRadius: 28, borderWidth: 1, borderColor: 'rgba(255,255,255,0.55)', backgroundColor: 'rgba(255,255,255,0.58)' },
+  panelDark: { padding: 18, borderRadius: 28, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', backgroundColor: 'rgba(30,30,30,0.85)' },
   panel: { padding: 18, borderRadius: 28, borderWidth: 1, borderColor: 'rgba(255,255,255,0.55)', backgroundColor: 'rgba(255,255,255,0.58)' },
   panelHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
   panelKicker: { fontSize: 11, letterSpacing: 2.5, color: '#C88D7A', fontWeight: '900' },

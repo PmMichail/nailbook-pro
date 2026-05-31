@@ -50,9 +50,7 @@ const authClient = (req: any, res: any, next: any) => {
   }
 };
 
-router.use(authClient);
-
-// GET /master/:id
+// GET /master/:id (public - for guest mode)
 router.get('/master/:id', async (req: any, res) => {
   try {
      const master = await prisma.user.findUnique({
@@ -66,20 +64,7 @@ router.get('/master/:id', async (req: any, res) => {
   }
 });
 
-// PUT /unlink
-router.put('/unlink', async (req: any, res) => {
-  try {
-     await prisma.user.update({
-         where: { id: req.user.id },
-         data: { masterId: null }
-     });
-     res.json({ success: true });
-  } catch(e) {
-     res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// GET /masters/search?city=xxx&lat=yyy&lng=zzz
+// GET /masters/search?city=xxx&lat=yyy&lng=zzz (public - for guest mode)
 router.get('/masters/search', async (req: any, res) => {
   const { city, lat, lng } = req.query;
   try {
@@ -118,7 +103,25 @@ router.get('/masters/search', async (req: any, res) => {
         });
      }
      
+     console.log('[BACKEND] Masters search result:', filteredMasters.length, 'masters found');
      res.json(filteredMasters);
+  } catch(e) {
+     console.error('[BACKEND] Masters search error:', e);
+     res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Apply auth middleware to protected routes only
+router.use(authClient);
+
+// PUT /unlink
+router.put('/unlink', async (req: any, res) => {
+  try {
+     await prisma.user.update({
+         where: { id: req.user.id },
+         data: { masterId: null }
+     });
+     res.json({ success: true });
   } catch(e) {
      res.status(500).json({ error: 'Server error' });
   }

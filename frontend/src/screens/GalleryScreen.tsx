@@ -60,6 +60,13 @@ export const GalleryScreen = () => {
   };
 
   const fetchGallery = async () => {
+    // Don't fetch for guests on MY and FAV tabs
+    if (isGuest && (activeTab === 'MY' || activeTab === 'FAV')) {
+      setImages([]);
+      setLoading(false);
+      return;
+    }
+    
     setLoading(true);
     try {
       let endpoint = '/api/gallery';
