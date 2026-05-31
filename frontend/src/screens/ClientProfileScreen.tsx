@@ -1,15 +1,19 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Switch, ScrollView, TextInput, Alert, Image, Share, RefreshControl } from 'react-native';
+import { useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import * as Clipboard from 'expo-clipboard';
 import api from '../api/client';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
+import { requireAuth } from '../utils/authCheck';
 
 export const ClientProfileScreen = ({ navigation }: any) => {
+  const route = useRoute();
   const { colors, isDark, toggleTheme } = useTheme();
   const { t } = useTranslation();
+  const isGuest = (route.params as any)?.isGuest || false;
   const [pushEnabled, setPushEnabled] = useState(true);
   const [telegramEnabled, setTelegramEnabled] = useState(false);
   
@@ -25,9 +29,18 @@ export const ClientProfileScreen = ({ navigation }: any) => {
   const [referralAvailable, setReferralAvailable] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
+  // Check auth for guest mode
   useEffect(() => {
-    loadAll();
-  }, []);
+    if (isGuest) {
+      requireAuth(navigation, 'Для перегляду профілю необхідно увійти або зареєструватися');
+    }
+  }, [isGuest]);
+
+  useEffect(() => {
+    if (!isGuest) {
+      loadAll();
+    }
+  }, [isGuest]);
 
   const loadAll = async () => {
     await loadProfile();

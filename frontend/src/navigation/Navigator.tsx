@@ -75,16 +75,20 @@ const MasterProfileStack = () => (
   </Stack.Navigator>
 );
 
-const ClientProfileStack = () => (
-  <Stack.Navigator screenOptions={{ headerShown: false }}>
-    <Stack.Screen name="ClientProfile" component={ClientProfileScreen} />
-    <Stack.Screen name="SettingsScreen" component={SettingsScreen} />
-    <Stack.Screen name="Favorites" component={FavoritesScreen} options={{ headerShown: true, title: 'Обрані дизайни', headerTintColor: '#C88D7A' }} />
-    <Stack.Screen name="SearchMastersScreen" component={SearchMastersScreen} options={{ headerShown: true, title: 'Пошук майстрів', headerTintColor: '#C88D7A' }} />
-    <Stack.Screen name="PublicMasterGalleryScreen" component={PublicMasterGalleryScreen} options={{ headerShown: true, title: 'Галерея майстра', headerTintColor: '#C88D7A' }} />
-    <Stack.Screen name="MastersList" component={MastersListScreen} options={{ headerShown: true, title: 'Пошук майстрів', headerTintColor: '#C88D7A' }} />
-  </Stack.Navigator>
-);
+const ClientProfileStack = ({ route }: any) => {
+  const isGuest = route?.params?.isGuest || false;
+  
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="ClientProfile" component={ClientProfileScreen} initialParams={{ isGuest }} />
+      <Stack.Screen name="SettingsScreen" component={SettingsScreen} initialParams={{ isGuest }} />
+      <Stack.Screen name="Favorites" component={FavoritesScreen} options={{ headerShown: true, title: 'Обрані дизайни', headerTintColor: '#C88D7A' }} initialParams={{ isGuest }} />
+      <Stack.Screen name="SearchMastersScreen" component={SearchMastersScreen} options={{ headerShown: true, title: 'Пошук майстрів', headerTintColor: '#C88D7A' }} initialParams={{ isGuest }} />
+      <Stack.Screen name="PublicMasterGalleryScreen" component={PublicMasterGalleryScreen} options={{ headerShown: true, title: 'Галерея майстра', headerTintColor: '#C88D7A' }} initialParams={{ isGuest }} />
+      <Stack.Screen name="MastersList" component={MastersListScreen} options={{ headerShown: true, title: 'Пошук майстрів', headerTintColor: '#C88D7A' }} initialParams={{ isGuest }} />
+    </Stack.Navigator>
+  );
+};
 
 import { GlobalHeaderPremium } from '../components/GlobalHeaderPremium';
 import { ClientsListScreen } from '../screens/ClientsListScreen';

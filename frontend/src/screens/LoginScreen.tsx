@@ -237,7 +237,7 @@ export const LoginScreen = ({ navigation }: any) => {
         </TouchableOpacity>
         
         <TouchableOpacity style={styles.guestButton} onPress={handleGuestMode}>
-          <Text style={[styles.guestButtonText, { color: colors.textSecondary }]}>Пропустити</Text>
+          <Text style={[styles.guestButtonText, { color: colors.textSecondary }]}>Гостьовий вхід</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>

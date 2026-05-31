@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, Modal, ActivityIndicator, Dimensions, Linking } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, Modal, ActivityIndicator, Dimensions, Linking, Alert } from 'react-native';
 import api from '../api/client';
 import { useTheme } from '../context/ThemeContext';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { requireAuth } from '../utils/authCheck';
 
 const { width } = Dimensions.get('window');
 
@@ -11,8 +12,7 @@ export const PublicMasterGalleryScreen = () => {
   const { colors } = useTheme();
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
-  const { masterId, masterName } = route.params || {};
-
+  const { masterId, masterName, isGuest } = route.params || {};
   const [images, setImages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -48,6 +48,11 @@ export const PublicMasterGalleryScreen = () => {
   };
 
   const handleRequestCode = async () => {
+      // Check auth for guest mode
+      if (isGuest) {
+          return requireAuth(navigation, 'Для запиту коду підключення необхідно увійти або зареєструватися');
+      }
+      
       try {
           const userStr = await AsyncStorage.getItem('user');
           if (!userStr) return;

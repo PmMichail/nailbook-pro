@@ -4,20 +4,25 @@ import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../api/client';
 import { useTheme } from '../context/ThemeContext';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { requireAuth } from '../utils/authCheck';
 
 export const SearchMastersScreen = () => {
+    const route = useRoute();
     const { colors, isDark } = useTheme();
     const navigation = useNavigation<any>();
+    const isGuest = (route.params as any)?.isGuest || false;
     const [masters, setMasters] = useState([]);
     const [loading, setLoading] = useState(false);
     const [connectionCode, setConnectionCode] = useState('');
     const [currentUser, setCurrentUser] = useState<any>(null);
 
     useEffect(() => {
-        loadUser();
+        if (!isGuest) {
+            loadUser();
+        }
         searchNearby();
-    }, []);
+    }, [isGuest]);
 
     const loadUser = async () => {
         const str = await AsyncStorage.getItem('user');
@@ -116,6 +121,12 @@ export const SearchMastersScreen = () => {
 
     const handleConnect = async () => {
        if (!connectionCode) return Alert.alert('Помилка', 'Введіть код');
+       
+       // Check auth for guest mode
+       if (isGuest) {
+         return requireAuth(navigation, 'Для підключення до майстра необхідно увійти або зареєструватися');
+       }
+       
        try {
           const res = await api.post('/api/client/masters/connect', { code: connectionCode });
           if (res.data.success) {

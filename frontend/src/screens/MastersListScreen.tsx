@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, Alert, Image, ActivityIndicator } from 'react-native';
+import { useRoute } from '@react-navigation/native';
 import api from '../api/client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../context/ThemeContext';
+import { requireAuth } from '../utils/authCheck';
 
 export const MastersListScreen = ({ navigation }: any) => {
+  const route = useRoute();
   const [cityQuery, setCityQuery] = useState('');
   const [masters, setMasters] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [connectionCode, setConnectionCode] = useState('');
   const { colors } = useTheme();
+  const isGuest = (route.params as any)?.isGuest || false;
 
   const searchMasters = async () => {
     try {
@@ -29,6 +33,12 @@ export const MastersListScreen = ({ navigation }: any) => {
 
   const handleConnect = async () => {
      if (!connectionCode) return Alert.alert('Помилка', 'Введіть код');
+     
+     // Check auth for guest mode
+     if (isGuest) {
+       return requireAuth(navigation, 'Для підключення до майстра необхідно увійти або зареєструватися');
+     }
+     
      try {
         const res = await api.post('/api/client/masters/connect', { code: connectionCode });
         if (res.data.success) {

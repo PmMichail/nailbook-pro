@@ -1,18 +1,31 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, ActivityIndicator, TouchableOpacity, Dimensions, Alert } from 'react-native';
+import { useRoute } from '@react-navigation/native';
 import api from '../api/client';
 import { useTheme } from '../context/ThemeContext';
+import { requireAuth } from '../utils/authCheck';
 
 const { width } = Dimensions.get('window');
 
 export const FavoritesScreen = () => {
+  const route = useRoute();
   const { colors } = useTheme();
+  const isGuest = (route.params as any)?.isGuest || false;
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Check auth for guest mode
   useEffect(() => {
-    loadFavorites();
-  }, []);
+    if (isGuest) {
+      requireAuth({ replace: (screen: string) => console.log('Navigate to', screen) } as any, 'Для перегляду обраного необхідно увійти або зареєструватися');
+    }
+  }, [isGuest]);
+
+  useEffect(() => {
+    if (!isGuest) {
+      loadFavorites();
+    }
+  }, [isGuest]);
 
   const loadFavorites = async () => {
     try {
