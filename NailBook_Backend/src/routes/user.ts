@@ -3,7 +3,7 @@ import prisma from '../models/prismaClient';
 import jwt from 'jsonwebtoken';
 import multer from 'multer';
 
-import { uploadCloud } from '../services/cloudinary';
+import { uploadCloud, deleteAllMasterImages } from '../services/cloudinary';
 // uploadCloud replaces multer({ storage })
 
 const router = Router();
@@ -126,6 +126,14 @@ router.delete('/profile', async (req: any, res) => {
   try {
     const userId = req.user.id;
     console.log('[DELETE ACCOUNT] User ID:', userId);
+    
+    // Delete images from Cloudinary first
+    try {
+      await deleteAllMasterImages(userId, prisma);
+      console.log('[DELETE ACCOUNT] Deleted images from Cloudinary');
+    } catch(e: any) {
+      console.log('[DELETE ACCOUNT] Cloudinary deletion error:', e?.message);
+    }
     
     // Delete prices, settings, etc cascaded or manually if needed
     try {
