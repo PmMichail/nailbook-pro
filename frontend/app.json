@@ -34,7 +34,7 @@
         "backgroundColor": "#FFB6C1"
       },
       "predictiveBackGestureEnabled": false,
-      "versionCode": 72
+      "versionCode": 73
     },
     "web": {
       "favicon": "./assets/favicon.png",
